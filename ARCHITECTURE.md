@@ -1,6 +1,6 @@
 # Arkitektur
 
-Status: beslutad utgångspunkt för implementation, 15 oktober 2026. Ingen applikationskod är skapad ännu. Ändringar dokumenteras i docs/DECISIONS.md.
+Status: beslutad utgångspunkt för implementation, 15 oktober 2026. P1-grundfiler finns. Ren installation, typkontroll, bygge och serverstart har verifierats i en separat kopia. Gabriela har bekräftat kartvisning, zoom, panorering, återställningsknapp och layout på dator och i simulerat mobilformat med smal skärm, samt musrullszoom på dator. Typkontroll och bygge passerar med musrullszoom aktiverad. Installation från en faktisk ny klon, Gabrielas genomgång och CI-körning återstår för P1. Fysisk mobil är ännu inte testad. Ändringar dokumenteras i docs/DECISIONS.md.
 
 ## Grundval
 
@@ -30,6 +30,7 @@ Skapas successivt av Gabriela i P1–P7; trädet är inte en lista över redan b
 ```text
 src/
   main.ts                 start och komposition
+  config/                 startvyns koordinater som konfigurationsdata
   map/                    kartlager, urval och ritverktyg
   ui/                     formulär, resultat, legend och status
   state/                  valt område, laddning och resultat

@@ -12,7 +12,7 @@ Du ansvarar för hela projektets produktion. Börja med en liten fungerande del 
 6. Kontrollera installation från en ny klon, typkontroll och produktionsbygge. Skriv kommandona i README när de finns och har provats.
 7. Öppna en pull request och visa resultatet för Henrik.
 
-Det finns inga `npm install`- eller startkommandon att köra i den ursprungliga dokumentationsversionen, eftersom package.json och appen skapas i P1.
+P1-grundfiler har nu skapats. Beroenden är installerade och typkontroll, bygge och serverstart passerar. Följ [P1 steg för steg](P1_STEG_FOR_STEG.md) för verktyg, filer, kommandon och återstående kontroller.
 
 ## Arbeta med AI
 
