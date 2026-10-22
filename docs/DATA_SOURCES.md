@@ -70,6 +70,15 @@ Metadataavgränsning utifrån befintligt underlag: `lat`/`lon` och observerade k
 - Fullständig rutleverans via kart-api är inte verifierad här. Direkt SCB WFS har undersökts som alternativ.
 - Serverbehov är inte avgjort. Lokala browserprov belägger bara testade anrop. Hemliga nycklar ska inte läggas i klientkod.
 
+Bedömning av kvarstående osäkerheter för kart-api:
+
+| Osäkerhet | Påverkan och motivering |
+| --- | --- |
+| CRS/datum och axelordning | Blockerar beroende koordinatimplementation, men inte fortsatt P2-bedömning som kandidat. [OpenAPI](https://api.kart-api.se/openapi.json) är kontraktskällan; dokumenterade `lat`/`lon` är inte i sig uttrycklig CRS-bekräftelse. Utred före användning som validerad WGS84. |
+| Dataårgång, uppdateringsfrekvens och kommunindelning | Behöver utredas före beroende implementation och årgångskoppling. Källvalet förblir föreslaget tills användbarheten kan bedömas; API-version eller testdatum får inte ersätta dessa uppgifter. |
+| Exakt cachetid och rätt till verkliga testfixturer | Dokumenteras som öppet utan att hindra kandidatbedömning med syntetiska fixturer. Långvarig lagring eller återpublicering av verkliga svar förutsätter klarlagd rätt för just den användningen. |
+| Luckor och sökbegränsningar | Kända begränsningar dokumenteras i P2; ingen fullständig täckning utlovas. Nytt användningskrav som kräver alla träffar kan påverka senare källval, eftersom paginering inte är dokumenterad. |
+
 ## SCB TAB628: kommunstatistik
 
 ### Observationer
@@ -141,12 +150,14 @@ Kontrollen kompletterar måttdefinitioner och redovisad precision. Ett metadatau
 
 Rättighetsstatus för TAB628: enligt Gabrielas nu redovisade kontroll av [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/) omfattas öppna statistikdata i Statistikdatabasen av **CC0 1.0**. Detta ger licensstöd för användning/visning, lagring och återpublicering av dessa data, inklusive provsvar; bedömningen bygger på statistikdatats egna villkor, inte på kommungränsernas licens. Datum för just villkorskontrollen är inte angivet. Tekniska anropsgränser och praktisk cachehantering är separata frågor. CKM är en statistisk metodbegränsning, inte ett licensvillkor.
 
+Bedömning: befintlig dokumentation av **referenstider, licens och API-begränsningar är tillräcklig för nuvarande P2-källbedömning av TAB628**. Dessa punkter behöver inte behandlas som obelagda hinder för källvalet. Praktisk cache-/uppdateringsstrategi och felkontrakt hör till senare beroende implementation; okänt datum för den separata villkorskontrollen dokumenteras utan att något datum antas. Kontroll av indelning mot vald geometri återstår före join, men ändrar inte de belagda egenskaperna hos statistikprodukten. Bedömningen avgör inte serverbehovet.
+
 ## SCB WFS: befolkningsrutor
 
 ### Observationer
 
 - Endpoint: `https://geodata.scb.se/geoserver/stat/wfs`; WFS 1.1.0; lager `stat:befolkning_1km_2025`.
-- `GetCapabilities`, `DescribeFeatureType` och begränsat `GetFeature` i GeoJSON uppges kontrollerade. Fullständiga anrops-URL:er och exakt formatparameter saknas i tillgängligt underlag och konstrueras inte här.
+- `GetCapabilities`, `DescribeFeatureType` och begränsat `GetFeature` i GeoJSON uppges kontrollerade. Ursprungliga fullständiga anrops-URL:er och exakt formatparameter saknas i tillgängligt underlag. Rekonstruerade GetFeature-URL:er anges separat nedan och är ännu inte återtestade.
 - Fält omfattar `objectid`, `rutid_inspire`, `rutid_scb`, `rutstorl`, `beftotalt`, `man`, `kvinna`, åldersfält, `referenstid`, `sp_geometry`. Flera fält är nillable.
 - Observerade geometrier: Polygon, EPSG:3006, `rutstorl=1000` m, `referenstid="20251231"`.
 - Servern rapporterade `numberMatched=115118` för lagret i ett begränsat exempeluttag. **Hela Sveriges lager har inte hämtats eller verifierats.**
@@ -163,6 +174,21 @@ Redovisade parametrar: `BBOX=825000,7328000,828000,7332000,EPSG:3006`, `maxFeatu
 | 10 | 5 | Komplettering, kontroll-/hämtningsdatum 22 oktober 2026: `numberMatched=17`, `numberReturned=5`, objectid 456198, 456199, 456200, 456658, 456659. EPSG:3006 och referenstid 20251231. |
 | 15 | 2 | Ursprunglig redovisning. |
 
+#### Rekonstruerade GetFeature-anrop – ännu inte återtestade
+
+URL:erna nedan rekonstruerades 23 oktober 2026 från redovisade parametrar och är inte bevarade originalanrop. Ingen nätverkskontroll har gjorts av dem. Benämningen `stat` i kompletteringsuppgiften tolkas som namnrymd; det tidigare dokumenterade fullständiga lagernamnet är `stat:befolkning_1km_2025`, vilket används i `typeName`.
+
+Rekonstruktionen använder WFS 1.1.0, `request=GetFeature`, `outputFormat=application/json` för GeoJSON och `srsName=EPSG:3006`. Formatsträngen är ett rekonstruktionsval, inte en bevarad uppgift om det ursprungliga anropet. Kolon, kommatecken och snedstreck i parametervärdena är procentkodade:
+
+```text
+https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Abefolkning_1km_2025&outputFormat=application%2Fjson&srsName=EPSG%3A3006&BBOX=825000%2C7328000%2C828000%2C7332000%2CEPSG%3A3006&maxFeatures=5&sortBy=objectid&startIndex=0
+https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Abefolkning_1km_2025&outputFormat=application%2Fjson&srsName=EPSG%3A3006&BBOX=825000%2C7328000%2C828000%2C7332000%2CEPSG%3A3006&maxFeatures=5&sortBy=objectid&startIndex=5
+https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Abefolkning_1km_2025&outputFormat=application%2Fjson&srsName=EPSG%3A3006&BBOX=825000%2C7328000%2C828000%2C7332000%2CEPSG%3A3006&maxFeatures=5&sortBy=objectid&startIndex=10
+https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Abefolkning_1km_2025&outputFormat=application%2Fjson&srsName=EPSG%3A3006&BBOX=825000%2C7328000%2C828000%2C7332000%2CEPSG%3A3006&maxFeatures=5&sortBy=objectid&startIndex=15
+```
+
+Tidigare observerad sidindelning är **5 + 5 + 5 + 2 = 17 objekt**, med 17 olika objectid enligt redovisningen ovan. Detta resultat tillskrivs inte de rekonstruerade URL:erna förrän de har återtestats. Ingen HTTP-status, CORS-header eller ny hämtningsdag har verifierats genom rekonstruktionen.
+
 Gabriela redovisar totalt **17 olika objectid**, i överensstämmelse med `numberMatched=17`. Luckan för sidan med startIndex 10 är därmed stängd i redovisningen. Detta stöder paginering och fullständighet i just BBOX-testet, inte nationell fullständighet eller obegränsad kapacitet. Individuella test-/hämtningsdatum för de tidigare testerna är fortfarande okända. Ursprungliga tester ingick i utkastet sammanställt 2026-10-22.
 
 ### Dokumentationsuppgifter och öppet
@@ -175,14 +201,25 @@ Gabriela redovisar totalt **17 olika objectid**, i överensstämmelse med `numbe
 - EPSG:3006 måste valideras före omprojektion till projektets webbgräns: GeoJSON/WGS 84, longitud före latitud. Ingen transformation är implementerad eller testad i projektet; CRS får inte bara etiketteras om.
 - Valet mellan direkt SCB-åtkomst och kart-api för rutor samt serverbehov är öppet.
 
-Samlad WFS-status: sidindelning är belagd genom redovisningen av det begränsade BBOX-testet, men en exakt reproducerbar GetFeature-URL saknas fortfarande. Den konstrueras inte i efterhand som om den vore testad. Gabrielas nu redovisade kontroll av [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/) anger **CC0 1.0 för öppna geodata i geodataplattformen**, vilket kompletterar lagrets redovisade CC0-uppgift med generellt stöd för användning/visning, lagring och återpublicering. Datum för just villkorskontrollen är inte angivet; metadatautdrag för lagret behöver fortfarande bevaras. Licensstödet kommer från villkoren, inte från lyckad browseråtkomst. Varken särskilt cacheförbud, viss cachetid, WFS-specifik numerisk kvot eller obegränsad anropskapacitet är belagt. PxWebs tekniska gränser ovan får inte överföras till WFS.
+Dokumentationskomplettering enligt Gabrielas nu lämnade underlag: [SCB:s produktsida Statistik på rutor](https://www.scb.se/vara-tjanster/oppna-data/oppna-geodata/statistik-pa-rutor/) anger **årlig uppdatering av befolkningsregistret och tillgänglighet via WFS**. Datum för just denna dokumentationskontroll är inte angivet. Detta är en leverantörsuppgift, inte ett nytt API-prov eller belägg för exakt publiceringsdatum/uppdateringstid i det testade WFS-lagret.
 
-## Högst tre återstående externa kontroller för dessa metadata
+Samlad WFS-status: sidindelning är belagd genom redovisningen av det begränsade BBOX-testet, men ursprunglig exakt GetFeature-URL saknas fortfarande. Rekonstruerade URL:er finns ovan, tydligt märkta som ännu inte återtestade. Gabrielas nu redovisade kontroll av [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/) anger **CC0 1.0 för öppna geodata i geodataplattformen**, vilket kompletterar lagrets redovisade CC0-uppgift med generellt stöd för användning/visning, lagring och återpublicering. Datum för just villkorskontrollen är inte angivet; metadatautdrag för lagret behöver fortfarande bevaras. Licensstödet kommer från villkoren, inte från lyckad browseråtkomst. Varken särskilt cacheförbud, viss cachetid, WFS-specifik numerisk kvot eller obegränsad anropskapacitet är belagt. PxWebs tekniska gränser ovan får inte överföras till WFS.
 
-Detta är nästa kontroller att genomföra, inte nya testresultat. Inga nätverksanrop gjordes vid denna komplettering. Övriga öppna frågor per källa och serverbeslutet kvarstår.
+Bedömning av kvarstående WFS-osäkerheter:
+
+| Osäkerhet | Påverkan och motivering |
+| --- | --- |
+| Ursprunglig GetFeature-URL saknas; rekonstruktion är inte återtestad | Hindrar att det rekonstruerade anropet markeras som färdigverifierat i P2. Lagret kan fortsatt bedömas som kandidat utifrån redovisade prov. Ett daterat återprov av URL:erna ovan behövs för att stänga reproducerbarhetsluckan; inget historiskt anrop antas. |
+| Tjänstespecifika kvoter, maxgränser och cachevillkor | Förblir obekräftade och dokumenteras som begränsning i källbedömningen, inte som påhittade tillstånd eller kvoter. Blockerar inte kandidatval i sig; måste utredas före uttags-/cachelösning som förutsätter viss kapacitet eller lagringstid. |
+| Lagrets exakta uppdateringstid och äldre testdatum | Dokumenteras som okända; blockerar inte bedömningen av den uttryckliga referenstiden 20251231. Årlig registeruppdatering fastställer inte tjänstens publiceringstid. |
+| Stabilt rut-ID, saknatillstånd och fullständiga fälttyper | Behöver beläggas före beroende normalisering och avduplicering. Kandidatbedömningen kan fortsätta, men dessa egenskaper får ännu inte påstås verifierade. |
+
+## Uppföljning av kvarvarande källmetadata
+
+Detta är uppföljning, inte nya testresultat eller ett påstående att samtliga punkter blockerar P2-källvalet. Påverkan anges i respektive källavsnitt. Inga nätverksanrop gjordes vid denna komplettering. Serverbeslutet kvarstår separat.
 
 1. **kart-api – källmetadata:** kontrollera [OpenAPI](https://api.kart-api.se/openapi.json) och [attributionsdokumentationen](https://kart-api.se/docs/attribution/) för uttryckligt CRS/datum, axelordning, dataversion/referenstid och uppdateringsfrekvens för geocode/kommunuppslag. Om uppgifterna saknas, begär klargörande från leverantörens tidigare dokumenterade kontakt `api@autonomousmedia.io`; inget meddelande har skickats. Bevara dokumentationshänvisning och kontrolldatum, även om svaret blir att uppgiften inte publiceras.
-2. **SCB TAB628 – praktiska driftuppgifter:** licens och numeriska API-gränser har nu officiella hänvisningar ovan och behöver inte utredas på nytt som obelagda. Kontrollera kvarvarande uppgifter om cache/uppdatering, nyckelbehov och felkontrakt via [PxWeb API-dokumentationen](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv).
+2. **SCB TAB628 – senare driftuppföljning:** referenstider, licens och numeriska API-gränser är tillräckligt belagda för nuvarande P2-källbedömning. Inför beroende implementation följs kvarvarande cache-/uppdateringsstrategi, nyckelbehov och felkontrakt upp via [PxWeb API-dokumentationen](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv).
 3. **SCB WFS – reproducerbarhet och tekniska villkor:** utgå från tjänsten `https://geodata.scb.se/geoserver/stat/wfs` och [SCB:s Statistik på rutor](https://www.scb.se/vara-tjanster/oppna-data/oppna-geodata/statistik-pa-rutor/). Bevara exakta GetCapabilities-/DescribeFeatureType-/GetFeature-URL:er och metadata för `stat:befolkning_1km_2025`, inklusive testets BBOX och sidparametrar ovan. Licensstödet är dokumenterat ovan; kontrollera kvarvarande WFS-specifika kvoter, maxstorlek och cachevillkor, eller dokumentera att sådana gränser inte publiceras. Ett litet daterat återprov räcker för att komplettera reproducerbarheten; nationell nedladdning eller belastningstest ingår inte.
 
 ## SCB: förenklade kommungränser
@@ -210,6 +247,8 @@ Gabriela redovisar kontroll av [SCB:s officiella sida för digitala gränser](ht
 - Gränserna är förenklade och avsedda för tematisering av statistik. **SCB anger uttryckligen att gränserna inte är lämpliga för analyser.** För exakta gränser hänvisar SCB till Lantmäteriet.
 
 Val av geometri för framtida analyser är därför fortsatt öppet och kan behöva diskuteras med Henrik. Denna dokumentationskomplettering fastställer inte ett sådant källval och ändrar inte DECISIONS.md. Kontrolldatumet för webbsidan är inte den tidigare ZIP-filens hämtningsdatum eller geometriårgång.
+
+Bedömning: SCB:s förenklade kommungränser rekommenderas som **kandidat för visualisering, inte för geografisk analys**. Detta är en rekommendation inom P2, inte ett fastställt geometribeslut. Okänd exakt geometriårgång hindrar inte kandidatbedömningen, men behöver klarläggas före årgångsberoende join eller presentation som en bestämd gränsårgång. Framtida analysgeometri är en öppen metod-/källfråga att stämma av med Henrik före geografisk analys; SCB:s angivna olämplighet får inte kringgås genom att kalla visualiseringsgeometrin analysunderlag. Saknade äldre hämtningsdatum och praktisk uppdateringsstrategi dokumenteras som sådana och gör inte CC0- eller visualiseringsbedömningen obekräftad.
 
 - **Geografisk årgång är okänd.** `260225` i filnamnet fastställer inte indelningsår eller referensår.
 - Bevara `.prj`-definition, geometriårgång, förenklings-/bearbetningsuppgifter och reproducerbar kontrollmetod. Omprojektion har inte testats i projektet.
