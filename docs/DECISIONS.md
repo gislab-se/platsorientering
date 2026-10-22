@@ -48,6 +48,8 @@ Teknikvalen kan ändras av Gabriela när ett konkret behov visas. Dokumentera or
 
 Observationerna nedan är Gabrielas redovisade externa tester enligt DATA_SOURCES, inte färdiga eller kontraktstestade projektintegrationer. Dokumenterade villkor hålls åtskilda från observationerna.
 
+Implementationsstatus för P2: [contracts.ts](../src/domain/contracts.ts) innehåller de fem interna datakontrakten och gemensamma stödtyper; [validation.ts](../src/domain/validation.ts) innehåller runtime-validering. [Typkontroller](../tests/contracts.types.ts) och [domäntester](../tests/validation.test.mjs) finns, med 29 passerade runtime-tester samt godkända typkontroller vid tidigare redovisad körning. Fyra syntetiska API-fixturfiler och deras [README](../tests/fixtures/README.md) finns. Domäntesterna använder ännu inte dessa fixturer. Inga verkliga svar har sparats som fixturer och inga API-adaptrar, källspecifika normaliserare eller liveintegrationer har implementerats. Tester har inte körts om vid denna statussynkronisering. Detta ändrar inte arbetsinriktningens föreslagna status eller öppna frågor om serverbehov, geometriårgång, rättigheter och API-begränsningar.
+
 | Behov och föreslagen arbetsinriktning | Redovisat underlag och motiv | Kända risker och öppna frågor |
 | --- | --- | --- |
 | Platsökning: kart-api `/v1/geocode` | Lokal browseråtkomst med HTTP 200 och CORS, strukturerat 422-svar, kommunfilter och begränsning med `limit` är redovisade. Ger ett konkret kontraktsunderlag för svensk platsökning. | Resultatlistan är begränsad; kontraktet anger högst 20 träffar och ingen dokumenterad paginering. Tomt filtrerat svar betyder inte att platsen saknas. CRS/axelordning, referenstid, uppdatering och geografiska luckor återstår att belägga. |

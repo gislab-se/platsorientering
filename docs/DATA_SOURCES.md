@@ -6,7 +6,9 @@ Sammanställt 22 oktober 2026 för P2. Underlaget är Gabrielas redovisade exter
 - **Dokumentation:** leverantörsuppgift, inte uppmätt beteende.
 - **Öppet:** underlag eller beslut saknas. Sammanställningsdatum är inte automatiskt hämtningsdatum.
 
-Inga liveintegrationer eller kontraktstester är byggda i detta repo. Inga separata provsvar/testfixturer har sparats. GitHub Issue #2 har inte kunnat läsas i genomgången; kravjämförelsen utgår från P2 i [ROADMAP](../ROADMAP.md) och [ARCHITECTURE](../ARCHITECTURE.md). Slutliga källval och serverbehov är inte avgjorda.
+De fem interna datakontrakten och gemensamma stödtyper finns i [contracts.ts](../src/domain/contracts.ts), med runtime-validering i [validation.ts](../src/domain/validation.ts). [Typkontroller](../tests/contracts.types.ts) och [domäntester](../tests/validation.test.mjs) finns; den tidigare redovisade körningen gav 29 passerade runtime-tester samt godkända typkontroller. Tester har inte körts om vid denna statussynkronisering.
+
+Fyra tydligt märkta syntetiska API-fixturfiler och deras [README](../tests/fixtures/README.md) finns under `tests/fixtures/`. Inga verkliga API-svar har sparats som fixturer. Fixturerna används ännu inte av domäntesterna; källspecifik normalisering och integrationstester mot dem saknas. Inga API-adaptrar eller liveintegrationer är byggda. GitHub Issue #2 har inte kunnat läsas i genomgången; kravjämförelsen utgår från P2 i [ROADMAP](../ROADMAP.md) och [ARCHITECTURE](../ARCHITECTURE.md). Slutliga källval och serverbehov är inte avgjorda.
 
 ## kart-api: dokumentation och gemensamma villkor
 
@@ -15,7 +17,7 @@ Gabriela kontrollerade [OpenAPI](https://api.kart-api.se/openapi.json), [villkor
 Dokumenterade uppgifter:
 
 - API-sökväg `/v1`, kontraktets `info.version=1.0.0`, specifikationsformat OpenAPI 3.1.0.
-- 200 anrop/dygn/IP utan nyckel; 10 000 anrop/månad med nyckel under betan. Kvottillämpning och nyckelbaserad åtkomst är inte browsertestade.
+- 200 anrop/dygn/IP utan nyckel; 10 000 anrop/månad med nyckel under betan. Den nyckellösa kvoten och attributionskravet stöds även av Gabrielas nu redovisade kontroll av [Kom igång](https://kart-api.se/docs/). Datum för just den kontrollen är inte angivet. Kvottillämpning och nyckelbaserad åtkomst är inte browsertestade; kvoten är en teknisk begränsning, attributionskravet ett användningsvillkor.
 - Visning, uppslag och rimlig cache tillåts med korrekt attribution. Egen databas för vidare distribution som dataprodukt eller bulk tillåts inte.
 - Beta utan garanterad servicenivå. Dokumentationen avgränsar tjänsten till Sverige; det belägger inte fullständighet för alla svenska platser.
 - Attribution ska följa med där data visas. Faktiska svarets lista har företräde framför attributionssidans sammanställning. För geocode anger sidan Lantmäteriet / Ortnamn / CC BY 4.0 / Bearbetad, med OpenStreetMap när träffen är en adress.
@@ -53,9 +55,11 @@ Kommunfiltrets `skal` var: ”1 träff(ar) låg i en annan kommun och togs bort.
 
 Fridhem-proven visar att resultatlistan begränsas av `limit` medan spridningsuppgifterna är oförändrade. Tre eller fem resultat är inte alla matchningar. Spridningsuppgifter ska hållas åtskilda från resultatlistans antal och kommunfiltrets utfall. Limit-gränserna 1 och 20 har inte testats; de är kontraktsuppgifter.
 
-422-provet belägger ett strukturerat felsvar för saknad `q`. Koordinatförklaringen i `skal` är inte specifik för detta fel. Proven verifierar API-beteende, inte projektets framtida validering, felhantering eller gränssnitt.
+422-provet belägger ett strukturerat felsvar för saknad `q`. Koordinatförklaringen i `skal` är inte specifik för detta fel. Proven verifierar API-beteende, inte projektets källspecifika felhantering eller gränssnitt. Separat runtime-validering och tester av de interna datakontrakten finns enligt statusen ovan.
 
 ### Öppet för kart-api
+
+Metadataavgränsning utifrån befintligt underlag: `lat`/`lon` och observerade koordinater belägger inte ett visst geodetiskt datum eller en CRS-definition. Källhänvisningen till Lantmäteriet/OSM fastställer inte vilken dataversion kart-api använder. Kontrolldatumet 22 oktober 2026 och API-versionen `/v1` är inte datats referenstid eller uppdateringsfrekvens. Dessa uppgifter förblir obekräftade; inga metadata om CRS eller uppdatering har härletts från testvärdena.
 
 - Uttryckligt CRS/datum och axelordning för koordinaterna. Rimliga talvärden bevisar inte EPSG:4326.
 - Källdatats referenstid/version, uppdateringsfrekvens hos kart-api och fördröjning gentemot Lantmäteriet/OSM.
@@ -77,7 +81,7 @@ Metadata: https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=s
 Data: GET https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data
 ```
 
-Redovisat urval (den fullständiga URL-kodade anropsadressen saknas):
+Äldre redovisat urval (den fullständiga URL-kodade adressen för just det äldre anropet saknas):
 
 ```text
 lang=sv
@@ -99,16 +103,43 @@ Uttaget gav 290 kommuner och 870 datapositioner. JSON-stat2: `id=[Region,Kon,Con
 
 Båda referensdagarna ska bevaras; olika dagar betyder inte automatiskt fel årgång. Röjandeskydd kan ge differenser vid summering enligt underlaget. Tabellen saknar geometri; CRS är inte tillämpligt på statistiksvaret.
 
-Från `http://127.0.0.1:5173`: HTTP 200, `type=cors`, `Access-Control-Allow-Origin: *`, `Content-Type: application/json; charset=UTF-8`. Observerade headers: `X-Rate-Limit-Remaining: 29`, `X-Rate-Limit-Limit: 10s`. Headers ensamma fastställer inte hela kvotregeln. Individuellt test-/hämtningsdatum saknas; resultaten ingick i utkastet sammanställt 2026-10-22.
+Äldre browserprov från `http://127.0.0.1:5173`: HTTP 200, `type=cors`, `Access-Control-Allow-Origin: *`, `Content-Type: application/json; charset=UTF-8`. Observerade headers: `X-Rate-Limit-Remaining: 29`, `X-Rate-Limit-Limit: 10s`. Headers ensamma fastställer inte hela kvotregeln. Individuellt test-/hämtningsdatum saknas; resultaten ingick i utkastet sammanställt 2026-10-22.
+
+#### Ny datakontroll 22 oktober 2026
+
+Gabriela redovisar ett nytt dataanrop den **22 oktober 2026** med följande exakta reproducerbara GET-URL:
+
+```text
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data?lang=sv&outputFormat=json-stat2&codelist%5BRegion%5D=vs_RegionKommun07EjAggr&valueCodes%5BRegion%5D=*&valueCodes%5BKon%5D=1%2B2&valueCodes%5BContentsCode%5D=BE0101U1%2CBE0101U2%2CBE0101U3&valueCodes%5BTid%5D=2025
+```
+
+Observerat resultat: ett läsbart JSON-stat2-svar med `version="2.0"`, `class="dataset"`, `id=[Region,Kon,ContentsCode,Tid]` och `size=[290,1,3,1]`. `value` innehöll 870 numeriska datapositioner. Urvalet var `Kon=1+2`, `Tid=2025` och måtten `BE0101U1`, `BE0101U2`, `BE0101U3`. I URL:en är plustecknet i `1+2` kodat som `%2B`.
+
+Detta är en separat datakontroll från det äldre browserprovet. Ingen specifik HTTP-status, CORS-header eller annan response-header har redovisats för det nya anropet; sådana uppgifter tillskrivs det inte.
 
 ### Dokumentationsuppgifter och öppet
 
-Den tidigare projekttexten länkar [Befolkningstäthet, folkmängd och landareal](https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__BE__BE0101__BE0101C/BefArealTathetKon/). Metadata som binder denna tabell till TAB628, måttdefinitioner och avrundning behöver bevaras.
+#### Metadatakontroll 22 oktober 2026
 
-- Tidigare dokumentationsuppgift i underlaget: 150 000 celler/anrop och 30 anrop/10 s/IP. Exakt officiell hänvisning och kontrolltid behöver kompletteras; långsiktig produktionskvot är inte testad.
-- Bevara exakt anrops-URL, särskilt korrekt kodning av värdet `1+2`; konstruera inte ett historiskt anrop som om det vore bevarat.
-- Licens, attribution, cache, rätt till lagring/återdistribution av provsvar, nyckelbehov, uppdateringsfrekvens och felkontrakt behöver beläggas. Geodatakällornas rättigheter får inte automatiskt tilldelas tabellsvaret.
+Gabriela redovisar kontroll av [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv) den **22 oktober 2026**. Följande är metadatauppgifter, inte nya browserobservationer av datauttaget ovan:
+
+- Tabell `TAB628`, PxWeb API v2. Titel: ”Befolkningstäthet (invånare per kvadratkilometer), folkmängd och landareal efter region och kön. År 1991–2025.” Den tidigare projekttextens [tabellreferens](https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__BE__BE0101__BE0101C/BefArealTathetKon/) behålls för spårbarhet.
+- Metadatafältet `updated` är `2026-02-24T07:00:00Z`. Det är metadatauppgiften om uppdatering, inte kontroll-/hämtningsdatum, statistikens referenstid eller belägg för uppdateringsfrekvens.
+- `BE0101U1`: befolkningstäthet, invånare per km², en decimal.
+- `BE0101U2`: folkmängd, personer, noll decimaler.
+- `BE0101U3`: landareal, km², två decimaler.
+- `Kon=1+2` betyder totalt. Kodlistan `vs_RegionKommun07EjAggr` anges för kommunurval.
+- Befolkningens referenstid är 31 december respektive år. Landarealens referenstid är 1 januari följande år. För uttaget 2025 motsvarar detta 2025-12-31 respektive 2026-01-01 enligt tabellen ovan.
+- Från referensåret 2025 tillämpar SCB Cell Key Method (CKM), vilket kan påverka summerbarheten. Summeringar får därför inte automatiskt förutsättas motsvara publicerade totaler.
+
+Kontrollen kompletterar måttdefinitioner och redovisad precision. Ett metadatautdrag behöver fortfarande bevaras för reproducerbarhet. Datumet ovan gäller metadatakontrollen; tidigare datauttags- och browserdatum förblir okända.
+
+- Enligt Gabrielas nu redovisade kontroll av [SCB:s PxWeb API-dokumentation](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) tillåter API v2 högst **150 000 dataceller per uttag och 30 anrop per 10 sekunder och IP-adress**. Datum för just dokumentationskontrollen är inte angivet. Detta är dokumenterade tekniska gränser, inte licensvillkor eller en ny uppmätning av kvottillämpningen.
+- Exakt URL med kodning av `1+2` finns nu för den nya datakontrollen ovan. Adress och individuellt datum för det äldre anropet är fortfarande okända.
+- Praktiska cache-/uppdateringsvillkor, nyckelbehov och felkontrakt behöver fortfarande beläggas. Licensunderlaget för statistikdata framgår separat nedan.
 - Statistikens gränsindelning måste kontrolleras mot kommungeometrierna. Källval och eventuellt serverbehov är öppna.
+
+Rättighetsstatus för TAB628: enligt Gabrielas nu redovisade kontroll av [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/) omfattas öppna statistikdata i Statistikdatabasen av **CC0 1.0**. Detta ger licensstöd för användning/visning, lagring och återpublicering av dessa data, inklusive provsvar; bedömningen bygger på statistikdatats egna villkor, inte på kommungränsernas licens. Datum för just villkorskontrollen är inte angivet. Tekniska anropsgränser och praktisk cachehantering är separata frågor. CKM är en statistisk metodbegränsning, inte ett licensvillkor.
 
 ## SCB WFS: befolkningsrutor
 
@@ -140,9 +171,19 @@ Gabriela redovisar totalt **17 olika objectid**, i överensstämmelse med `numbe
 
 - `beftotalt` får inte ersättas av `man + kvinna`; observerade värden kan avvika. Noll, saknat/sekretess och röjandeskydd behöver dokumenterad tolkning för vald datavariant.
 - Stabilitet/unikhet för avsett rut-ID, exakta anrop, fel-/tomsvar, tekniska maxgränser, kvoter, nyckelbehov, cache och uppdatering behöver beläggas.
-- Eventuella ytterligare distributionsvillkor behöver kontrolleras; bulkbegränsning är inte konstaterad.
+- Licensstödet för användning, lagring och återpublicering framgår nedan. WFS-specifika tekniska uttags- och cachevillkor är fortfarande obekräftade; bulkbegränsning är inte konstaterad.
 - EPSG:3006 måste valideras före omprojektion till projektets webbgräns: GeoJSON/WGS 84, longitud före latitud. Ingen transformation är implementerad eller testad i projektet; CRS får inte bara etiketteras om.
 - Valet mellan direkt SCB-åtkomst och kart-api för rutor samt serverbehov är öppet.
+
+Samlad WFS-status: sidindelning är belagd genom redovisningen av det begränsade BBOX-testet, men en exakt reproducerbar GetFeature-URL saknas fortfarande. Den konstrueras inte i efterhand som om den vore testad. Gabrielas nu redovisade kontroll av [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/) anger **CC0 1.0 för öppna geodata i geodataplattformen**, vilket kompletterar lagrets redovisade CC0-uppgift med generellt stöd för användning/visning, lagring och återpublicering. Datum för just villkorskontrollen är inte angivet; metadatautdrag för lagret behöver fortfarande bevaras. Licensstödet kommer från villkoren, inte från lyckad browseråtkomst. Varken särskilt cacheförbud, viss cachetid, WFS-specifik numerisk kvot eller obegränsad anropskapacitet är belagt. PxWebs tekniska gränser ovan får inte överföras till WFS.
+
+## Högst tre återstående externa kontroller för dessa metadata
+
+Detta är nästa kontroller att genomföra, inte nya testresultat. Inga nätverksanrop gjordes vid denna komplettering. Övriga öppna frågor per källa och serverbeslutet kvarstår.
+
+1. **kart-api – källmetadata:** kontrollera [OpenAPI](https://api.kart-api.se/openapi.json) och [attributionsdokumentationen](https://kart-api.se/docs/attribution/) för uttryckligt CRS/datum, axelordning, dataversion/referenstid och uppdateringsfrekvens för geocode/kommunuppslag. Om uppgifterna saknas, begär klargörande från leverantörens tidigare dokumenterade kontakt `api@autonomousmedia.io`; inget meddelande har skickats. Bevara dokumentationshänvisning och kontrolldatum, även om svaret blir att uppgiften inte publiceras.
+2. **SCB TAB628 – praktiska driftuppgifter:** licens och numeriska API-gränser har nu officiella hänvisningar ovan och behöver inte utredas på nytt som obelagda. Kontrollera kvarvarande uppgifter om cache/uppdatering, nyckelbehov och felkontrakt via [PxWeb API-dokumentationen](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv).
+3. **SCB WFS – reproducerbarhet och tekniska villkor:** utgå från tjänsten `https://geodata.scb.se/geoserver/stat/wfs` och [SCB:s Statistik på rutor](https://www.scb.se/vara-tjanster/oppna-data/oppna-geodata/statistik-pa-rutor/). Bevara exakta GetCapabilities-/DescribeFeatureType-/GetFeature-URL:er och metadata för `stat:befolkning_1km_2025`, inklusive testets BBOX och sidparametrar ovan. Licensstödet är dokumenterat ovan; kontrollera kvarvarande WFS-specifika kvoter, maxstorlek och cachevillkor, eller dokumentera att sådana gränser inte publiceras. Ett litet daterat återprov räcker för att komplettera reproducerbarheten; nationell nedladdning eller belastningstest ingår inte.
 
 ## SCB: förenklade kommungränser
 
@@ -162,11 +203,17 @@ SWEREF 99 TM identifierades utifrån `.prj`. EPSG:3006 är en uppgift i underlag
 
 ### Dokumentationsuppgifter och öppet
 
-Enligt underlaget tillhandahålls SCB:s öppna digitala gränser under CC0 och är förenklade för tematisk visning, inte precisionsbestämning av administrativa gränser. Officiell villkors-/produkthänvisning och kontrolltid behöver kompletteras för just filen.
+Gabriela redovisar kontroll av [SCB:s officiella sida för digitala gränser](https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/digitala-granser/) den **22 oktober 2026**. Följande är dokumentationsuppgifter, inte nya kontroller av den tidigare nedladdade ZIP-filens innehåll:
+
+- SCB:s öppna digitala kommungränser har licensen **CC0**. Data får användas, delas och tillgängliggöras utan krav på källangivelse. SCB rekommenderar ändå `Källa: SCB`.
+- Koordinatsystemet anges som **SWEREF99 TM**. Detta kompletterar CRS-underlaget, men ersätter inte kontroll av den faktiska ZIP-filens `.prj` inför omprojektion.
+- Gränserna är förenklade och avsedda för tematisering av statistik. **SCB anger uttryckligen att gränserna inte är lämpliga för analyser.** För exakta gränser hänvisar SCB till Lantmäteriet.
+
+Val av geometri för framtida analyser är därför fortsatt öppet och kan behöva diskuteras med Henrik. Denna dokumentationskomplettering fastställer inte ett sådant källval och ändrar inte DECISIONS.md. Kontrolldatumet för webbsidan är inte den tidigare ZIP-filens hämtningsdatum eller geometriårgång.
 
 - **Geografisk årgång är okänd.** `260225` i filnamnet fastställer inte indelningsår eller referensår.
 - Bevara `.prj`-definition, geometriårgång, förenklings-/bearbetningsuppgifter och reproducerbar kontrollmetod. Omprojektion har inte testats i projektet.
-- Belägg uppdateringsfrekvens, cache/lagring, attribution och återdistributionsrätt för eventuellt bearbetat utdrag eller provsvar.
+- Uppdateringsfrekvens och praktisk cache-/lagringsstrategi återstår att fastställa. CC0 och SCB:s rekommenderade, inte obligatoriska, källangivelse är dokumenterade ovan; geometriårgång och bearbetning behöver fortfarande följas för spårbarhet.
 - Lokal browserleverans av vald gränsprodukt, storleksgränser och eventuellt server-/bearbetningsbehov är inte avgjorda.
 - Tidigare DeSO-data är referensmaterial, inte fastställd produktionskälla. Härledda kommunpolygoner måste i så fall beskrivas med ursprung, bearbetning och datum.
 
@@ -180,9 +227,9 @@ Bakgrundskarta väljs separat med kontroll av visningsvillkor, attribution och a
 | --- | --- |
 | Endpoints, parametrar, täckning, referenstider, CRS, rättigheter, kvoter och hämtningsdatum | Kända uppgifter dokumenterade ovan; saknade datum, metadata och rättighetsbelägg står öppna per källa. Källorna är undersökta, inte slutligt valda. |
 | Lokala browserprov, nycklar, CORS, paginering och storleksgränser | Redovisade prov dokumenterade med avgränsningar. WFS-paginering gäller ett BBOX; storleks-/åtkomstvillkor är inte helt utredda. |
-| Små tillåtna provsvar, interna typer, hantering av tomma/felaktiga/begränsade svar | API-observationer finns, men inga fixturer, interna kontrakt eller projektkontroller har tillkommit. |
-| Återpublicering bedömd separat från visning | Skillnaden dokumenterad. kart-api-fixturer i privat/offentligt repo är öppna; SCB-rättigheter behöver belägg enligt respektive avsnitt. |
-| Serverbehov avgjort i DECISIONS före beroende funktioner | Inte avgjort. Källval, årgångar och åtkomstlösning behöver dokumenteras där i ett senare steg. DECISIONS ändras inte nu. |
+| Små tillåtna provsvar, interna typer, hantering av tomma/felaktiga/begränsade svar | Fem interna kontrakt, runtime-validering, typkontroller, 29 tidigare passerade domäntester och syntetiska API-fixturer finns. Källspecifik normalisering och integrationstester med fixturerna återstår; inga verkliga svar har sparats som fixturer. |
+| Återpublicering bedömd separat från visning | Skillnaden dokumenterad. kart-api-fixturer i privat/offentligt repo är öppna. SCB:s CC0 1.0 för öppna statistikdata och geodata har nu officiellt villkorsunderlag; tekniska gränser/cachefrågor kvarstår enligt respektive avsnitt. |
+| Serverbehov avgjort i DECISIONS före beroende funktioner | Inte avgjort. DECISIONS innehåller föreslagen arbetsinriktning för källval och åtkomst, inte slutliga beslut. Källval, årgångar och åtkomstlösning behöver fortfarande avgöras. |
 
 Källregistret ska per faktiskt vald källa innehålla leverantör, dokumentationslänk, exakt endpoint/metod, parametrar, områdesfilter, paginering, hämtningsdatum, täckning/luckor, storleksgränser, referenstid/geometriårgång, CRS/axelordning/upplösning, enheter/saknatillstånd/röjandeskydd, CORS/nycklar/kvoter/cache/fel, licens/attribution/lagring/återdistribution och hur provsvaret jämförts med källan. Okänt ska förbli okänt tills underlag finns.
 
