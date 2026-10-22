@@ -6,7 +6,7 @@ GISLABs webbapp för en första geografisk orientering av en okänd plats i Sver
 
 ## Status
 
-Projektet startades 15 oktober 2026. Repot innehåller projektunderlag, arbetsflöde och uppgifter. Det finns ännu ingen körbar app eller publicerad projektversion. Arkitekturen nedan är utgångspunkt för Gabrielas implementation.
+Projektet startades 15 oktober 2026. P1-grunden finns: en svensk kartsida, TypeScript-konfiguration och CI för byggkontroller. Gabriela har bekräftat kartvisning, zoom, panorering, återställningsknappen och layouten på dator och i simulerat mobilformat med smal skärm. Musrullszoom fungerar. Ren installation, typkontroll, bygge och serverstart har kontrollerats i en separat kopia. Typkontroll och bygge passerar även med musrullszoom aktiverad. Installation från en faktisk ny klon, Gabrielas genomgång och CI-körning på GitHub återstår för P1. Test på fysisk mobil är ännu inte gjort. Ingen projektversion är publicerad.
 
 Repot är privat. Slutmålet är en publik app på **gislab.se**. Exakt URL och hur GISLABs webbhotell tar emot filer behöver fastställas innan publicering.
 
@@ -22,6 +22,22 @@ Repot är privat. Slutmålet är en publik app på **gislab.se**. Exakt URL och 
 Havsnivåanalys ingår i en senare etapp. Det första fungerande delmålet är mindre: välj en kommun och se befolkning och täthet med källa och år.
 
 ## Kom igång
+
+P1 använder Node.js 24 (exakt version i `.nvmrc`) och npm. På Windows kan Node.js LTS installeras med `winget install --id OpenJS.NodeJS.LTS --exact`. Öppna en ny terminal efter installationen och kontrollera `node --version` och `npm.cmd --version`.
+
+Följ [P1-guiden](docs/P1_STEG_FOR_STEG.md). P1 hör till [issue #1](https://github.com/gislab-se/platsorientering/issues/1), identifierad av Gabriela. Beroendena är låsta i `package-lock.json`. Efter kloning och byte till grenen med P1-filerna:
+
+```powershell
+npm.cmd ci
+npm.cmd run dev
+# I en separat terminal:
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+`npm.cmd run dev` visar en lokal adress i terminalen. Öppna den i webbläsaren; stoppa servern med Ctrl+C. `npm.cmd run build` kör också typkontroll och skapar `dist/`. `npm.cmd run preview` visar byggresultatet lokalt. `npm.cmd` undviker att PowerShell försöker köra npm som ett blockerat PowerShell-skript.
+
+Verifierat på Windows med Node.js 24.20.0 och npm 11.19.0: `npm ci`, typkontroll, produktionsbygge och serverstart i en separat ren kopia av arbetsfilerna, utan befintlig `node_modules`. Servern svarade med HTTP 200. Detta var inte en ny Git-klon, eftersom P1-filerna ännu inte är committade. Efter koordinatflytten passerade typkontroll och produktionsbygge även på den aktuella arbetsversionen. I Codex behövde Vites bygge och serverstart köras utanför sandlådan eftersom den blockerade underprocesser (`spawn EPERM`). Se P1-guiden för manuella testresultat och återstående kontroller.
 
 ```powershell
 git clone https://github.com/gislab-se/platsorientering.git
