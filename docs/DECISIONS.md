@@ -109,3 +109,6 @@ Lägg till ett kort numrerat beslut när en fråga blir avgjord:
 - Alternativ som faktiskt övervägdes.
 - Konsekvenser för användare, data, drift och tester.
 - Länk till issue eller pull request.
+# Lokalt P3-beslut – kommunval, 30 oktober 2026
+
+På uppdrag införs tre panelsteg och val av en kommun genom kartklick. Befolkning och analys markeras som planerade. Kommunpolygonen hämtas direkt från kart-api:s `/v1/kommun/{kod}` efter punktuppslag; inga nationella rådatafiler lagras eller återpubliceras. Detta väljer kart-api för denna avgränsade visualisering och ändrar inte öppna beslut om analysgeometri eller SCB. Gränsårgången visas som okänd. Kommunkod är tangentbordsalternativ. Flera kommuner, regioner och ritade områden implementeras senare.

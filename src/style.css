@@ -7,7 +7,17 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
-header, main, footer { width: min(1100px, 100%); margin-inline: auto; padding: 1rem 1.25rem; }
+header, main, footer { width: min(1440px, 100%); margin-inline: auto; padding: 1rem 1.25rem; }
+main { display: grid; grid-template-columns: minmax(260px, 330px) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.workflow { display: grid; gap: 1rem; }
+.workflow p { margin-block: .5rem; }
+.workflow form { display: grid; gap: .5rem; }
+input { font: inherit; padding: .6rem; min-width: 0; width: 100%; border: 1px solid #81998e; border-radius: .35rem; }
+.source-note { font-size: .85rem; color: #435d54; }
+.planned-option { display: flex; gap: .5rem; align-items: center; margin-top: .75rem; }
+.planned-option input { width: auto; }
+.planned-option span { font-size: .8rem; background: #eef2ef; padding: .1rem .4rem; border-radius: .3rem; }
+@media (max-width: 800px) { main { grid-template-columns: 1fr; } }
 header { padding-top: 2rem; }
 h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.2; margin-block: .5rem; }
 h2 { font-size: 1.25rem; margin: 0; }

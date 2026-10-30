@@ -42,6 +42,8 @@ Klart när:
 
 ## P3 – Välj kommun och visa rätt område
 
+Lokalt påbörjat 30 oktober 2026 på `feat/3-kommunval-panel`: panel i tre steg och kommunval med kartklick eller kod är implementerade. Bygge och 65 tester passerar. Webbläsarverifiering och namnval återstår; P3 är inte avslutat. Befolkningsdata och analys är fortsatt planerade. GitHub Issue #3 kunde inte läsas från miljön; uppgiften följer användarens avgränsning och kriterierna nedan. Grenen bygger på aktuell P2-arbetskopia med befintliga lokala ändringar bevarade; dessa behöver hållas åtskilda vid senare commit/PR.
+
 Ansvarig: Gabriela. Beroenden: P2.
 
 Bygg val av kommun med namn och kod. Behåll inledande nollor i kommunkoder och visa vald gräns med årgång.

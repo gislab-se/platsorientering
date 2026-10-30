@@ -4,6 +4,8 @@ Status: beslutad utgångspunkt för implementation. P1-grunden är implementerad
 
 ## Grundval
 
+Lokalt P3-tillägg 30 oktober 2026: vänsterpanelen har områdesval, dataval och analys. Kartklick använder kommunuppslaget och hämtar sedan endast vald kommun via `municipalityBoundary.ts`. GeoJSON valideras före rendering. Nya val avbryter tidigare anrop och ett löpnummer hindrar sena svar från att ändra valet. Namn, kod, attribution och geometri kommer från API:t. Dataval och analys är ännu planerade; gränsgeometrin används endast för visning.
+
 En statisk webbklient byggs med TypeScript, Vite och Leaflet. Ingen server eller databas behövs innan ett verifierat behov finns. Valet bygger vidare på Gabrielas erfarenhet av Leaflet, HTML, CSS och JavaScript och lämpar sig för en första GitHub-publicering samt senare drift på gislab.se.
 
 Välj aktuella stödda biblioteksversioner när projektgrunden skapas, ange Node-version och checka in package-lock.json. Rita-funktionen behöver ett Leaflet-kompatibelt verktyg; välj efter kontroll av underhåll, licens, mobilstöd och redigering. Biblioteket är ännu inte valt.
