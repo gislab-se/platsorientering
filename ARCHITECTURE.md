@@ -1,6 +1,6 @@
 # Arkitektur
 
-Status: beslutad utgångspunkt för implementation. P1-grunden är implementerad och sammanslagen till `main`. P2 pågår med datakontrakt, validering, källunderlag, testfixturer och kart-api-adaptrar; lokala P2-ändringar är ännu inte fullständigt committade eller granskade. Gränssnittet visar fortfarande bara bakgrundskartan. Aktuell funktionsstatus finns i README och beslut dokumenteras i docs/DECISIONS.md.
+Status: beslutad utgångspunkt för implementation. P1-grunden är implementerad och sammanslagen till `main`. P2 pågår med datakontrakt, validering, källunderlag, testfixturer och kart-api-adaptrar; P2-ändringar är committade på P3-grenen men etappen är ännu inte avslutad. Gränssnittet har tre panelsteg och kommunval. Aktuell funktionsstatus finns i README och beslut dokumenteras i docs/DECISIONS.md.
 
 ## Grundval
 

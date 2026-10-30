@@ -1,6 +1,6 @@
 # Stegvis publicering
 
-Gabriela ansvarar för genomförandet. Ingen version är publicerad och ingen publik URL är verifierad. Publicering sker i två steg: först en förhandsversion via Gabrielas GitHub-konto och senare slutpublicering på gislab.se.
+Gabriela ansvarar för genomförandet. P1 finns på den verifierade adressen https://yakimovskagabriela-ctrl.github.io/platsorientering/ (HTTP 200, kontrollerat 30 oktober 2026). Kommunvalet och panelens tre steg förbereds nu för publicering på samma adress på användarens uppdrag. Publicering sker i två steg: först en förhandsversion via Gabrielas GitHub-konto och senare slutpublicering på gislab.se.
 
 ## Aktuellt läge
 
@@ -8,14 +8,14 @@ Gabriela ansvarar för genomförandet. Ingen version är publicerad och ingen pu
 | --- | --- |
 | Källkodsrepo | Privat: `gislab-se/platsorientering` |
 | Första publiceringskonto | `yakimovskagabriela-ctrl` |
-| Publikt byggrepo | Skapat och tomt: `yakimovskagabriela-ctrl/platsorientering` |
-| GitHub Pages-URL | Inte publicerad eller verifierad |
+| Publikt byggrepo | `yakimovskagabriela-ctrl/platsorientering`, innehåller den publicerade P1-versionen |
+| GitHub Pages-URL | https://yakimovskagabriela-ctrl.github.io/platsorientering/ – P1 verifierad 30 oktober 2026 |
 | Publiceringskälla | Godkända commits på privata `gislab-se/platsorientering`, grenen `main` |
-| Automatik | GitHub Actions-workflow förberett; aktiveras först på privata `main` när nödvändig hemlighet finns |
-| Senast verifierat produktionsbygge | Historiskt verifierat för P1; nytt releasebygge återstår |
+| Automatik | Workflow följer med releasen till privata `main`. Repository secret `PAGES_DEPLOY_TOKEN` finns; dess värde har inte lästs eller visats. |
+| Senast verifierat produktionsbygge | 30 oktober 2026: typkontroll, bygge med `/platsorientering/` och 65 tester passerar |
 | Slutmål | gislab.se; exakt URL och överföringsmetod är inte verifierade |
 
-P1-grunden är sammanslagen till `main`. P2 pågår och har både pushade commits och lokala, ännu inte committade ändringar. Publiceringen utgår därför endast från en commit som har nått privata `main`, aldrig direkt från den lokala arbetsmappen eller en feature-gren.
+P1-grunden är sammanslagen till `main`. Kommunval och dess P2-beroenden är committade och pushade på `feat/3-kommunval-panel`. Publiceringsuppdraget gäller denna förhandsversion; P2:s öppna metadatafrågor och P3:s återstående namnval kvarstår. Publiceringen utgår därför endast från en commit som har nått privata `main`, aldrig direkt från den lokala arbetsmappen eller en feature-gren.
 
 ## Steg 1 – förhandsversion via GitHub
 
@@ -52,3 +52,7 @@ Slutreleasen ska byggas från en granskad commit eller tagg. Kontrollera huvudfl
 Publicera inte `.git`, `.env`, privata dokument, rådatacache eller hemligheter. Kart-api-data får inte göras till en egen nedladdningsdatabas. Rättigheter och attribution i DATA_SOURCES gäller även för en publik förhandsversion.
 
 Spara identiteten på föregående fungerande artefakt. Vid fel återpubliceras den artefakten med samma verifierade metod. Kontrollera därefter resurser och huvudflöde och dokumentera orsaken. HANDOVER fylls med verkliga kommandon och adresser först när de har provats.
+
+## Releasekontroll 30 oktober 2026
+
+Användaren har beställt publicering av panelens tre steg och kommunvalet. Release via pull request till privata `main` och befintligt dist-workflow. Föregående offentliga P1-version svarar HTTP 200 men saknar `area-heading` och `analysis-heading`. Efter releasen kontrolleras dessa markörer samt HTTP-status och innehåll för samtliga refererade JS/CSS-resurser under `/platsorientering/`. Interaktiv webbläsarkontroll och fysisk mobil är ännu inte verifierade. Endast byggartefakten får föras till det publika repot; inga kart-api-råsvar eller privata dokument.
