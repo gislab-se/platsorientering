@@ -2,11 +2,11 @@
 import type {
   AreaOfInterest, SourceMetadata, MunicipalityStatistics, PopulationGridCell,
   AnalysisResult, MunicipalityCode, Wgs84AreaGeometry, PolygonGeometry,
-  NumericValue, DataState,
+  NumericValue, DataState, MunicipalityLookupResponse, GeocodeResponse,
 } from '../src/domain/contracts';
 import {
   parseAreaOfInterest, parseSourceMetadata, parseMunicipalityStatistics,
-  parsePopulationGridCell, parseAnalysisResult,
+  parsePopulationGridCell, parseAnalysisResult, parseMunicipalityLookupResponse, parseGeocodeResponse,
 } from '../src/domain/validation';
 
 type Assert<T extends true> = T;
@@ -14,6 +14,8 @@ type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends
   (<T>() => T extends B ? 1 : 2) ? true : false;
 
 export type ContractChecks = [
+  Assert<Equal<ReturnType<typeof parseGeocodeResponse>, GeocodeResponse>>,
+  Assert<Equal<ReturnType<typeof parseMunicipalityLookupResponse>, MunicipalityLookupResponse>>,
   Assert<Equal<ReturnType<typeof parseAreaOfInterest>, AreaOfInterest>>,
   Assert<Equal<ReturnType<typeof parseSourceMetadata>, SourceMetadata>>,
   Assert<Equal<ReturnType<typeof parseMunicipalityStatistics>, MunicipalityStatistics>>,

@@ -1,26 +1,31 @@
 # Startguide för Gabriela
 
-Du ansvarar för hela projektets produktion. Börja med en liten fungerande del och bygg vidare efter varje demo. Henrik hjälper dig med krav, GIS-frågor och granskning.
+Du ansvarar för projektets produktion och ska samtidigt få utrymme att förstå och prova varje steg. Henrik hjälper med krav, GIS-frågor och granskning. Börja alltid med att kontrollera aktuell status i README och ROADMAP.
 
-## Första arbetspasset
+## Aktuellt läge
 
-1. Logga in på ditt GitHub-konto och acceptera inbjudan till repot om den visas. Repot är privat.
-2. Klona `https://github.com/gislab-se/platsorientering.git` till en egen lokal mapp och öppna den i VS Code.
-3. Läs README, PROJECT_BRIEF, AGENTS, ARCHITECTURE och P1 i ROADMAP.
-4. Öppna GitHub-issuen för P1 och kontrollera dess acceptanskriterier.
-5. Skapa en gren, exempelvis `feat/1-projektgrund`. Bygg projektgrunden där.
-6. Kontrollera installation från en ny klon, typkontroll och produktionsbygge. Skriv kommandona i README när de finns och har provats.
-7. Öppna en pull request och visa resultatet för Henrik.
+- P1-grunden är implementerad och sammanslagen till `main` genom PR #10.
+- P2 pågår på `feat/2-datakallor-datakontrakt` och har lokala ändringar som ska bevaras.
+- Ingen version är publicerad.
+- Första framtida publicering ska ske via GitHub-kontot `yakimovskagabriela-ctrl`; gislab.se är slutmålet.
 
-P1-grundfiler har nu skapats. Beroenden är installerade och typkontroll, bygge och serverstart passerar. Följ [P1 steg för steg](P1_STEG_FOR_STEG.md) för verktyg, filer, kommandon och återstående kontroller.
+## Börja ett arbetspass
+
+1. Öppna repot `https://github.com/gislab-se/platsorientering.git` i VS Code.
+2. Läs den aktuella uppgiften och relevanta delar av README, AGENTS och ROADMAP.
+3. Kör `git status` och `git branch --show-current`. Byt inte gren med osparade ändringar.
+4. Arbeta i ett litet steg som går att förklara och kontrollera.
+5. Kör relevanta kontroller och anteckna vad du själv provade.
+
+P1-guiden är ett historiskt och pedagogiskt stöd för hur kartgrunden hänger ihop. P2:s aktuella källunderlag finns i DATA_SOURCES.
 
 ## Arbeta med AI
 
 Ge AI:n en tydlig uppgift med aktuellt issue-nummer och be den läsa AGENTS.md. Be om förklaringar till kod och metod du inte förstår. Testa resultatet själv och fråga varför vid oväntade utfall.
 
-Exempel på första uppdrag:
+Exempel på uppdrag:
 
-> Läs AGENTS.md och uppgiften P1. Hjälp mig skapa en minimal TypeScript-, Vite- och Leaflet-app. Genomför bara P1, förklara hur filerna hänger ihop och visa hur jag själv kontrollerar installation, typkontroll och bygge. Uppdatera README med provade kommandon.
+> Läs AGENTS.md och den aktuella uppgiften. Förklara först nuläget. Genomför ett litet steg, förklara vilka filer som påverkas och visa hur jag själv kontrollerar resultatet.
 
 Om du skriver på makedonska ska AI:n svara på makedonska och svenska enligt AGENTS.md, så att Henrik också kan följa arbetet.
 

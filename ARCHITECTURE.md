@@ -1,10 +1,10 @@
 # Arkitektur
 
-Status: beslutad utgångspunkt för implementation, 15 oktober 2026. P1-grundfiler finns. Ren installation, typkontroll, bygge och serverstart har verifierats i en separat kopia. Gabriela har bekräftat kartvisning, zoom, panorering, återställningsknapp och layout på dator och i simulerat mobilformat med smal skärm, samt musrullszoom på dator. Typkontroll och bygge passerar med musrullszoom aktiverad. Installation från en faktisk ny klon, Gabrielas genomgång och CI-körning återstår för P1. Fysisk mobil är ännu inte testad. Ändringar dokumenteras i docs/DECISIONS.md.
+Status: beslutad utgångspunkt för implementation. P1-grunden är implementerad och sammanslagen till `main`. P2 pågår med datakontrakt, validering, källunderlag, testfixturer och kart-api-adaptrar; lokala P2-ändringar är ännu inte fullständigt committade eller granskade. Gränssnittet visar fortfarande bara bakgrundskartan. Aktuell funktionsstatus finns i README och beslut dokumenteras i docs/DECISIONS.md.
 
 ## Grundval
 
-En statisk webbklient byggs med TypeScript, Vite och Leaflet. Ingen server eller databas behövs innan ett verifierat behov finns. Valet bygger vidare på Gabrielas erfarenhet av Leaflet, HTML, CSS och JavaScript och ger en liten driftsättning på gislab.se.
+En statisk webbklient byggs med TypeScript, Vite och Leaflet. Ingen server eller databas behövs innan ett verifierat behov finns. Valet bygger vidare på Gabrielas erfarenhet av Leaflet, HTML, CSS och JavaScript och lämpar sig för en första GitHub-publicering samt senare drift på gislab.se.
 
 Välj aktuella stödda biblioteksversioner när projektgrunden skapas, ange Node-version och checka in package-lock.json. Rita-funktionen behöver ett Leaflet-kompatibelt verktyg; välj efter kontroll av underhåll, licens, mobilstöd och redigering. Biblioteket är ännu inte valt.
 
@@ -12,7 +12,7 @@ Välj aktuella stödda biblioteksversioner när projektgrunden skapas, ange Node
 
 ```mermaid
 flowchart LR
-    User[Platsval eller ritat område] --> State[Gemensamt apptillstånd]
+    User[Kommun, region, sammansatt eller ritat område] --> State[Gemensamt apptillstånd]
     State --> Providers[Datakällornas adaptrar]
     Providers --> APIs[Verifierade API:er]
     APIs --> Validate[Validering och normalisering]
@@ -25,7 +25,7 @@ Adaptrarna kapslar in leverantörernas svar och fel. UI och analys får interna,
 
 ## Planerad struktur
 
-Skapas successivt av Gabriela i P1–P7; trädet är inte en lista över redan befintliga filer.
+Strukturen skapas successivt av Gabriela i P1–P7. Alla kataloger nedan finns inte ännu.
 
 ```text
 src/
@@ -45,7 +45,7 @@ docs/                      metoder, beslut och drift
 
 ## Interna kontrakt
 
-Gabriela konkretiserar typerna i P2 och sparar små lagligt delbara provsvar. Följande behöver finnas:
+P2 innehåller de fem typerna nedan samt runtime-validering och små lagligt delbara provsvar. Det nuvarande områdeskontraktet täcker kommun och ritat område; regioner och sammansatta områden kräver en senare, separat utvidgning.
 
 | Objekt | Minsta information |
 | --- | --- |
@@ -74,6 +74,6 @@ Om datakällan inte kan användas direkt från webbläsaren väljs antingen en a
 
 ## Publicering och kvalitet
 
-Vite ska stödja den slutliga underkatalogen med korrekt bas-URL. Kartor, dataanrop och resurser måste fungera även när appen ligger under en sökväg på gislab.se. Startversionen behöver ingen klientrouter eller SPA-omskrivning.
+Vite ska stödja en underkatalog med korrekt bas-URL. En GitHub Actions-körning efter push till privata `gislab-se/platsorientering` på `main` ska bygga med bas-URL `/platsorientering/` och överföra endast den kontrollerade `dist/`-artefakten till det publika repot `yakimovskagabriela-ctrl/platsorientering`. Åtkomst sker med en separat, minimalt behörig Actions-hemlighet; privat källkod och P2-arbetsfiler ska inte kopieras. Den verkliga Pages-URL:en ska verifieras efter första publiceringen. Slutversionens resurser och dataanrop ska även fungera under den bekräftade sökvägen på gislab.se. Startversionen behöver ingen klientrouter eller SPA-omskrivning.
 
 Gabriela inför typkontroll, enhetstester för analys och integrationstester med sparade provsvar. Ett webbläsartest ska täcka platsval → resultat → rita → sammanställning. Live-API-kontroll hålls separat så att kvoter och externa driftfel inte gör vanliga tester instabila.

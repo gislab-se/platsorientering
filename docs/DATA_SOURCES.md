@@ -1,18 +1,71 @@
 # Datakällor och API-utvärdering
 
-Sammanställt 22 oktober 2026 för P2. Underlaget är Gabrielas redovisade externa tester i Codex-konversationen, det bifogade utkastet ”P2 – Datakällor: verifierade fynd och öppna punkter” (sammanställt 2026-10-22) samt dokumentationsgenomgångar i samma konversation. Inga nya anrop har gjorts vid denna dokumentationsändring.
+Sammanställt 22 oktober 2026 för P2, uppdaterat 28 oktober 2026 med projektets livekontroller av kart-api, senaste testkörning och en separat metadatakontroll enligt nedan. Äldre underlag är Gabrielas redovisade externa tester, utkastet ”P2 – Datakällor: verifierade fynd och öppna punkter” (2026-10-22) och dokumentationsgenomgångar i Codex-konversationen. Vid metadatakompletteringen hämtades officiell dokumentation, TAB628-metadata, WFS-metadata, en befolkningsruta och kommungränsarkivet på nytt. Inga kodändringar eller nya körningar av den ordinarie testsviten gjordes.
 
-- **Observation:** ett redovisat externt testresultat, inte ett test som upprepats i projektet eller oberoende verifierats av AI.
+- **Observation:** äldre redovisat externt testresultat, om inget annat anges. Avsnittet om livekontroll 28 oktober anger vilka prov AI faktiskt körde med projektets adaptrar.
 - **Dokumentation:** leverantörsuppgift, inte uppmätt beteende.
 - **Öppet:** underlag eller beslut saknas. Sammanställningsdatum är inte automatiskt hämtningsdatum.
 
-De fem interna datakontrakten och gemensamma stödtyper finns i [contracts.ts](../src/domain/contracts.ts), med runtime-validering i [validation.ts](../src/domain/validation.ts). [Typkontroller](../tests/contracts.types.ts) och [domäntester](../tests/validation.test.mjs) finns; den tidigare redovisade körningen gav 29 passerade runtime-tester samt godkända typkontroller. Tester har inte körts om vid denna statussynkronisering.
+De fem interna datakontrakten och gemensamma stödtyper finns i [contracts.ts](../src/domain/contracts.ts), med runtime-validering i [validation.ts](../src/domain/validation.ts). Senaste körningen den 28 oktober, efter tillägget av verkliga SCB-fixturer, gav **63 passerade runtime-tester** (29 domäntester och 34 käll-/adaptertester) samt godkända typkontrakt. Även `npm.cmd run typecheck` passerade. Testkörningen behövde ske utanför Codex-sandlådan efter `spawn EPERM`; detta var ett miljöhinder, inte ett konstaterat kodfel. Inga tester kördes om vid denna dokumentsynkronisering.
 
-Fyra tydligt märkta syntetiska API-fixturfiler och deras [README](../tests/fixtures/README.md) finns under `tests/fixtures/`. Inga verkliga API-svar har sparats som fixturer. Fixturerna används ännu inte av domäntesterna; källspecifik normalisering och integrationstester mot dem saknas. Inga API-adaptrar eller liveintegrationer är byggda. GitHub Issue #2 har inte kunnat läsas i genomgången; kravjämförelsen utgår från P2 i [ROADMAP](../ROADMAP.md) och [ARCHITECTURE](../ARCHITECTURE.md). Slutliga källval och serverbehov är inte avgjorda.
+Fyra märkta syntetiska API-fixturfiler finns under `tests/fixtures/` och används av [käll-/adaptertesterna](../tests/source-fixtures.test.mjs). Adaptrarna [municipalityLookup.ts](../src/providers/municipalityLookup.ts) och [geocode.ts](../src/providers/geocode.ts) finns och har provats mot riktiga API-svar. De är ännu inte inkopplade i gränssnittet. Tre verkliga SCB-svar har nu sparats som fixturer enligt avsnittet nedan; SCB-normalisering och adapterintegration återstår. GitHub Issue #2 kunde inte läsas direkt, men Gabriela har därefter tillhandahållit dess fem klartkriterier i konversationen. De motsvarar P2 i [ROADMAP](../ROADMAP.md); jämförelsen nedan använder denna kravtext och [ARCHITECTURE](../ARCHITECTURE.md). För kart-api är direkt browseråtkomst utan API-nyckel beslutad i samråd med Henrik den 28 oktober 2026; se [DECISIONS](DECISIONS.md#p2--api-åtkomst-28-oktober-2026). Åtkomstlösningar för SCB och kommungränser är inte slutligt avgjorda.
+
+## Daterad metadatakontroll, 28 oktober 2026
+
+### Sparade verkliga SCB-fixturer, 28 oktober 2026
+
+Efter metadatakontrollerna sparades tre små, verkliga JSON-svar direkt från SCB i [tests/fixtures](../tests/fixtures/README.md), med CC0-stöd från [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/), återkontrollerade samma dag:
+
+- [scb-tab628.real.json](../tests/fixtures/scb-tab628.real.json): nio publicerade värden, tre mått för Uppsala, Malmö och Kiruna, totalt kön, år 2025. Folkmängd avser 2025-12-31 och landareal 2026-01-01; tabellsvaret saknar geometri.
+- [scb-wfs-limited.real.json](../tests/fixtures/scb-wfs-limited.real.json): en hel ruta, 1 av 17 BBOX-träffar, EPSG:3006 och referenstid 20251231.
+- [scb-wfs-empty.real.json](../tests/fixtures/scb-wfs-empty.real.json): geografiskt tomt utsnitt, 0 träffar och `crs=null`.
+
+Varje fil innehåller exakt käll-URL, hämtningsögonblick i UTC, observerad HTTP-status, licens/villkorslänk, attribution, referenstider, CRS-underlag och hela JSON-svaret under `body`. Ingen semantisk bearbetning av svarskropparna gjordes. Dessa begränsade API-uttag är sparade provsvar, inte en egen nationell databas. Inga verkliga kart-api-data hämtades eller sparades i detta steg.
+
+`npm.cmd test` passerade med typkontrakt och **63 runtime-tester** (fyra nya); `npm.cmd run typecheck` passerade också. Nya tester kontrollerar proveniens, JSON-stat-dimensionsindex och kommunkoder, avrundad täthet för provvärdena, begränsat WFS-svar, tomt CRS och skydd mot ometikettering av EPSG:3006 till WGS84. Testsviten använder sparade svar utan nätverk. Första nya TAB628-testets antagande om JavaScripts nyckelordning rättades i testet till JSON-stat-index; inga källdata eller produktionsfunktioner ändrades. Körningen behövde ske utanför sandlådan efter `spawn EPERM`.
+
+Nedanstående redovisningar av att inga verkliga provsvar sparades gäller de tidigare kontrollstegen. De tre filerna ovan är ett senare, uttryckligt fixturtillägg; kart-api:s fixturrättigheter är fortfarande öppna.
+
+AI hämtade nedanstående resurser från leverantörernas officiella adresser. Angivna datum är nya kontroll-/hämtningsdatum och ersätter inte okända datum för Gabrielas äldre uttag. API- och ZIP-innehåll lästes i minnet; inga nya rådatafiler eller fixturer lades i repot. Kontrollen gjordes via Node/PowerShell, inte i webbläsaren.
+
+| Källa och hämtat underlag | Bekräftat | Fortsatt öppet |
+| --- | --- | --- |
+| kart-api: [OpenAPI](https://api.kart-api.se/openapi.json), [Kom igång](https://kart-api.se/docs/), [attribution](https://kart-api.se/docs/attribution/), [API-referens](https://kart-api.se/docs/referens/), [kommunguiden](https://kart-api.se/guider/vilken-kommun/) och [Om talen](https://kart-api.se/om-talen/) | OpenAPI hämtades med HTTP 200. Kommunguiden anger punkt-i-polygon mot Lantmäteriets gränser. OpenAPI:s `KommunFeature.geometry` beskrivs som WGS84, förenklad för visning. Detta gäller geometri från kommunendpointen, inte ett uttryckligt CRS-besked för geocode/lookup. | Uttryckligt CRS/datum för geocodes `lat`/`lon` och lookup-indata, källdatats referenstid/version, uppdateringsfrekvens och kommunindelningens årgång kunde inte beläggas i dessa källor. |
+| SCB [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv), HTTP 200 | `ContentsCode.extension.refperiod` anger befolkning 31 december och landareal 1 januari följande år. Urvalet 2025 avser alltså 2025-12-31 respektive 2026-01-01; tätheten relaterar dessa mått. `updated=2026-02-24T07:00:00Z` bekräftades. Tabellen saknar geometri: CRS är inte tillämpligt på tabellsvaret. | Matchning mot vald gränsårgång återstår. Metadatafältet `updated` är inte ett hämtningsdatum eller ett generellt besked om uppdateringsfrekvens. |
+| SCB [WFS GetCapabilities](https://geodata.scb.se/geoserver/stat/wfs?service=wfs&version=1.1.0&request=GetCapabilities), HTTP 200, samt dess länkade [ISO-metadata](https://www.geodata.se/geodataportalen/oppnadata/swe/csw?request=GetRecordById&service=CSW&version=2.0.2&elementSetName=full&id=1c1d36c5-58b5-4447-94ab-36b57e818931&outputSchema=csw:IsoRecord), HTTP 200 | `stat:befolkning_1km_2025` har `DefaultSRS=urn:x-ogc:def:crs:EPSG:3006`. ISO-posten anger också EPSG:3006, nationella data utan INSPIRE och tidsutsträckning 2015-12-31–2025-12-31. Ett nytt GetFeature-prov gav `referenstid="20251231"` och uttryckligt EPSG:3006. | Ingen omprojektion eller generell kontroll av axelordning för alla WFS-format gjordes. Full sidindelning återtestades inte. |
+| SCB [Digitala gränser](https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/digitala-granser/) och sidans [shape_svenska_260225.zip](https://www.scb.se/contentassets/3443fea3fa6640f7a57ea15d9a372d33/shape_svenska_260225.zip) | Arkivet hämtades och `Kommun_Sweref99TM.zip/Kommun_Sweref99TM.prj` lästes. SCB anger SWEREF99 TM; projektionens parametrar överensstämmer med Lantmäteriets officiella definition nedan. | Varken produktsidan eller kommunarkivets innehåll fastställer gränsernas giltighetsdag/årgång. ZIP-tidsstämplar är inte en sådan uppgift. Äldre nedladdningsdatum är fortsatt okänt. |
+
+### Underlag för kommungränsernas CRS och årgång
+
+Kommunarkivet innehöll `.dbf`, `.prj`, `.shp` och `.shx`, utan separat text-/XML-metadata om årgång. `.prj` anger `PROJECTION["Transverse_Mercator"]`, GRS 80 (`6378137.0`, `298.257222101`), centralmeridian 15°, skalfaktor 0,9996, falsk öst 500000 m, falsk nord 0 m, latitud för origo 0° och enhet meter. Namnen är `unnamed`/`D_GRS_80`; explicit EPSG-auktoritet och AXIS-poster saknas.
+
+SCB:s uttryckliga uppgift SWEREF99 TM tillsammans med parameterkontrollen stöder **SWEREF 99 TM/EPSG:3006 för den nu hämtade gränsfilen**. Jämförelsekällor, kontrollerade 28 oktober: [Lantmäteriets referenssystem och projektionsparametrar](https://www.lantmateriet.se/en/geodata/gps-geodesy-and-swepos/swedish-reference-systems/) och [Svenska transformationer i PROJ, tabell 1](https://www.lantmateriet.se/globalassets/geodata/gps-och-geodetisk-matning/svenska-transformationer-i-proj-web.pdf), som kopplar SWEREF 99 TM till EPSG:3006. `.prj` ensam namnger inte datumet tillräckligt; SCB:s produktbeskrivning ingår därför i belägget. Ingen omprojektion eller kontroll av samtliga koordinater gjordes.
+
+Ytterarkivets kommun-ZIP hade tidsstämpel 2023-11-13 och de fyra kommunfilerna 2023-05-16. Dessa är observerade arkivtidsstämplar, **inte bekräftad gränsårgång**. Varken `260225` i nedladdningsnamnet eller de äldre filstämplarna används som referenstid. Nästa steg är att få produktens giltighetsdag/indelningsår från SCB, exempelvis via den publicerade kontakten `uppdrag@scb.se`; inget meddelande har skickats.
+
+### Nytt begränsat WFS-prov för referenstid och CRS
+
+Exakt GET-URL, hämtad 28 oktober 2026 med HTTP 200:
+
+```text
+https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Abefolkning_1km_2025&outputFormat=application%2Fjson&srsName=EPSG%3A3006&BBOX=825000%2C7328000%2C828000%2C7332000%2CEPSG%3A3006&maxFeatures=1&sortBy=objectid&startIndex=0
+```
+
+Svaret innehöll en Polygon, `objectid=454820`, `rutstorl=1000`, `referenstid="20251231"`, `crs.properties.name="urn:ogc:def:crs:EPSG::3006"`, `numberMatched=17` och `numberReturned=1`. Detta bekräftar endast ett begränsat prov och ersätter inte återtest av de fyra rekonstruerade sidorna med `maxFeatures=5`. Begärans BBOX och det returnerade GeoJSON-liknande svaret använder här öst/nord; det innebär inte att EPSG-definitionens formella axelordning eller andra WFS-format får antas vara samma.
+
+Den länkade ISO-postens `dateStamp=2026-03-31T12:43:33.031Z` är metadatarevision. Posten listar två publiceringsdatum, 2025-04-15 och 2026-04-01; inget av dem används här som entydigt publiceringsdatum för just 2025-lagret. SCB:s [produktsida](https://www.scb.se/vara-tjanster/oppna-data/oppna-geodata/statistik-pa-rutor/), kontrollerad 28 oktober, anger årlig RTB-uppdatering och skiljer mellan europeiska ETRS89-rutor och nationella SWEREF99TM-rutor. CRS för det valda lagret fastställs av dess egna metadata ovan.
+
+**Viktig metoduppgift från ISO-postens lineage:** data omfattar befolkade rutor; obefolkade rutor ingår inte. SCB beskriver ett nollvärde som en befolkad men röjandegranskad ruta. Noll får därför inte automatiskt visas som obebodd yta i denna produkt. Tolkning per variabel samt null-/saknatillstånd behöver fortfarande kontrolleras före normalisering; detta är ingen kodändring eller generell regel för andra SCB-produkter.
+
+### Avgränsning av återstående kart-api-metadata
+
+OpenAPI:s explicita WGS84-beskrivning för `KommunFeature.geometry` överförs inte till andra endpoints. De granskade beskrivningarna av geocode/lookup anger fältnamn och talvärden men fastställer inte uttryckligen deras geodetiska datum. Kommunguiden bekräftar Lantmäteriet som gränskälla; årgång och importdatum saknas fortfarande. Guidens uppgift om 422 utanför Sverige-fönstret avviker dessutom från det tidigare observerade 404-svaret för `(0,0)`; observationen behålls.
+
+Sidan Om talen redovisar räkning av ortnamn och kommunpolygoner den 2026-09-11. Detta är ett mätdatum för antal i leverantörens databas, inte källdatats referenstid, gränsårgång eller senaste import. För att stänga metadatafrågorna behövs ytterligare officiellt belägg eller leverantörsbesked via den publicerade kontakten `api@autonomousmedia.io`; inget meddelande har skickats.
 
 ## kart-api: dokumentation och gemensamma villkor
 
-Gabriela kontrollerade [OpenAPI](https://api.kart-api.se/openapi.json), [villkor](https://kart-api.se/villkor/) och [attribution](https://kart-api.se/docs/attribution/) **22 oktober 2026**. Dokumentation hade även granskats 15 oktober enligt den tidigare projekttexten. I konversationen kunde OpenAPI läsas tidigare i genomgången men inte vid senaste försöket; ingen lokal kontraktskopia finns.
+Gabriela kontrollerade [OpenAPI](https://api.kart-api.se/openapi.json), [villkor](https://kart-api.se/villkor/) och [attribution](https://kart-api.se/docs/attribution/) **22 oktober 2026**. Dokumentation hade även granskats 15 oktober enligt den tidigare projekttexten. Den 28 oktober hämtade AI OpenAPI med Node (`HTTP 200`, `info.version=1.0.0`) och kontrollerade parametrar och svarsscheman för geocode/kommunuppslag. `GeoTraff.tier` och `kalla` är strängar; valfria fält och `spridning.entydig=null` stöds av schemat. Ingen lokal kontraktskopia finns. Villkorssidorna lästes inte om i den senaste testomgången.
 
 Dokumenterade uppgifter:
 
@@ -53,9 +106,35 @@ Testerna redovisades som genomförda **22 oktober 2026** i Microsoft Edge från 
 
 Kommunfiltrets `skal` var: ”1 träff(ar) låg i en annan kommun och togs bort. Noll kvar betyder att ingen träff låg i 0562, inte att platsen inte finns.” Tomt filtrerat svar betyder inte att Stockholm saknas. Testet belägger bortfiltrering av den redovisade träffen, inte att alla tänkbara matchningar i kommunen genomsökts.
 
-Fridhem-proven visar att resultatlistan begränsas av `limit` medan spridningsuppgifterna är oförändrade. Tre eller fem resultat är inte alla matchningar. Spridningsuppgifter ska hållas åtskilda från resultatlistans antal och kommunfiltrets utfall. Limit-gränserna 1 och 20 har inte testats; de är kontraktsuppgifter.
+Fridhem-proven den 22 oktober visar att resultatlistan begränsas av `limit` medan spridningsuppgifterna är oförändrade. Tre eller fem resultat är inte alla matchningar. Spridningsuppgifter ska hållas åtskilda från resultatlistans antal och kommunfiltrets utfall. Limit-gränserna 1 och 20 provades senare den 28 oktober, se nedan.
 
 422-provet belägger ett strukturerat felsvar för saknad `q`. Koordinatförklaringen i `skal` är inte specifik för detta fel. Proven verifierar API-beteende, inte projektets källspecifika felhantering eller gränssnitt. Separat runtime-validering och tester av de interna datakontrakten finns enligt statusen ovan.
+
+### Livekontroll av projektets adaptrar, 28 oktober 2026
+
+AI körde de befintliga TypeScript-funktionerna med Node.js 24.20.0 och `--experimental-transform-types --input-type=module`, via ett tillfälligt skript på standardindata. Inga filer ändrades eller verkliga svar sparades. Nätverksfunktionen gjorde verkliga `fetch`-anrop utan nyckel, läste en kopia av JSON-svaret och lämnade det ursprungliga svaret till adaptern. För lyckade och tomma geocode-svar jämfördes adapterdata med hela råsvaret; detsamma gjordes för lyckade kommunuppslag. Inledande testfel berodde på PowerShell-pipens teckenkodning för å/ö och en felaktig förväntan om 422 för `(0,0)`. Efter Unicode-escapning och korrigerad förväntan passerade dessa fall; inget produktionsfel konstaterades.
+
+Bas-URL för samtliga anrop nedan: `https://api.kart-api.se/v1`. Sökväg och frågesträng anger de exakta korrigerade anropen.
+
+| GET-sökväg och parametrar | Observerat resultat och adapterkontroll |
+| --- | --- |
+| `/kommun/lookup?lat=58.705&lon=15.77` | 200, `ready`, Finspång `0562`, län `05`. |
+| `/kommun/lookup?lat=59.8586&lon=17.6389` | 200, `ready`, Uppsala `0380`, län `03`. |
+| `/kommun/lookup?lat=55.605&lon=13.0038` | 200, `ready`, Malmö `1280`, län `12`. |
+| `/kommun/lookup?lat=67.8558&lon=20.2253` | 200, `ready`, Kiruna `2584`, län `25`. |
+| `/kommun/lookup?lat=58&lon=20` och `/kommun/lookup?lat=0&lon=0` | 404, `empty`, fullständighet `unknown`. `(0,0)` visar att det tidigare felmeddelandets Sverige-fönster inte kan behandlas som en generellt tillämpad 422-gräns. |
+| `/geocode?q=Uppsala&limit=1`, `/geocode?q=Malm%C3%B6&limit=1`, `/geocode?q=Kiruna&limit=1` | 200, `ready`, en kommunträff med rätt namn och kod `0380`, `1280` respektive `2584`. |
+| `/geocode?q=Fridhem&limit=3` och `/geocode?q=Fridhem&limit=20` | 200, `ready`, 3 respektive 20 träffar; båda anger 1198 exakta namnträffar i 217 kommuner och `entydig=false`. |
+| `/geocode?q=Stockholm&limit=3&kommunkod=0562` | 200, `empty`, 0 träffar, `kommunfilter.begard="0562"`, `bortfiltrerade=1`; spridning 63 träffar i 48 kommuner bevarades. |
+| `/geocode?q=Finsp%C3%A5ng&limit=5&kommunkod=0562` | 200, `ready`, 4 träffar, alla med kod `0562`. Spridning 3 exakta namnträffar i 2 kommuner; den räknar något annat än resultatlistan, som även innehöll Finspångsån. |
+| `/geocode?q=zzzxqvnonexistent987654321&limit=5` | 200, `empty`, 0 träffar, `spridning.entydig=null`; attribution och förklaring bevarades. |
+| `/kommun/lookup?lat=999&lon=18` och `/geocode?limit=5` | Verkliga 422-svar blev `error`, `kind="http"`, `httpStatus=422`. Testets nätverksfunktion ändrade avsiktligt koordinaten respektive tog bort `q` för att nå API:s felväg. Vanliga ogiltiga funktionsindata stoppas lokalt. |
+
+Fyrsiffriga kommunkoder och attribution bevarades. Lookup-svaren angav Lantmäteriet/Administrativ indelning/CC BY 4.0. Geocode-svaren angav Lantmäteriet/Ortnamn/CC BY 4.0/Bearbetad, Lantmäteriet/Administrativ indelning/CC BY 4.0 och OpenStreetMap/ODbL 1.0. Ingen träff valdes automatiskt. `geocode` markerade sökfullständighet som `unknown`.
+
+Anropen skickade `Origin: http://127.0.0.1:5173`. I första livekörningen observerades `Access-Control-Allow-Origin: *` för svaren med status 200 och 404. Headern loggades inte vid den korrigerade körningen eller de nya 422-proven. **Node upprätthåller inte webbläsarens CORS-regler:** detta är inget nytt browsertest och ingen verifiering av gränssnittet. Tidigare Edge-prov gäller fortsatt med sina avgränsningar. Nätverksfel, ogiltig JSON och 429/500 provades med simulerade svar i den ordinarie testsviten; tjänsten belastades inte för att framkalla sådana fel.
+
+Kontrollera lokalt med `npm.cmd test` och `npm.cmd run typecheck`. Dessa kommandon använder syntetiska data och upprepar inte liveproven. För ett nytt liveprov: importera respektive adapter i Node med flaggorna ovan och anropa den med tabellens indata utan att ange en simulerad fetcher. Spara datum, HTTP-status och jämförelse mot råsvaret; håll antalet anrop begränsat. Testdatumet är inte källdatats referenstid. Inga fel hittades i de verifierade fallen; fullständig geografisk täckning, CRS och dataårgång fastställdes inte.
 
 ### Öppet för kart-api
 
@@ -63,12 +142,12 @@ Metadataavgränsning utifrån befintligt underlag: `lat`/`lon` och observerade k
 
 - Uttryckligt CRS/datum och axelordning för koordinaterna. Rimliga talvärden bevisar inte EPSG:4326.
 - Källdatats referenstid/version, uppdateringsfrekvens hos kart-api och fördröjning gentemot Lantmäteriet/OSM.
-- Geografiska luckor och sökbegränsningar samt gränskälla och geometriårgång för kommunuppslag och geocodes kommunfilter.
+- Geografiska luckor och sökbegränsningar samt geometriårgång för kommunuppslag och geocodes kommunfilter. Lantmäteriet är nu dokumenterad gränskälla för kommunuppslag enligt kommunguiden; detta fastställer inte årgången.
 - Närmare cachevillkor, inklusive lagringstid. Visnings- och cacherätt avgör inte automatiskt rätt till versionshantering av verkliga provsvar.
 - Verkliga provsvar i **privat GitHub-repo: öppet**. Villkoren nämner inte testfixturer eller privat versionshantering; privat repo är inte automatiskt lokal cache.
 - Verkliga provsvar i **offentligt GitHub-repo: öppet**. Villkoren tillåter uppslagssvar men klargör inte uttryckligen publicerade testfixturer. Varken generellt tillstånd eller förbud mot varje litet svar är fastställt. Leverantörens klargörande behövs för båda fallen; attribution ska bevaras.
 - Fullständig rutleverans via kart-api är inte verifierad här. Direkt SCB WFS har undersökts som alternativ.
-- Serverbehov är inte avgjort. Lokala browserprov belägger bara testade anrop. Hemliga nycklar ska inte läggas i klientkod.
+- För kart-api är direkt browseråtkomst utan API-nyckel beslutad den 28 oktober 2026; serveradapter behövs inte i nuläget. Lösningen omprövas vid nya behov eller begränsningar. Lokala browserprov belägger bara testade anrop. Hemliga nycklar ska inte läggas i klientkod.
 
 Bedömning av kvarstående osäkerheter för kart-api:
 
@@ -157,7 +236,7 @@ Bedömning: befintlig dokumentation av **referenstider, licens och API-begränsn
 ### Observationer
 
 - Endpoint: `https://geodata.scb.se/geoserver/stat/wfs`; WFS 1.1.0; lager `stat:befolkning_1km_2025`.
-- `GetCapabilities`, `DescribeFeatureType` och begränsat `GetFeature` i GeoJSON uppges kontrollerade. Ursprungliga fullständiga anrops-URL:er och exakt formatparameter saknas i tillgängligt underlag. Rekonstruerade GetFeature-URL:er anges separat nedan och är ännu inte återtestade.
+- `GetCapabilities`, `DescribeFeatureType` och begränsat `GetFeature` i GeoJSON uppges kontrollerade i det äldre underlaget. Ursprungliga fullständiga anrops-URL:er saknas. Rekonstruerade GetFeature-URL:er och schema återtestades den 28 oktober enligt nedan; detta ger nya daterade prov utan att återskapa äldre hämtningsdatum.
 - Fält omfattar `objectid`, `rutid_inspire`, `rutid_scb`, `rutstorl`, `beftotalt`, `man`, `kvinna`, åldersfält, `referenstid`, `sp_geometry`. Flera fält är nillable.
 - Observerade geometrier: Polygon, EPSG:3006, `rutstorl=1000` m, `referenstid="20251231"`.
 - Servern rapporterade `numberMatched=115118` för lagret i ett begränsat exempeluttag. **Hela Sveriges lager har inte hämtats eller verifierats.**
@@ -174,9 +253,9 @@ Redovisade parametrar: `BBOX=825000,7328000,828000,7332000,EPSG:3006`, `maxFeatu
 | 10 | 5 | Komplettering, kontroll-/hämtningsdatum 22 oktober 2026: `numberMatched=17`, `numberReturned=5`, objectid 456198, 456199, 456200, 456658, 456659. EPSG:3006 och referenstid 20251231. |
 | 15 | 2 | Ursprunglig redovisning. |
 
-#### Rekonstruerade GetFeature-anrop – ännu inte återtestade
+#### Rekonstruerade GetFeature-anrop – återtestade 28 oktober 2026
 
-URL:erna nedan rekonstruerades 23 oktober 2026 från redovisade parametrar och är inte bevarade originalanrop. Ingen nätverkskontroll har gjorts av dem. Benämningen `stat` i kompletteringsuppgiften tolkas som namnrymd; det tidigare dokumenterade fullständiga lagernamnet är `stat:befolkning_1km_2025`, vilket används i `typeName`.
+URL:erna nedan rekonstruerades 23 oktober 2026 från redovisade parametrar och är inte bevarade originalanrop. De återtestades av AI den 28 oktober 2026 enligt avsnittet nedan. Det fullständiga lagernamnet `stat:befolkning_1km_2025` används i `typeName`.
 
 Rekonstruktionen använder WFS 1.1.0, `request=GetFeature`, `outputFormat=application/json` för GeoJSON och `srsName=EPSG:3006`. Formatsträngen är ett rekonstruktionsval, inte en bevarad uppgift om det ursprungliga anropet. Kolon, kommatecken och snedstreck i parametervärdena är procentkodade:
 
@@ -187,7 +266,54 @@ https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetF
 https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Abefolkning_1km_2025&outputFormat=application%2Fjson&srsName=EPSG%3A3006&BBOX=825000%2C7328000%2C828000%2C7332000%2CEPSG%3A3006&maxFeatures=5&sortBy=objectid&startIndex=15
 ```
 
-Tidigare observerad sidindelning är **5 + 5 + 5 + 2 = 17 objekt**, med 17 olika objectid enligt redovisningen ovan. Detta resultat tillskrivs inte de rekonstruerade URL:erna förrän de har återtestats. Ingen HTTP-status, CORS-header eller ny hämtningsdag har verifierats genom rekonstruktionen.
+Tidigare observerad sidindelning är **5 + 5 + 5 + 2 = 17 objekt**. Det nya återprovet av URL:erna bekräftade samma antal och identifierare enligt nedan; de äldre observationernas okända datum ändras inte.
+
+#### Liveprov av sidor, tomt svar och fel, 28 oktober 2026
+
+AI körde URL:erna ovan sekventiellt via Node `fetch`, utan nyckel eller autentisering, med `Origin: http://127.0.0.1:5173`. Assertioner kontrollerade HTTP-status, antal, sortering, referenstid, rutstorlek, geometri och identifierarnas unikhet. Svaren lästes i minnet; inga verkliga fixturer sparades.
+
+| startIndex | HTTP | numberMatched / numberReturned | objectid |
+| --- | --- | --- | --- |
+| 0 | 200 | 17 / 5 | 454820, 454821, 454822, 455279, 455280 |
+| 5 | 200 | 17 / 5 | 455281, 455282, 455738, 455739, 455740 |
+| 10 | 200 | 17 / 5 | 456198, 456199, 456200, 456658, 456659 |
+| 15 | 200 | 17 / 2 | 457118, 457119 |
+| 20 | 200 | 17 / 0 | Tom lista; provat genom samma URL med `startIndex=20`. |
+
+Sammanlagt **17 unika `objectid`, 17 unika `rutid_inspire` och 17 unika `rutid_scb`**, inga dubbletter mellan de fyra innehållande sidorna och stigande objectid. Alla 17 objekt hade Polygon, `rutstorl=1000`, `referenstid="20251231"`; svaren med objekt angav EPSG:3006. Detta belägger fullständighet i just utsnittet vid testet, inte nationell täckning eller ID-stabilitet mellan leverantörsuppdateringar.
+
+Samtliga fem sidor angav `Access-Control-Allow-Origin: http://127.0.0.1:5173`; första körningen loggade även `Access-Control-Allow-Credentials: true` för de fyra sidorna med objekt. Inga cache-/kvot-/Retry-After-headers observerades på dessa fyra svar. Avsaknad av headers bevisar inte obegränsad kapacitet. Node genomdriver inte CORS: detta ersätter inte tidigare browserprov eller ett nytt prov i webbläsaren.
+
+Två tomfall och ett verkligt felprov:
+
+- Sidan efter sista träffen (`startIndex=20`) gav `features=[]`, `numberMatched=17`, `numberReturned=0` och **`crs=null`**. Första testskriptet antog felaktigt ett CRS-objekt även för tomt svar och avbröts där; efter korrigerat test passerade kontrollerna. Inget produktionsfel rättades.
+- Geografiskt tomt BBOX gav HTTP 200, `numberMatched=0`, `numberReturned=0`, `features=[]`, `crs=null`:
+
+```text
+https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Abefolkning_1km_2025&outputFormat=application%2Fjson&srsName=EPSG%3A3006&BBOX=0%2C0%2C1000%2C1000%2CEPSG%3A3006&maxFeatures=5&sortBy=objectid&startIndex=0
+```
+
+- Ogiltigt lagernamn gav **HTTP 200 men `Content-Type: application/xml` och `ows:ExceptionReport`**, `exceptionCode="InvalidParameterValue"`, `locator="typeName"`. HTTP 200 får alltså inte ensamt tolkas som lyckat datauttag. Felprovet begärde inte JSON-format, så det belägger inte svarets format när `outputFormat=application/json` uttryckligen begärs:
+
+```text
+https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=stat%3Ap2_nonexistent_layer&maxFeatures=1
+```
+
+Även [DescribeFeatureType](https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=1.1.0&request=DescribeFeatureType&typeName=stat%3Abefolkning_1km_2025) hämtades med HTTP 200. Schemat anger `objectid` som obligatorisk, icke-null `xsd:int`; rut-ID och referenstid som valfria nullable strängar; rutstorlek och befolknings-/åldersfält som valfria nullable heltal; geometri som nullable `gml:SurfacePropertyType`. Det är tjänstens schema, inte belägg för att varje objekt alltid har rut-ID eller Polygon. Det observerade Polygon-utfallet gäller dessa 17 objekt.
+
+#### API-begränsningar och lagring av verkliga provsvar, kontrollerat 28 oktober 2026
+
+| Tjänst | Bekräftade tekniska uppgifter | Kvarvarande avgränsning |
+| --- | --- | --- |
+| SCB PxWeb v2/TAB628 | [SCB:s API-sida](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) anger 150 000 dataceller per uttag och 30 anrop per 10 sekunder och IP. [Officiella användarhandledningen](https://www.pxtools.net/PxWebApi/documentation/user-guide/), länkad av SCB, beskriver 400 för felaktigt/för stort urval, 404 för saknad resurs, 429 för för hög anropstakt, 503 för otillgänglighet samt cirka 2100 tecken som GET-URL-begränsning. | Gränserna är dokumentationsuppgifter, inte belastningsprov. Den generella handledningens taktbeskrivning ersätter inte SCB:s numeriska IP-gräns. Praktisk cachetid och felkropparnas exakta SCB-format är fortfarande inte verifierade. |
+| SCB WFS | Begränsade nyckellösa uttag och paginering verifierade ovan. [GetCapabilities 2.0.0](https://geodata.scb.se/geoserver/stat/wfs?service=WFS&version=2.0.0&request=GetCapabilities), HTTP 200, annonserar `CountDefault=1000000`, `ImplementsResultPaging=TRUE`, `PagingIsTransactionSafe=FALSE`. | `CountDefault` är en annonserad standardgräns, inte en uppmätt hård maxgräns eller kapacitetsgaranti; överförs inte automatiskt till 1.1.0-anropens `maxFeatures`. Ingen numerisk anropskvot eller exakt cachetid hittades i granskade SCB-sidor, WFS-guide eller capabilities. Ingen belastning/nationell nedladdning gjordes. Pagineringsmetadata garanterar inte en oföränderlig ögonblicksbild vid samtidiga uppdateringar. |
+| kart-api | [Autentisering och takt](https://kart-api.se/docs/autentisering/) anger 200 anrop/dygn/IP utan nyckel, 10 000/månad med nyckel och takt 10 anrop/sekund med utrymme för skurar. JSON, rendering, routing och MCP räknas; tiles/stilar/typsnitt undantas från periodkvoten. Dokumenterade kvotheaders: `X-Kartapi-Kvar`, `X-Kartapi-Tak`, `X-Kartapi-Nyckel`; `X-Kartapi-Kvot: omatt` betyder att mätningen saknades. 429 med `Retry-After` i sekunder och 401 för ogiltig nyckel beskrivs. | Ingen kvotgräns framkallades. Geocode har fortsatt dokumenterad limit 1–20 utan dokumenterad paginering. [Villkoren](https://kart-api.se/villkor/) tillåter rimlig cache men anger ingen exakt lagringstid. Uppgiften att kommungränser ändras årligen är inte belägg för tjänstens importårgång. |
+
+SCB:s [WMS-/WFS-guide](https://www.scb.se/contentassets/302de7b6076847e08e260d112475dfc5/scbs-oppna-geodata-via-wms-och-wfs-tjanster_20250303.pdf), avsnittet om WFS i QGIS, rekommenderar uttryckligen att spara data lokalt eller på egen server för bearbetning. Guidens 3000-objektsgräns gäller ArcGIS-klientens standardinställning, **inte SCB-serverns maxgräns**. Guiden anger att tjänsterna levererar senaste versionen och kan rättas; en sparad fixtur måste därför ha eget hämtningsdatum och får inte beskrivas som alltid aktuell.
+
+**Rättighetsbedömning, skild från tekniska kvoter:** SCB:s [användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/), återlästa 28 oktober, anger CC0 1.0 för öppna data i Statistikdatabasen och geodataplattformen. Detta ger stöd för att spara och återpublicera små verkliga TAB628-/WFS-utdrag som testfixturer, även i privat eller offentligt Git-repo. Det är projektets tillämpning av den angivna licensen; sidan behöver inte särskilt nämna GitHub för varje filformat. Bevara källa, exakt anrop, hämtningsdatum, referenstid, CRS och bearbetning för projektets spårbarhet. Inga sådana fixturfiler skapades i denna dokumentationsuppgift.
+
+kart-api:s villkor, gällande från 2026-09-12 och återlästa 28 oktober, tillåter cache och uppslagssvar med attribution men förbjuder återdistribution som egen dataprodukt/bulk. **Lokal rimlig cache har uttryckligt stöd; rätt att versionshantera verkliga provsvar som testfixturer i privat respektive offentligt repo är fortsatt oklar.** Granskningen hittade varken ett uttryckligt fixturetillstånd eller ett generellt förbud mot varje litet provsvar. Ingen rätt härleds enbart från lyckade anrop eller repots privata status. Nästa steg är leverantörsklargörande om just denna användning; inget meddelande har skickats.
 
 Gabriela redovisar totalt **17 olika objectid**, i överensstämmelse med `numberMatched=17`. Luckan för sidan med startIndex 10 är därmed stängd i redovisningen. Detta stöder paginering och fullständighet i just BBOX-testet, inte nationell fullständighet eller obegränsad kapacitet. Individuella test-/hämtningsdatum för de tidigare testerna är fortfarande okända. Ursprungliga tester ingick i utkastet sammanställt 2026-10-22.
 
@@ -195,32 +321,32 @@ Gabriela redovisar totalt **17 olika objectid**, i överensstämmelse med `numbe
 
 [SCB:s Statistik på rutor](https://www.scb.se/vara-tjanster/oppna-data/oppna-geodata/statistik-pa-rutor/) är tidigare dokumentationsreferens. Enligt redovisningen anger WFS GetCapabilities CC0 1.0, utan avgift eller åtkomstbegränsning på servicenivå. Det är inte ett löfte om obegränsad teknisk kapacitet. Metadatautdrag och datum behöver bevaras. `Källa: SCB` rekommenderas för spårbarhet enligt underlaget.
 
-- `beftotalt` får inte ersättas av `man + kvinna`; observerade värden kan avvika. Noll, saknat/sekretess och röjandeskydd behöver dokumenterad tolkning för vald datavariant.
-- Stabilitet/unikhet för avsett rut-ID, exakta anrop, fel-/tomsvar, tekniska maxgränser, kvoter, nyckelbehov, cache och uppdatering behöver beläggas.
+- `beftotalt` får inte ersättas av `man + kvinna`; observerade värden kan avvika. ISO-metadata kontrollerad 28 oktober anger att produkten innehåller befolkade rutor och beskriver noll som befolkad men röjandegranskad ruta, se metadatakontrollen ovan. Variabelspecifik tolkning och null-/saknatillstånd återstår före normalisering.
+- Unikhet för tre ID-fält, exakta anrop, tomsvar och ett fel med ogiltigt lager verifierades 28 oktober enligt ovan. Schemat är kontrollerat. ID-stabilitet mellan uppdateringar, variabelspecifika saknatillstånd och en eventuell hård servergräns/numerisk anropskvot är fortfarande öppna. Begränsade anrop utan nyckel fungerar; detta är ingen garanti om framtida åtkomst.
 - Licensstödet för användning, lagring och återpublicering framgår nedan. WFS-specifika tekniska uttags- och cachevillkor är fortfarande obekräftade; bulkbegränsning är inte konstaterad.
-- EPSG:3006 måste valideras före omprojektion till projektets webbgräns: GeoJSON/WGS 84, longitud före latitud. Ingen transformation är implementerad eller testad i projektet; CRS får inte bara etiketteras om.
+- EPSG:3006 är nu bekräftat för det valda lagret genom GetCapabilities, länkad ISO-metadata och ett nytt provsvar den 28 oktober. Omprojektion till projektets webbgräns, GeoJSON/WGS 84 med longitud före latitud, är fortfarande inte implementerad eller testad; CRS får inte bara etiketteras om.
 - Valet mellan direkt SCB-åtkomst och kart-api för rutor samt serverbehov är öppet.
 
 Dokumentationskomplettering enligt Gabrielas nu lämnade underlag: [SCB:s produktsida Statistik på rutor](https://www.scb.se/vara-tjanster/oppna-data/oppna-geodata/statistik-pa-rutor/) anger **årlig uppdatering av befolkningsregistret och tillgänglighet via WFS**. Datum för just denna dokumentationskontroll är inte angivet. Detta är en leverantörsuppgift, inte ett nytt API-prov eller belägg för exakt publiceringsdatum/uppdateringstid i det testade WFS-lagret.
 
-Samlad WFS-status: sidindelning är belagd genom redovisningen av det begränsade BBOX-testet, men ursprunglig exakt GetFeature-URL saknas fortfarande. Rekonstruerade URL:er finns ovan, tydligt märkta som ännu inte återtestade. Gabrielas nu redovisade kontroll av [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/) anger **CC0 1.0 för öppna geodata i geodataplattformen**, vilket kompletterar lagrets redovisade CC0-uppgift med generellt stöd för användning/visning, lagring och återpublicering. Datum för just villkorskontrollen är inte angivet; metadatautdrag för lagret behöver fortfarande bevaras. Licensstödet kommer från villkoren, inte från lyckad browseråtkomst. Varken särskilt cacheförbud, viss cachetid, WFS-specifik numerisk kvot eller obegränsad anropskapacitet är belagt. PxWebs tekniska gränser ovan får inte överföras till WFS.
+Samlad WFS-status efter återprovet 28 oktober: de rekonstruerade URL:erna är verifierade för det begränsade BBOX-testet med 17 unika objekt. Reproducerbarhetsluckan för dessa nya anrop är stängd; äldre exakta anrop/datum har inte rekonstruerats som historiska fakta. SCB:s CC0-villkor är återlästa och stöder lagring/återpublicering av små verkliga provutdrag enligt bedömningen ovan. `CountDefault=1000000` är annonserat i WFS 2.0.0-metadata; hård maxgräns, numerisk anropskvot och exakt cachetid är inte belagda. PxWebs tekniska gränser överförs inte till WFS.
 
 Bedömning av kvarstående WFS-osäkerheter:
 
 | Osäkerhet | Påverkan och motivering |
 | --- | --- |
-| Ursprunglig GetFeature-URL saknas; rekonstruktion är inte återtestad | Hindrar att det rekonstruerade anropet markeras som färdigverifierat i P2. Lagret kan fortsatt bedömas som kandidat utifrån redovisade prov. Ett daterat återprov av URL:erna ovan behövs för att stänga reproducerbarhetsluckan; inget historiskt anrop antas. |
+| Reproducerbarhet för rekonstruerade GetFeature-URL:er | Stängd genom återprov 28 oktober av alla fyra sidor samt en tom slutsida. Äldre saknade originalanrop förblir okända men behövs inte för att reproducera de nya proven. |
 | Tjänstespecifika kvoter, maxgränser och cachevillkor | Förblir obekräftade och dokumenteras som begränsning i källbedömningen, inte som påhittade tillstånd eller kvoter. Blockerar inte kandidatval i sig; måste utredas före uttags-/cachelösning som förutsätter viss kapacitet eller lagringstid. |
 | Lagrets exakta uppdateringstid och äldre testdatum | Dokumenteras som okända; blockerar inte bedömningen av den uttryckliga referenstiden 20251231. Årlig registeruppdatering fastställer inte tjänstens publiceringstid. |
 | Stabilt rut-ID, saknatillstånd och fullständiga fälttyper | Behöver beläggas före beroende normalisering och avduplicering. Kandidatbedömningen kan fortsätta, men dessa egenskaper får ännu inte påstås verifierade. |
 
 ## Uppföljning av kvarvarande källmetadata
 
-Detta är uppföljning, inte nya testresultat eller ett påstående att samtliga punkter blockerar P2-källvalet. Påverkan anges i respektive källavsnitt. Inga nätverksanrop gjordes vid denna komplettering. Serverbeslutet kvarstår separat.
+Detta är uppföljning efter de daterade kontrollerna ovan, inte ett påstående att samtliga punkter blockerar P2-källvalet. Beslutet om kart-api den 28 oktober gäller fortsatt; åtkomstlösningar och eventuellt serverbehov för SCB och kommungränser återstår separat.
 
 1. **kart-api – källmetadata:** kontrollera [OpenAPI](https://api.kart-api.se/openapi.json) och [attributionsdokumentationen](https://kart-api.se/docs/attribution/) för uttryckligt CRS/datum, axelordning, dataversion/referenstid och uppdateringsfrekvens för geocode/kommunuppslag. Om uppgifterna saknas, begär klargörande från leverantörens tidigare dokumenterade kontakt `api@autonomousmedia.io`; inget meddelande har skickats. Bevara dokumentationshänvisning och kontrolldatum, även om svaret blir att uppgiften inte publiceras.
 2. **SCB TAB628 – senare driftuppföljning:** referenstider, licens och numeriska API-gränser är tillräckligt belagda för nuvarande P2-källbedömning. Inför beroende implementation följs kvarvarande cache-/uppdateringsstrategi, nyckelbehov och felkontrakt upp via [PxWeb API-dokumentationen](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv).
-3. **SCB WFS – reproducerbarhet och tekniska villkor:** utgå från tjänsten `https://geodata.scb.se/geoserver/stat/wfs` och [SCB:s Statistik på rutor](https://www.scb.se/vara-tjanster/oppna-data/oppna-geodata/statistik-pa-rutor/). Bevara exakta GetCapabilities-/DescribeFeatureType-/GetFeature-URL:er och metadata för `stat:befolkning_1km_2025`, inklusive testets BBOX och sidparametrar ovan. Licensstödet är dokumenterat ovan; kontrollera kvarvarande WFS-specifika kvoter, maxstorlek och cachevillkor, eller dokumentera att sådana gränser inte publiceras. Ett litet daterat återprov räcker för att komplettera reproducerbarheten; nationell nedladdning eller belastningstest ingår inte.
+3. **SCB WFS – kvarvarande tekniska frågor:** reproducerbarhet, schema, tomfall och ett felprov är nu dokumenterade med exakta URL:er ovan. Små verkliga CC0-fixturer med proveniens är sparade och offlinekontrollerade. Numerisk anropskvot, hård maxgräns och exakt cachetid hittades inte i granskade officiella källor; om vald uttagslösning kräver bestämda värden behöver SCB klargöra dem. Nationell nedladdning eller belastningstest behövs inte för denna kontroll.
 
 ## SCB: förenklade kommungränser
 
@@ -236,7 +362,7 @@ Observerad fil: `Kommun_Sweref99TM.shp`, med `KnKod`, `KnNamn` och geometri. Und
 
 290 av 290 fyrsiffriga `KnKod` matchade PxWebs `Region`. Inledande nollor ska bevaras. Kodmatchningen bevisar inte att gränsårgång och statistikindelning är desamma.
 
-SWEREF 99 TM identifierades utifrån `.prj`. EPSG:3006 är en uppgift i underlaget som behöver stöd av den faktiska CRS-definitionen; filnamnet räcker inte. `.prj` är primärt stöd om auktoritetskod saknas. Exakt hämtnings-/kontrolldatum och verktyg/metod för geometri- och kodkontrollen saknas; resultatet ingick i utkastet sammanställt 2026-10-22.
+SWEREF 99 TM identifierades enligt den äldre redovisningen utifrån `.prj`. Den 28 oktober hämtades ZIP-filen på nytt och den faktiska definitionen jämfördes med SCB:s produktbeskrivning och Lantmäteriets parametrar; tillsammans stöder de EPSG:3006 enligt avsnittet om metadatakontroll ovan. Filnamnet används inte som CRS-belägg. Exakt äldre hämtnings-/kontrolldatum och verktyg/metod för geometri- och kodkontrollen saknas fortfarande; det äldre resultatet ingick i utkastet sammanställt 2026-10-22. Den nya läsningen av arkiv och `.prj` upprepar inte geometri- eller kodkontrollen.
 
 ### Dokumentationsuppgifter och öppet
 
@@ -251,7 +377,7 @@ Val av geometri för framtida analyser är därför fortsatt öppet och kan beh�
 Bedömning: SCB:s förenklade kommungränser rekommenderas som **kandidat för visualisering, inte för geografisk analys**. Detta är en rekommendation inom P2, inte ett fastställt geometribeslut. Okänd exakt geometriårgång hindrar inte kandidatbedömningen, men behöver klarläggas före årgångsberoende join eller presentation som en bestämd gränsårgång. Framtida analysgeometri är en öppen metod-/källfråga att stämma av med Henrik före geografisk analys; SCB:s angivna olämplighet får inte kringgås genom att kalla visualiseringsgeometrin analysunderlag. Saknade äldre hämtningsdatum och praktisk uppdateringsstrategi dokumenteras som sådana och gör inte CC0- eller visualiseringsbedömningen obekräftad.
 
 - **Geografisk årgång är okänd.** `260225` i filnamnet fastställer inte indelningsår eller referensår.
-- Bevara `.prj`-definition, geometriårgång, förenklings-/bearbetningsuppgifter och reproducerbar kontrollmetod. Omprojektion har inte testats i projektet.
+- `.prj`-parametrarna och kontrollmetoden för den nya hämtningen är dokumenterade ovan. Geometriårgång och närmare förenklings-/bearbetningsuppgifter är fortfarande öppna. Omprojektion har inte testats i projektet.
 - Uppdateringsfrekvens och praktisk cache-/lagringsstrategi återstår att fastställa. CC0 och SCB:s rekommenderade, inte obligatoriska, källangivelse är dokumenterade ovan; geometriårgång och bearbetning behöver fortfarande följas för spårbarhet.
 - Lokal browserleverans av vald gränsprodukt, storleksgränser och eventuellt server-/bearbetningsbehov är inte avgjorda.
 - Tidigare DeSO-data är referensmaterial, inte fastställd produktionskälla. Härledda kommunpolygoner måste i så fall beskrivas med ursprung, bearbetning och datum.
@@ -262,13 +388,22 @@ Bakgrundskarta väljs separat med kontroll av visningsvillkor, attribution och a
 
 ## Återstående P2-dokumentation och beslut
 
+**Bedömning 28 oktober 2026: P2 är delvis uppfyllt och kan inte markeras klart utifrån underlaget.** Tabellen jämför med de fem klartkriterier som Gabriela tillhandahållit från [Issue #2](https://github.com/gislab-se/platsorientering/issues/2); de motsvarar ROADMAP. Direkt GitHub-åtkomst saknas men kravtexten är nu tillgänglig. Avsaknad av gränssnittskoppling för adaptrarna är kommande funktionsarbete, inte ett extra P2-krav.
+
 | Krav i P2 | Status efter denna sammanställning |
 | --- | --- |
-| Endpoints, parametrar, täckning, referenstider, CRS, rättigheter, kvoter och hämtningsdatum | Kända uppgifter dokumenterade ovan; saknade datum, metadata och rättighetsbelägg står öppna per källa. Källorna är undersökta, inte slutligt valda. |
-| Lokala browserprov, nycklar, CORS, paginering och storleksgränser | Redovisade prov dokumenterade med avgränsningar. WFS-paginering gäller ett BBOX; storleks-/åtkomstvillkor är inte helt utredda. |
-| Små tillåtna provsvar, interna typer, hantering av tomma/felaktiga/begränsade svar | Fem interna kontrakt, runtime-validering, typkontroller, 29 tidigare passerade domäntester och syntetiska API-fixturer finns. Källspecifik normalisering och integrationstester med fixturerna återstår; inga verkliga svar har sparats som fixturer. |
+| Endpoints, parametrar, täckning, referenstider, CRS, rättigheter, kvoter och hämtningsdatum | Nya metadata-/hämtningsdatum 28 oktober dokumenterade ovan. TAB628:s referensdagar är återbekräftade; WFS-lagrets EPSG:3006 och referensdag är bekräftade. Kommunfilens CRS stöds av faktisk `.prj` och officiella produktuppgifter. kart-api:s CRS för geocode/lookup, dataversioner och kommungränsernas årgång förblir öppna; äldre okända datum har inte skrivits över. |
+| Lokala browserprov, nycklar, CORS, paginering och storleksgränser | Tidigare browserprov finns. Nyckellösa WFS-sidor återtestade via Node 28 oktober med rätt CORS-headers, 17 unika objekt och tom-/felprov. PxWeb- och kart-api-kvoter är daterat dokumenterade; WFS annonserar CountDefault i 2.0.0 men hård maxgräns, numerisk anropskvot och exakt cachetid hittades inte. Inget nytt browsertest gjordes. |
+| Små tillåtna provsvar, interna typer, hantering av tomma/felaktiga/begränsade svar | Fem interna kontrakt, runtime-validering, fyra syntetiska och tre verkliga SCB-fixturer finns nu. Typkontrakt, 63 runtime-tester och typkontroll passerade efter SCB-tillägget. Båda kart-api-adaptrarna är syntetiskt fixturtestade och tidigare liveprovade. Verkliga kart-api-fixturer saknas av rättighetsskäl. SCB-proven kontrolleras med delscheman och semantiska kontroller, inte färdiga adaptrar. |
 | Återpublicering bedömd separat från visning | Skillnaden dokumenterad. kart-api-fixturer i privat/offentligt repo är öppna. SCB:s CC0 1.0 för öppna statistikdata och geodata har nu officiellt villkorsunderlag; tekniska gränser/cachefrågor kvarstår enligt respektive avsnitt. |
-| Serverbehov avgjort i DECISIONS före beroende funktioner | Inte avgjort. DECISIONS innehåller föreslagen arbetsinriktning för källval och åtkomst, inte slutliga beslut. Källval, årgångar och åtkomstlösning behöver fortfarande avgöras. |
+| Serverbehov avgjort i DECISIONS före beroende funktioner | Avgjort för kart-api den 28 oktober 2026 i samråd med Henrik: direkt browseråtkomst utan API-nyckel, ingen serveradapter i nuläget. Omprövas vid nya behov eller begränsningar. Övriga källval, årgångar och åtkomstlösningar för SCB och kommungränser återstår att avgöra. |
+
+Närmaste återstående P2-arbete:
+
+1. Kravtexten från Issue #2 har nu jämförts med ROADMAP och stämmer överens; ingen issue-checklista har ändrats. Slutför kvarvarande källkontroller nedan före slutlig P2-bedömning.
+2. Komplettera kart-api:s CRS/axelordning, referenstid och indelningsårgång med primärkällebelägg eller dokumenterat leverantörsbesked. Klargör kvarvarande cache- och fixturrättigheter utan att anta att alla öppna metadatafrågor i sig stoppar kandidatbedömningen.
+3. WFS-återproven är genomförda och små verkliga SCB-prov är nu sparade med proveniens och offlinekontroller. Kvar före beroende implementation: adapterhantering av tomt `crs`, XML-fel med HTTP 200, nullable fält, variabelspecifika saknatillstånd och ID-stabilitet vid uppdateringar.
+4. Fastställ källval och åtkomstlösningar för SCB och kommungränser i DECISIONS. Det aktuella förslaget är direkt TAB628/WFS-åtkomst och lokalt förberedda, statiskt levererade SCB-gränser för visualisering, utan extra server i drift. Det är inte ett bekräftat Henrik-beslut för SCB. Gränsproduktens CRS-underlag är kontrollerat; giltighetsdag/årgång återstår. Små verkliga SCB-provsvar är redan sparade med proveniens. Analysgeometri avgörs före beroende geografisk analys.
 
 Källregistret ska per faktiskt vald källa innehålla leverantör, dokumentationslänk, exakt endpoint/metod, parametrar, områdesfilter, paginering, hämtningsdatum, täckning/luckor, storleksgränser, referenstid/geometriårgång, CRS/axelordning/upplösning, enheter/saknatillstånd/röjandeskydd, CORS/nycklar/kvoter/cache/fel, licens/attribution/lagring/återdistribution och hur provsvaret jämförts med källan. Okänt ska förbli okänt tills underlag finns.
 

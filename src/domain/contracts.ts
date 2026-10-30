@@ -35,6 +35,46 @@ export type MunicipalityCode = string & {
   readonly [municipalityCodeBrand]: true;
 };
 
+// Validerat råsvar från kart-api:s kommunuppslag, utan geometri.
+export interface MunicipalityLookupResponse {
+  kommunkod: MunicipalityCode;
+  kommunnamn: string;
+  lanskod: string;
+  lansnamn?: string | null;
+  attribution: readonly string[];
+}
+
+// Geocode-råsvar. Lat/lon och bbox innebär ingen bekräftad CRS-märkning.
+export interface GeocodeHit {
+  lat: number;
+  lon: number;
+  namn: string;
+  tier: string;
+  kalla: string;
+  typ?: string | null;
+  kommunkod?: MunicipalityCode | null;
+  lanskod?: string | null;
+  bbox?: readonly number[] | null;
+}
+
+export interface GeocodeResponse {
+  query: string;
+  antal: number;
+  results: readonly GeocodeHit[];
+  attribution: readonly string[];
+  spridning?: {
+    traffar: number;
+    kommuner: number;
+    entydig: boolean | null;
+    skal?: string | null;
+  } | null;
+  kommunfilter?: {
+    begard: MunicipalityCode;
+    bortfiltrerade: number;
+    skal: string;
+  } | null;
+}
+
 export type Position = [x: number, y: number];
 export type LinearRing = Position[];
 

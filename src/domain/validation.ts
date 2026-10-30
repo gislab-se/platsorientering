@@ -1,6 +1,6 @@
 import type {
-  AnalysisResult, AreaOfInterest, AreaSelection, Completeness, DataState,
-  Known, Measure, MunicipalityCode, MunicipalityStatistics, NumericValue,
+  AnalysisResult, AreaOfInterest, AreaSelection, Completeness, DataState, GeocodeResponse,
+  Known, Measure, MunicipalityCode, MunicipalityLookupResponse, MunicipalityStatistics, NumericValue,
   PopulationGridCell, ReferenceTime, SourceCrs, SourceMetadata, Unit,
   Wgs84AreaGeometry, LinearRing, Position,
 } from './contracts';
@@ -66,6 +66,72 @@ export function parseMunicipalityCode(value: unknown, path = 'municipalityCode')
     return fail(path, 'kommunkod måste vara en sträng med exakt fyra siffror');
   }
   return value as MunicipalityCode;
+}
+
+export function parseMunicipalityLookupResponse(
+  value: unknown, path = 'lookup',
+): MunicipalityLookupResponse {
+  const item = object(value, path);
+  return {
+    kommunkod: parseMunicipalityCode(item.kommunkod, `${path}.kommunkod`),
+    kommunnamn: text(item.kommunnamn, `${path}.kommunnamn`),
+    lanskod: text(item.lanskod, `${path}.lanskod`),
+    ...(Object.hasOwn(item, 'lansnamn') ? {
+      lansnamn: item.lansnamn === null ? null : text(item.lansnamn, `${path}.lansnamn`),
+    } : {}),
+    attribution: list(item.attribution, `${path}.attribution`, text),
+  };
+}
+
+export function parseGeocodeResponse(value: unknown, path = 'geocode'): GeocodeResponse {
+  const item = object(value, path);
+  function count(value: unknown, path: string): number {
+    const n = finite(value, path);
+    if (!Number.isInteger(n) || n < 0) return fail(path, 'förväntade ett icke-negativt heltal');
+    return n;
+  }
+  function optional<T>(item: Record<string, unknown>, key: string, path: string, parse: Parser<T>) {
+    return Object.hasOwn(item, key)
+      ? { [key]: item[key] === null ? null : parse(item[key], `${path}.${key}`) } : {};
+  }
+  const results = list(item.results, `${path}.results`, (value, p) => {
+    const hit = object(value, p);
+    return {
+      lat: finite(hit.lat, `${p}.lat`), lon: finite(hit.lon, `${p}.lon`),
+      namn: text(hit.namn, `${p}.namn`), tier: text(hit.tier, `${p}.tier`),
+      kalla: text(hit.kalla, `${p}.kalla`),
+      ...optional(hit, 'typ', p, text),
+      ...optional(hit, 'kommunkod', p, parseMunicipalityCode),
+      ...optional(hit, 'lanskod', p, text),
+      ...optional(hit, 'bbox', p, (v, p) => list(v, p, finite)),
+    };
+  });
+  const antal = count(item.antal, `${path}.antal`);
+  if (antal !== results.length) return fail(`${path}.antal`, 'antal stämmer inte med results');
+  return {
+    query: text(item.query, `${path}.query`), antal, results,
+    attribution: list(item.attribution, `${path}.attribution`, text),
+    ...optional(item, 'spridning', path, (v, p) => {
+      const spread = object(v, p);
+      if (spread.entydig !== null && typeof spread.entydig !== 'boolean') {
+        return fail(`${p}.entydig`, 'förväntade boolean eller null');
+      }
+      return {
+        traffar: count(spread.traffar, `${p}.traffar`),
+        kommuner: count(spread.kommuner, `${p}.kommuner`),
+        entydig: spread.entydig,
+        ...optional(spread, 'skal', p, text),
+      };
+    }),
+    ...optional(item, 'kommunfilter', path, (v, p) => {
+      const filter = object(v, p);
+      return {
+        begard: parseMunicipalityCode(filter.begard, `${p}.begard`),
+        bortfiltrerade: count(filter.bortfiltrerade, `${p}.bortfiltrerade`),
+        skal: text(filter.skal, `${p}.skal`),
+      };
+    }),
+  };
 }
 
 export function parseNumericValue(value: unknown, path = 'value'): NumericValue {
