@@ -1,19 +1,33 @@
 # Platsorientering Sverige
 
-GISLABs webbapp för en första geografisk orientering av en okänd plats i Sverige. Målgruppen är kollegor på Lablab som vill välja ett område, förstå befolkningsfördelningen och få en begriplig överblick utan att behöva arbeta i ett GIS-program.
+GISLABs webbapp för en första geografisk orientering av en plats i Sverige. Kollegor på LABLAB ska kunna välja en kommun, en region eller ett område sammansatt av flera kommuner eller regioner och få en begriplig överblick utan att arbeta i ett GIS-program.
 
-**Gabriela ansvarar för hela produktionen:** utveckling, datahantering, analys, tester, dokumentation, publicering och överlämning. Henrik är beställare och GIS-stöd och granskar resultat tillsammans med Gabriela.
+Projektet har två lika viktiga mål: Gabriela ska lära sig bygga kartor och program med AI i Codex, och resultatet ska bli användbart för LABLAB. Gabriela deltar därför själv i utveckling, test och publicering. Henrik är beställare, handledare och GIS-stöd.
 
 ## Status
 
-Projektet startades 15 oktober 2026. P1-grunden finns: en svensk kartsida, TypeScript-konfiguration och CI för byggkontroller. Gabriela har bekräftat kartvisning, zoom, panorering, återställningsknappen och layouten på dator och i simulerat mobilformat med smal skärm. Musrullszoom fungerar. Ren installation, typkontroll, bygge och serverstart har kontrollerats i en separat kopia. Typkontroll och bygge passerar även med musrullszoom aktiverad. Installation från en faktisk ny klon, Gabrielas genomgång och CI-körning på GitHub återstår för P1. Test på fysisk mobil är ännu inte gjort. Ingen projektversion är publicerad.
+| Del | Status |
+| --- | --- |
+| P1 – projektgrund | Implementerad och sammanslagen till `main` genom PR #10. Kartan visar OpenStreetMap och har zoom, panorering och återställning. |
+| P2 – datakällor och kontrakt | Pågår. Adaptrar, kontrakt, testfixturer och källunderlag är committade på `feat/3-kommunval-panel`; metadatafrågor återstår. |
+| P3 – kommunval | Lokalt implementerat på `feat/3-kommunval-panel`: tre steg i vänsterpanelen, kommunval genom kartklick eller kommunkod och markerad kommunpolygon. Webbläsarkontroll återstår. |
+| Senare funktioner | Befolkningslager och analys visas som planerade. Regioner, sammansatta och ritade områden är ännu inte implementerade. |
+| Publicering | P1 är publicerad på [GitHub Pages](https://yakimovskagabriela-ctrl.github.io/platsorientering/) (HTTP 200, verifierat 30 oktober 2026). Uppdateringen med kommunval förbereds via pull request till privata `main`; se [releasekontroll](docs/DEPLOYMENT.md). |
 
-Repot är privat. Slutmålet är en publik app på **gislab.se**. Exakt URL och hur GISLABs webbhotell tar emot filer behöver fastställas innan publicering.
+Källkodsrepot är privat och ligger på `gislab-se/platsorientering`. En godkänd push till dess `main` ska automatiskt bygga appen och överföra endast `dist/` till det publika repot `yakimovskagabriela-ctrl/platsorientering`. GitHub Pages-adressen är verifierad för P1; den nya versionen kontrolleras separat efter publicering. Slutpublicering på **gislab.se** sker i projektets slutskede.
 
-## Första versionen
+## Planerad första version
+
+### Prova det lokala kommunvalet
+
+Starta med `npm.cmd run dev`. Vänsterpanelen visar **1. Välj område**, **2. Välj data** och **3. Analys**. Klicka inom en svensk kommun: kommunens namn och kod visas och polygonen markeras grönt. Klicka på en annan kommun för att byta. Alternativt ange en fyrsiffrig kommunkod (exempelvis 0380, 1280 eller 2584) och välj med knappen eller Enter. Prova också snabba byten, en okänd kod och en punkt utanför Sverige. Ett äldre svar ska inte ersätta det senaste valet.
+
+Kommungränsen hämtas via kart-api och är förenklad för visning; gränsårgången är okänd. Ingen befolkningsstatistik eller analys utförs ännu. Typkontroll, produktionsbygge och 65 tester passerade den 30 oktober 2026. Visuell kontroll, kartklick och mobilkontroll i webbläsare återstår; ändringen är inte publicerad.
+
+### Mål för kommande etapper
 
 - Täcker Sverige och fungerar för olika platser utan kodändringar.
-- Låter användaren söka plats, välja kommun eller rita ett eget område.
+- Låter användaren söka plats och välja kommun. Regioner, sammansatta områden och ett eget ritat område införs stegvis.
 - Visar befolkning och befolkningstäthet för kommuner samt ett lager med befolkningsrutor.
 - Ger en enkel och metodmässigt tydlig sammanställning för ett ritat område.
 - Visar källa, referensår, enhet och begränsningar nära resultatet.
@@ -23,9 +37,9 @@ Havsnivåanalys ingår i en senare etapp. Det första fungerande delmålet är m
 
 ## Kom igång
 
-P1 använder Node.js 24 (exakt version i `.nvmrc`) och npm. På Windows kan Node.js LTS installeras med `winget install --id OpenJS.NodeJS.LTS --exact`. Öppna en ny terminal efter installationen och kontrollera `node --version` och `npm.cmd --version`.
+Projektet använder Node.js 24 (exakt version i `.nvmrc`) och npm. På Windows kan Node.js LTS installeras med `winget install --id OpenJS.NodeJS.LTS --exact`. Öppna en ny terminal efter installationen och kontrollera `node --version` och `npm.cmd --version`.
 
-Följ [P1-guiden](docs/P1_STEG_FOR_STEG.md). P1 hör till [issue #1](https://github.com/gislab-se/platsorientering/issues/1), identifierad av Gabriela. Beroendena är låsta i `package-lock.json`. Efter kloning och byte till grenen med P1-filerna:
+Följ [startguiden](docs/GETTING_STARTED.md). Beroendena är låsta i `package-lock.json`. Efter kloning:
 
 ```powershell
 npm.cmd ci
@@ -37,15 +51,15 @@ npm.cmd run build
 
 `npm.cmd run dev` visar en lokal adress i terminalen. Öppna den i webbläsaren; stoppa servern med Ctrl+C. `npm.cmd run build` kör också typkontroll och skapar `dist/`. `npm.cmd run preview` visar byggresultatet lokalt. `npm.cmd` undviker att PowerShell försöker köra npm som ett blockerat PowerShell-skript.
 
-Verifierat på Windows med Node.js 24.20.0 och npm 11.19.0: `npm ci`, typkontroll, produktionsbygge och serverstart i en separat ren kopia av arbetsfilerna, utan befintlig `node_modules`. Servern svarade med HTTP 200. Detta var inte en ny Git-klon, eftersom P1-filerna ännu inte är committade. Efter koordinatflytten passerade typkontroll och produktionsbygge även på den aktuella arbetsversionen. I Codex behövde Vites bygge och serverstart köras utanför sandlådan eftersom den blockerade underprocesser (`spawn EPERM`). Se P1-guiden för manuella testresultat och återstående kontroller.
+Historiskt verifierat för P1 på Windows med Node.js 24.20.0 och npm 11.19.0: ren installation i en separat kopia, typkontroll, produktionsbygge, serverstart och HTTP 200. Gabriela har kontrollerat kartvisning, zoom, panorering, återställning och smal layout. P1 är senare sammanslaget till `main`. Se [P1-guiden](docs/P1_STEG_FOR_STEG.md) för de daterade kontrollerna och [ROADMAP](ROADMAP.md) för aktuell status. Fysisk mobil är ännu inte dokumenterat testad.
 
 ```powershell
 git clone https://github.com/gislab-se/platsorientering.git
 cd platsorientering
-git switch -c feat/1-projektgrund
+git status
 ```
 
-Du behöver GitHub-behörighet till det privata repot. En eventuell inbjudan måste accepteras före kloning. Se [startguiden](docs/GETTING_STARTED.md) och börja med P1 i [arbetsplanen](ROADMAP.md).
+Du behöver GitHub-behörighet till det privata repot. En eventuell inbjudan måste accepteras före kloning. Kontrollera alltid aktuell gren och lokala ändringar med `git status` innan du fortsätter.
 
 ## Läsordning
 
@@ -58,7 +72,7 @@ Du behöver GitHub-behörighet till det privata repot. En eventuell inbjudan må
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Grenar, pull requests och klartkriterier |
 | [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Datakällor, API-utvärdering och källregister |
 | [docs/ANALYSIS_METHODS.md](docs/ANALYSIS_METHODS.md) | Befolkning, täthet och gränsrutor |
-| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Plan för gislab.se, publicering och återställning |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Stegvis publicering via GitHub och senare gislab.se |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Beslut, antaganden och öppna frågor |
 | [docs/HANDOVER.md](docs/HANDOVER.md) | Mall för drift och överlämning |
 

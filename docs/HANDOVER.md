@@ -5,6 +5,7 @@ Detta är en mall som Gabriela fyller i under projektet och färdigställer i P8
 ## Leverans
 
 - Produktions-URL: inte publicerad.
+- GitHub-förhandsversion: inte publicerad; planerad via `yakimovskagabriela-ctrl`.
 - Levererad version och commit: ej fastställda.
 - Datum och utförare: ej fastställda.
 - Produktionsansvarig under projektet: Gabriela.
@@ -20,7 +21,7 @@ Lista faktiskt använda källor, referenstider, indelningar och uppdateringsför
 
 ## Publicering och återställning
 
-Fyll i bekräftad miljö, artefakt, målplats, överföringsmetod, kontroll efter release och provad återställning. Beskriv var hemligheter hanteras utan att ange deras värden.
+Fyll i både GitHub-förhandsversion och slutmiljö på gislab.se: artefakt, målplats, överföringsmetod, kontroll efter release och provad återställning. Beskriv var hemligheter hanteras utan att ange deras värden.
 
 ## Vanliga fel
 

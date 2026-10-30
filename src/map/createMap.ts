@@ -29,5 +29,5 @@ export function createMap(container: HTMLElement, status: HTMLElement) {
   const resizeObserver = new ResizeObserver(() => leafletMap.invalidateSize());
   resizeObserver.observe(container);
 
-  return { resetView };
+  return { resetView, leafletMap };
 }

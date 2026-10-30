@@ -1,0 +1,98 @@
+name: Publicera GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publicera-github-pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta den godkända main-versionen
+        uses: actions/checkout@v4
+
+      - name: Använd projektets Node-version
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Installera låsta beroenden
+        run: npm ci
+
+      - name: Typkontrollera och bygg för GitHub Pages
+        run: npm run build -- --base=/platsorientering/
+
+      - name: Kontrollera den publika byggartefakten
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f dist/index.html
+          touch dist/.nojekyll
+
+          if find dist -type l -print -quit | grep -q .; then
+            echo "::error::dist får inte innehålla symboliska länkar."
+            exit 1
+          fi
+
+          forbidden_files="$(find dist -type f \( \
+            -name '.env*' -o \
+            -name '*.map' -o \
+            -name '*.md' -o \
+            -name '*.ts' -o \
+            -name '*.tsx' -o \
+            -name '*.test.*' -o \
+            -name '*.spec.*' \
+          \) -print)"
+
+          if [ -n "${forbidden_files}" ]; then
+            echo "::error::dist innehåller filer som inte får publiceras:"
+            printf '%s\n' "${forbidden_files}"
+            exit 1
+          fi
+
+          echo "Filer som ska publiceras:"
+          find dist -type f -print | sort
+
+      - name: Publicera endast dist till det publika repot
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          TARGET_REPOSITORY: yakimovskagabriela-ctrl/platsorientering
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::Repository secret PAGES_DEPLOY_TOKEN saknas."
+            exit 1
+          fi
+
+          publish_dir="${RUNNER_TEMP}/platsorientering-public"
+          gh auth setup-git
+          gh repo clone "${TARGET_REPOSITORY}" "${publish_dir}"
+
+          if ! git -C "${publish_dir}" rev-parse --verify HEAD >/dev/null 2>&1; then
+            git -C "${publish_dir}" symbolic-ref HEAD refs/heads/main
+          fi
+
+          rsync -a --delete --exclude='.git/' dist/ "${publish_dir}/"
+
+          git -C "${publish_dir}" config user.name "github-actions[bot]"
+          git -C "${publish_dir}" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "${publish_dir}" add --all
+
+          if git -C "${publish_dir}" diff --cached --quiet; then
+            echo "Byggresultatet är oförändrat; ingen ny publik commit behövs."
+            exit 0
+          fi
+
+          git -C "${publish_dir}" commit -m "Publicera ${GITHUB_SHA}"
+          git -C "${publish_dir}" push --set-upstream origin HEAD:main

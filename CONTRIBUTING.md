@@ -1,6 +1,6 @@
 # Samarbete och leverans
 
-Gabriela ansvarar för alla produktionsuppgifter. Henrik bidrar med krav och granskning. Arbeta med en GitHub-issue i taget och håll ändringarna små nog att förklara vid en demo.
+Gabriela ansvarar för alla produktionsuppgifter. Henrik bidrar med krav och granskning. Varje uppgift ska både ge ett kontrollerbart projektresultat och hjälpa Gabriela att förstå lösningen. Arbeta med en GitHub-issue i taget och håll ändringarna små nog att förklara vid en demo.
 
 ## Git-flöde
 

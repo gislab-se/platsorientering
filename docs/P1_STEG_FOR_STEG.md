@@ -2,9 +2,11 @@
 
 Målet är att förstå och kunna köra en liten kartsida. Kommunval, statistik och ritverktyg kommer senare.
 
+**Aktuell status:** P1-implementationen är sammanslagen till `main` genom PR #10. Guiden bevarar de daterade kontrollerna från arbetet med P1 och används som lärandestöd. Formuleringar om sådant som då återstod ska läsas som historik, inte som aktuell Git-status.
+
 ## 1. Verktyg och arbetsgren
 
-Projektet är klonat till `C:\LIA2-GISLAB-praktik\platsorientering`. Arbetsgrenen heter `feat/1-projektgrund`. Uppgiften är [issue #1 – Skapa och förstå en körbar projektgrund](https://github.com/gislab-se/platsorientering/issues/1), identifierad av Gabriela på GitHub. Issue-innehållet har inte lästs av AI:n; kontrollen utgår från P1 i ROADMAP.md.
+Under P1-arbetet var projektet klonat till `C:\LIA2-GISLAB-praktik\platsorientering` och arbetsgrenen hette `feat/1-projektgrund`. Uppgiften var [issue #1 – Skapa och förstå en körbar projektgrund](https://github.com/gislab-se/platsorientering/issues/1). Den nuvarande arbetsgrenen anges i README och kontrolleras med `git branch --show-current`.
 
 Node.js kör utvecklingsverktygen och npm installerar biblioteken. Node.js 24.20.0 och npm 11.19.0 är installerade och kontrollerade.
 
@@ -76,7 +78,7 @@ Verifierat 15 oktober 2026:
 
 - Gabriela har testat webbappen manuellt på dator och i ett simulerat mobilformat med smal skärm. Kartan visas korrekt, zoomning och panorering fungerar, knappen ”Visa Sverige” återställer kartan och layouten fungerar på smal skärm.
 - Gabriela har också bekräftat att `scrollWheelZoom: true` fungerar med musens scrollhjul. Testet i simulerat mobilformat verifierar layouten; användning på fysisk mobil och pekgester är ännu inte verifierade.
-- En separat ren kopia av arbetsfilerna utan befintlig `node_modules` kunde installeras med `npm ci`, typkontrolleras, byggas och startas med `npm run dev`. Servern svarade med HTTP 200. Detta var inte en faktisk ny Git-klon; ändringarna är ännu inte committade.
+- En separat ren kopia av arbetsfilerna utan befintlig `node_modules` kunde installeras med `npm ci`, typkontrolleras, byggas och startas med `npm run dev`. Servern svarade med HTTP 200. Vid kontrolltillfället var detta inte en faktisk ny Git-klon; P1 committades och slogs senare samman till `main`.
 - Den tidigare beroendeinstallationen med `npm install` rapporterade inga kända sårbarheter. Ingen ny säkerhetsgranskning ingick i kontrollen av den rena kopian.
 - Vite behövde köras utanför Codex-sandlådan på grund av blockerade underprocesser (`spawn EPERM`).
 - Efter flytten av startkoordinaterna till konfigurationen kördes `npm.cmd run typecheck` och `npm.cmd run build` igen på den aktuella arbetsversionen. Båda passerade. Produktionsbygget inkluderar den nya konfigurationsmodulen.
@@ -90,8 +92,8 @@ Verifierat 15 oktober 2026:
 | Karta visas och anpassas till skärmstorleken. | Gabriela har bekräftat kartvisning och fungerande layout på dator och i simulerat mobilformat med smal skärm. |
 | Typkontroll och produktionsbygge passerar. | Båda passerar, även med musrullszoom aktiverad. |
 | Node-version och låsfil finns; Gabriela kan förklara delarna. | `.nvmrc` och `package-lock.json` finns. Sambandet mellan HTML, TypeScript, CSS och Leaflet beskrivs ovan; Gabrielas egen genomgång återstår. |
-| CI kör typkontroll och bygge vid pull requests. | Arbetsflödet finns och `npm run build` inkluderar typkontroll. En körning på GitHub återstår när en pull request har godkänts för skapande. |
+| CI kör typkontroll och bygge vid pull requests. | Arbetsflödet finns och `npm run build` inkluderar typkontroll. P1 slogs senare samman genom PR #10; resultatet från den enskilda CI-körningen är inte belagt av den lokala Git-historiken. |
 
-P1 är inte helt verifierad förrän återstående delar i tabellen är kontrollerade. Kompletterande kontroller av fysisk mobil/pekgester, tangentbord och nätverksfel återstår också; dessa är inte separata acceptanskriterier i P1. Ingen pull request har skapats.
+P1 är nu sammanslaget genom PR #10. Tabellen ovan bevarar vad som var verifierat när guiden skrevs. Fysisk mobil/pekgester och Gabrielas egen fortsatta genomgång är fortfarande värdefull kvalitets- och lärandeuppföljning. Någon ny kontroll har inte lagts till vid dokumentuppdateringen.
 
-Startkoordinaterna ligger i `src/config/mapConfig.ts` och importeras av `src/map/createMap.ts`. Ingen commit, push eller PR har gjorts. Inga GitHub-uppgifter eller åtkomsttoken behöver hanteras för den manuellt identifierade issue-hänvisningen.
+Startkoordinaterna ligger i `src/config/mapConfig.ts` och importeras av `src/map/createMap.ts`. P1:s slutliga historik finns i Git; inga GitHub-uppgifter eller åtkomsttoken ska skrivas i dokumentationen.

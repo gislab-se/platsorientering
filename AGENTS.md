@@ -4,9 +4,17 @@ Gäller hela detta repo. Läs README.md, PROJECT_BRIEF.md, ARCHITECTURE.md och d
 
 ## Människor och ansvar
 
-- Gabriela studerar GIS på Ocellus och gör LIA på GISLAB. Hon ansvarar för hela produktionen, från planering och implementation till test, publicering och överlämning.
+- Projektet har två lika viktiga mål: Gabriela lär sig bygga kartor och program med AI i Codex, och kollegor på LABLAB får ett geografiskt tittfönster för platser i Sverige.
+- Gabriela studerar GIS på Ocellus och gör LIA på GISLAB. Hon driver projektet och deltar själv i utveckling, test och publicering för att förstå och kunna förvalta resultatet.
 - Henrik Aldén är beställare, GIS-expert och handledare på GISLAB. Han hjälper till med krav, GIS-metod och granskning.
-- AI är stöd i Gabrielas arbete. Förklara ändringar så att hon kan förstå, testa och själv förvalta dem. Skriv tydliga start- och kontrollsteg; undvik en stor ogenomskinlig implementation över flera etapper.
+- AI är stöd i Gabrielas arbete. Förklara kort vad som ändras, varför och hur hon själv kontrollerar resultatet. Ge utrymme för egna försök och anpassa takten när hon vill öva.
+
+## Produkt och aktuellt läge
+
+- Målet är att välja och utforska en kommun, en region eller ett område sammansatt av flera kommuner eller regioner. Börja med en kommun; övriga områdesval införs i separata steg.
+- Befolkning är första tematiska kartlagret och ska hämtas via ett verifierat kart-API. Exakt tjänst och endpoint för befolkningslagret är ett öppet beslut. SCB TAB628 och SCB:s WFS-rutor är undersökta kandidater; `api.kart-api.se` är verifierat för platsökning och kommunuppslag.
+- Prioritera områdesval, kartnavigering, teckenförklaring och information om källa, år, geografisk upplösning och begränsningar. Fler API-lager kan tillkomma senare.
+- Skilj alltid fungerande funktioner, pågående arbete, planer och öppna beslut. Aktuell status hör hemma i README; källunderlag i docs/DATA_SOURCES.md och beslut i docs/DECISIONS.md.
 
 ## Språk
 
@@ -18,8 +26,8 @@ Gäller hela detta repo. Läs README.md, PROJECT_BRIEF.md, ARCHITECTURE.md och d
 ## Arbetssätt
 
 1. Bedöm om uppgiften behöver förtydligas. Synliggör viktiga antaganden. Fråga bara när oklarheten påverkar resultatet; en tydlig uppgift ska genomföras direkt.
-2. Arbeta mot en avgränsad GitHub-issue i en egen gren. Blanda inte olika etapper i samma pull request.
-3. Håll implementationen enkel och modulerna begripliga. Inför nya bibliotek och tjänster bara när de löser ett konkret behov.
+2. Arbeta i små, testbara steg mot en avgränsad GitHub-issue i en egen gren. Blanda inte olika etapper i samma pull request. Kontrollera lokala ändringar före grenbyte och bevara pågående arbete.
+3. Håll koden och strukturen lättbegripliga, med få beroenden. Bygg en fungerande grund innan fler funktioner läggs till. Inför bibliotek och tjänster bara för konkreta behov.
 4. Kontrollera aktuella API-kontrakt i primärkällorna. Hitta inte på endpoints, kolumnnamn, licenser eller täckning. Dokumentera observerade svar och hämtningsdatum.
 5. Kör kontroller som är relevanta för ändringen. Matematik, urval, gränsfall och datakontrakt behöver meningsfulla tester. Små textändringar behöver inte nya enhetstester.
 6. Redovisa vad som ändrades, hur det kontrollerades och vad som återstår. Påstå inte att något fungerar, är testat eller är publicerat utan belägg.
@@ -40,5 +48,6 @@ Gäller hela detta repo. Läs README.md, PROJECT_BRIEF.md, ARCHITECTURE.md och d
 - Lägg aldrig token, API-nyckel, lösenord eller privata anslutningsuppgifter i Git, webbläsarkod, loggar eller exempel.
 - Vite-variabler som skickas till klienten är publika. Hemliga nycklar hör hemma i en servermiljö.
 - Dokumentera hämtningar och bearbetningar. Håll stora rådata, cache och byggresultat utanför Git.
-- Publiceringsmålet är gislab.se. Repo- och dokumentationsarbete innebär inte att en app redan är klar att driftsätta. Följ beställarens aktuella publiceringsuppdrag och docs/DEPLOYMENT.md; inför inga extra generella godkännandesteg.
+- Första publiceringen ska ske med GitHub Pages från det publika byggrepot `yakimovskagabriela-ctrl/platsorientering`. En lyckad byggning efter push till privata `main` ska automatiskt spegla endast den kontrollerade `dist/`-artefakten dit. Den verkliga Pages-URL:en ska verifieras efter första publiceringen. Publicering på gislab.se blir aktuell i slutskedet.
+- README ska beskriva lokal körning och publicering. Anpassa docs/DEPLOYMENT.md till publiceringsuppdraget innan det genomförs. Kontrollera bygge, resurssökvägar och publicerad URL; ange inte en föreslagen adress som en fungerande webbplats. Inför inga extra generella godkännandesteg.
 - Bevara andra personers lokala ändringar. Radera inte historik och använd inte force push på gemensamma grenar.

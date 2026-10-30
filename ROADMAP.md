@@ -1,10 +1,14 @@
 # Arbetsplan
 
-Alla produktionsuppgifter ägs av Gabriela. Henrik ger kravstöd och återkoppling. Rubrikerna P1–P9 används även för GitHub-issues; aktuell status följs där. Ingen appfunktion är klar vid projektstart.
+Alla produktionsuppgifter ägs av Gabriela. Henrik ger kravstöd och återkoppling. Arbetet ska ge både lärande och en användbar geografisk tittfunktion. Rubrikerna P1–P9 används även för GitHub-issues; aktuell detaljstatus följs där.
 
-Första delmål: P1–P4 ger en fungerande kommunöversikt. Version 1: P1–P8 ger hela Sverigeomfattningen i projektbeskrivningen. P9 är en senare utredning, inte ett villkor för version 1. Ingen tidsuppskattning är beslutad.
+**Färdigt:** P1-implementationen är sammanslagen till `main` genom PR #10. **Pågår:** P2 på grenen `feat/2-datakallor-datakontrakt`; tre commits finns på GitHub och ytterligare lokala ändringar är inte committade. **Planerat:** P3–P8. P9 är en senare utredning. Ingen projektversion är publicerad.
+
+Första funktionsmål: P1–P4 ger en kommunöversikt med befolkning. Regioner och sammansatta områden införs därefter i avgränsade steg. En stabil, granskad förhandsversion ska först publiceras via `yakimovskagabriela-ctrl`; exakt tidpunkt, repo och metod beslutas före publicering. Slutpublicering på gislab.se ingår i P8.
 
 ## P1 – Skapa och förstå en körbar projektgrund
+
+Status: **implementerad och sammanslagen till `main` genom PR #10**. De daterade manuella kontrollerna finns i P1-guiden. Gabrielas fortsatta genomgång av hur delarna hänger ihop och test på fysisk mobil är lärande-/kvalitetsuppföljning och ändrar inte Git-historiken.
 
 Ansvarig: Gabriela. Beroenden: inga.
 
@@ -20,6 +24,10 @@ Klart när:
 
 ## P2 – Verifiera datakällor och skriv datakontrakt
 
+Status 28 oktober 2026: **delvis uppfyllt, inte avslutat**. De fem klartkriterierna nedan motsvarar Issue #2 enligt kravtexten från Gabriela. Fem interna kontrakt, runtime-validering, fyra syntetiska och tre verkliga SCB-fixturer finns. Senaste typkontrakt, 63 runtime-tester och typkontroll passerade. kart-api-adaptrarna har liveprovats; SCB WFS-paginering har återtestats med 17 unika objekt samt tom-/felprov. Källor och rättighetsbedömning finns i [DATA_SOURCES](docs/DATA_SOURCES.md).
+
+Direkt kart-api-åtkomst utan nyckel/server är beslutad i samråd med Henrik. Åtkomst för SCB och kommungränser är fortsatt ett förslag, se [DECISIONS](docs/DECISIONS.md). Kvar för P2-bedömningen är att fastställa dessa käll-/åtkomstval och hantera öppna metadatafrågor, särskilt kart-api:s CRS/referenstid och kommungränsernas årgång. Dokumentationen skiljer dem från senare implementation: P3-gränssnitt och färdiga SCB-adaptrar införs inte för att avsluta P2. Ingen ny testkörning eller ändring av GitHub-status har gjorts vid denna dokumentsynkronisering.
+
 Ansvarig: Gabriela. Beroenden: P1.
 
 Kontrollera kart-api och SCB mot riktiga svar och leverantörernas dokumentation. Utred de datakällor som behövs för kommunval, platsökning, kommunstatistik och befolkningsrutor i Sverige.
@@ -33,6 +41,8 @@ Klart när:
 - Eventuellt serverbehov är avgjort i DECISIONS innan beroende funktioner byggs.
 
 ## P3 – Välj kommun och visa rätt område
+
+Lokalt påbörjat 30 oktober 2026 på `feat/3-kommunval-panel`: panel i tre steg och kommunval med kartklick eller kod är implementerade. Bygge och 65 tester passerar. Webbläsarverifiering och namnval återstår; P3 är inte avslutat. Befolkningsdata och analys är fortsatt planerade. GitHub Issue #3 kunde inte läsas från miljön; uppgiften följer användarens avgränsning och kriterierna nedan. Grenen bygger på aktuell P2-arbetskopia med befintliga lokala ändringar bevarade; dessa behöver hållas åtskilda vid senare commit/PR.
 
 Ansvarig: Gabriela. Beroenden: P2.
 
@@ -59,15 +69,16 @@ Klart när:
 - Analysen har meningsfulla tester och kan köras utan nätverk.
 - Gabriela visar den första fungerande kommunöversikten för Henrik.
 
-## P5 – Sök plats och rita ett eget område
+## P5 – Sök plats och hantera fler områdesval
 
 Ansvarig: Gabriela. Beroenden: P3; kan genomföras efter P4.
 
-Inför platsökning och ett ritverktyg för polygoner. Håll detta områdesval skilt från kommunstatistiken.
+Inför platsökning. Utvidga områdesvalet stegvis med regioner, områden sammansatta av flera kommuner eller regioner och ett ritverktyg för polygoner. Avgränsa varje områdestyp i en egen liten uppgift och håll dess statistik skild från kommunstatistiken.
 
 Klart när:
 
 - Flera orter med samma namn presenteras så att användaren kan välja rätt.
+- Regioner och sammansatta områden har tydliga identifierare, geometriårgångar och källor innan de visas som valbara.
 - Polygoner kan ritas, redigeras och tas bort. Ogiltig eller tom geometri avvisas begripligt.
 - Gammal kommunstatistik visas inte som statistik för ett nytt ritat område.
 - Områdesvalet och geometrin kan testas oberoende av kartans utseende.
@@ -102,11 +113,11 @@ Klart när:
 - Ingen resultatruta blandar olika områdesval eller årgångar utan förklaring.
 - Gabriela har dokumenterat användartest, åtgärder och kvarstående kända fel.
 
-## P8 – Publicera version 1 på gislab.se och lämna över
+## P8 – Slutpublicera version 1 på gislab.se och lämna över
 
 Ansvarig: Gabriela. Beroenden: P7 och driftsuppgifter från Henrik.
 
-Fyll i DEPLOYMENT med faktisk målmiljö och genomför en reproducerbar release. Henrik ordnar tillgång till domän/webbhotell; Gabriela ansvarar för genomförandet.
+Utgå från erfarenheten från den tidigare GitHub-förhandsversionen. Fyll i DEPLOYMENT med faktisk målmiljö och genomför en reproducerbar slutrelease. Henrik ordnar tillgång till domän/webbhotell; Gabriela ansvarar för genomförandet.
 
 Klart när:
 
