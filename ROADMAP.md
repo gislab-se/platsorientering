@@ -141,3 +141,7 @@ Klart när:
 - En enkel höjdtröskel skiljs från en modell för kustöversvämning; ingen punktfråga används som ytmodell.
 - Antaganden, osäkerheter, testområde och behov av serverberäkning är beskrivna.
 - Henrik och Gabriela har valt om och hur implementationen ska fortsätta.
+
+## Publicerad förhandsversion, 30 oktober 2026
+
+PR #12 är sammanslagen och panelens tre steg samt kommunval publicerade på GitHub Pages. HTTP- och resurskontroller passerar. P2 och P3 är fortsatt inte helt avslutade: öppna metadatafrågor, namnval och interaktiv webbläsarkontroll återstår. Automatisk överföring nekades med 403; reservpubliceringen och åtgärdsbehovet beskrivs i docs/DEPLOYMENT.md.
