@@ -10,11 +10,11 @@ Projektet har två lika viktiga mål: Gabriela ska lära sig bygga kartor och pr
 | --- | --- |
 | P1 – projektgrund | Implementerad och sammanslagen till `main` genom PR #10. Kartan visar OpenStreetMap och har zoom, panorering och återställning. |
 | P2 – datakällor och kontrakt | Pågår. Adaptrar, kontrakt, testfixturer och källunderlag är committade på `feat/3-kommunval-panel`; metadatafrågor återstår. |
-| P3 – kommunval | Lokalt implementerat på `feat/3-kommunval-panel`: tre steg i vänsterpanelen, kommunval genom kartklick eller kommunkod och markerad kommunpolygon. Webbläsarkontroll återstår. |
+| P3 – kommunval | Publicerat via PR #12: tre steg i vänsterpanelen, kommunval genom kartklick eller kommunkod och markerad kommunpolygon. HTTP- och resurskontroll godkända; interaktiv webbläsarkontroll återstår. |
 | Senare funktioner | Befolkningslager och analys visas som planerade. Regioner, sammansatta och ritade områden är ännu inte implementerade. |
-| Publicering | P1 är publicerad på [GitHub Pages](https://yakimovskagabriela-ctrl.github.io/platsorientering/) (HTTP 200, verifierat 30 oktober 2026). Uppdateringen med kommunval förbereds via pull request till privata `main`; se [releasekontroll](docs/DEPLOYMENT.md). |
+| Publicering | Kommunvalet är publicerat på [GitHub Pages](https://yakimovskagabriela-ctrl.github.io/platsorientering/) och verifierat 30 oktober 2026. Reservpublicering användes efter tokenfel 403; automatisk överföring behöver rättade behörigheter. Se [releasekontroll](docs/DEPLOYMENT.md). |
 
-Källkodsrepot är privat och ligger på `gislab-se/platsorientering`. En godkänd push till dess `main` ska automatiskt bygga appen och överföra endast `dist/` till det publika repot `yakimovskagabriela-ctrl/platsorientering`. GitHub Pages-adressen är verifierad för P1; den nya versionen kontrolleras separat efter publicering. Slutpublicering på **gislab.se** sker i projektets slutskede.
+Källkodsrepot är privat och ligger på `gislab-se/platsorientering`. En godkänd push till dess `main` ska automatiskt bygga appen och överföra endast `dist/` till det publika repot `yakimovskagabriela-ctrl/platsorientering`. GitHub Pages-adressen är verifierad för kommunvalet och panelens tre steg. Slutpublicering på **gislab.se** sker i projektets slutskede.
 
 ## Planerad första version
 
@@ -22,7 +22,7 @@ Källkodsrepot är privat och ligger på `gislab-se/platsorientering`. En godkä
 
 Starta med `npm.cmd run dev`. Vänsterpanelen visar **1. Välj område**, **2. Välj data** och **3. Analys**. Klicka inom en svensk kommun: kommunens namn och kod visas och polygonen markeras grönt. Klicka på en annan kommun för att byta. Alternativt ange en fyrsiffrig kommunkod (exempelvis 0380, 1280 eller 2584) och välj med knappen eller Enter. Prova också snabba byten, en okänd kod och en punkt utanför Sverige. Ett äldre svar ska inte ersätta det senaste valet.
 
-Kommungränsen hämtas via kart-api och är förenklad för visning; gränsårgången är okänd. Ingen befolkningsstatistik eller analys utförs ännu. Typkontroll, produktionsbygge och 65 tester passerade den 30 oktober 2026. Visuell kontroll, kartklick och mobilkontroll i webbläsare återstår; ändringen är inte publicerad.
+Kommungränsen hämtas via kart-api och är förenklad för visning; gränsårgången är okänd. Ingen befolkningsstatistik eller analys utförs ännu. Typkontroll, produktionsbygge och 65 tester passerade den 30 oktober 2026. Visuell kontroll, kartklick och mobilkontroll i webbläsare återstår; ändringen är publicerad och HTTP-/resurskontrollerad på GitHub Pages.
 
 ### Mål för kommande etapper
 

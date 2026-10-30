@@ -1,6 +1,6 @@
 # Stegvis publicering
 
-Gabriela ansvarar för genomförandet. P1 finns på den verifierade adressen https://yakimovskagabriela-ctrl.github.io/platsorientering/ (HTTP 200, kontrollerat 30 oktober 2026). Kommunvalet och panelens tre steg förbereds nu för publicering på samma adress på användarens uppdrag. Publicering sker i två steg: först en förhandsversion via Gabrielas GitHub-konto och senare slutpublicering på gislab.se.
+Gabriela ansvarar för genomförandet. P1 finns på den verifierade adressen https://yakimovskagabriela-ctrl.github.io/platsorientering/ (HTTP 200, kontrollerat 30 oktober 2026). Kommunvalet och panelens tre steg är nu publicerade på samma adress på användarens uppdrag och HTTP-/resurskontrollerade. Publicering sker i två steg: först en förhandsversion via Gabrielas GitHub-konto och senare slutpublicering på gislab.se.
 
 ## Aktuellt läge
 
@@ -9,9 +9,9 @@ Gabriela ansvarar för genomförandet. P1 finns på den verifierade adressen htt
 | Källkodsrepo | Privat: `gislab-se/platsorientering` |
 | Första publiceringskonto | `yakimovskagabriela-ctrl` |
 | Publikt byggrepo | `yakimovskagabriela-ctrl/platsorientering`, innehåller den publicerade P1-versionen |
-| GitHub Pages-URL | https://yakimovskagabriela-ctrl.github.io/platsorientering/ – P1 verifierad 30 oktober 2026 |
+| GitHub Pages-URL | https://yakimovskagabriela-ctrl.github.io/platsorientering/ – kommunval och tre panelsteg verifierade 30 oktober 2026 |
 | Publiceringskälla | Godkända commits på privata `gislab-se/platsorientering`, grenen `main` |
-| Automatik | Workflow följer med releasen till privata `main`. Repository secret `PAGES_DEPLOY_TOKEN` finns; dess värde har inte lästs eller visats. |
+| Automatik | Workflow finns på privata `main`, men push till byggrepot nekades med HTTP 403. `PAGES_DEPLOY_TOKEN` finns men dess skrivbehörighet behöver rättas; värdet har inte lästs eller visats. |
 | Senast verifierat produktionsbygge | 30 oktober 2026: typkontroll, bygge med `/platsorientering/` och 65 tester passerar |
 | Slutmål | gislab.se; exakt URL och överföringsmetod är inte verifierade |
 
@@ -56,3 +56,17 @@ Spara identiteten på föregående fungerande artefakt. Vid fel återpubliceras 
 ## Releasekontroll 30 oktober 2026
 
 Användaren har beställt publicering av panelens tre steg och kommunvalet. Release via pull request till privata `main` och befintligt dist-workflow. Föregående offentliga P1-version svarar HTTP 200 men saknar `area-heading` och `analysis-heading`. Efter releasen kontrolleras dessa markörer samt HTTP-status och innehåll för samtliga refererade JS/CSS-resurser under `/platsorientering/`. Interaktiv webbläsarkontroll och fysisk mobil är ännu inte verifierade. Endast byggartefakten får föras till det publika repot; inga kart-api-råsvar eller privata dokument.
+
+## Verifierat publiceringsresultat, 30 oktober 2026
+
+- Privat release: `94a237dd88eba1d3f76c9d55d42b9c85e14d14cb`, squash merge av PR #12.
+- Publik artefaktcommit: `8be8a30c48237533942a47d282a7d315a7df2ce7`. Föregående publika commit: `890ac9fdef84c58396de0dfe5021aefaeb8271f4`. Ingen historik har skrivits om.
+- Privat Actions-körning `41046287107` byggde och kontrollerade artefakten, men push nekades med 403. Reservpublicering utfördes med befintlig Git-inloggning från lokalt Pages-bygge vars källträd verifierades identiskt med privata `main` genom `git diff --exit-code HEAD origin/main`.
+- Endast `dist/` och `.nojekyll` ersatte det publika repots aktuella innehåll. Tidigare källkod och dokument fanns i byggrepot och ingår inte längre i dess senaste träd; äldre historik finns kvar. Ingen rådata hämtades eller lades till.
+- Pages ändrades från workflow-bygge till publicering från `main` och `/` enligt projektets avsedda upplägg. Pages byggde artefaktcommiten.
+- Publik URL gav HTTP 200 och innehöll `area-heading`, `data-heading` och `analysis-heading`. JS och CSS under `/platsorientering/assets/` gav HTTP 200 med rätt innehållstyper och SHA-256 identiskt med releasefilerna.
+- Visuellt kartflöde och fysisk mobil har inte kontrollerats i webbläsare. Namnval, befolkningslager, analys och visning av alla kommungränser är inte införda.
+
+### Kvar för automatisk överföring
+
+Rätta `PAGES_DEPLOY_TOKEN` så att tokenägaren har skrivåtkomst till `yakimovskagabriela-ctrl/platsorientering` och token är begränsad till det repot med `Contents: Read and write`. Kontrollera därefter en ny Actions-körning. Inga breda lokala Git-inloggningsuppgifter har kopierats till Actions. Reservpubliceringen är ett dokumenterat undantag för detta användarbeställda släpp, inte ett belägg för fungerande automatik.
