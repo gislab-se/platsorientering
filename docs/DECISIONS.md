@@ -1,5 +1,13 @@
 # Beslut och öppna frågor
 
+## Aktuell P2-beslutsstatus, 2 november 2026
+
+Gabriela har godkänt kart-api för kommunval/visningsgränser, SCB TAB628 för kommunstatistik 2025 via direkt browseråtkomst utan separat server och SCB WFS `stat:befolkning_1km_2025` för 1 km-rutor med direktåtkomst som inledande riktning. De daterade besluten nedan är styrande inom denna omfattning och ersätter äldre förslagsstatus för samma frågor. Historiska formuleringar innebär inte att besluten saknas i dag. Separat Henrik-godkännande påstås inte för besluten den 2 november.
+
+P2:s fem kriterier är bedömda som uppfyllda inom dokumenterad avgränsning i [ROADMAP](../ROADMAP.md#avslutsbedömning-2-november-2026); slutkontroller och Gabrielas avslutsgodkännande återstår. [DATA_SOURCES](DATA_SOURCES.md#aktuell-p2-sammanställning-2-november-2026) skiljer faktiskt browserprov från Node-kontroll: TAB628 har ett precist Edge-prov 1 november, medan WFS har ett äldre redovisat browserprov med begränsad proveniens och senare Node-paginering. Inget nytt test genomförs genom denna statusuppdatering.
+
+Lookup/geocode-CRS, kommungränsernas version/giltighet och kompatibilitet med SCB-statistik är fortsatt öppna. Källvalet godkänner inte koordinatantaganden eller geografisk join. Cache-/kvotstrategi, fullständighet, WFS-ID/null-/XML-hantering, produktionens browseråtkomst och transformation till WGS84 kvarstår inför beroende P3–P6-implementation. Serverinriktningen omprövas vid belagda hinder. Oklara rättigheter till verkliga kart-api-fixturer ger inget lagringstillstånd; befintliga syntetiska fixturer används. Inga nya funktioner, implementation, push, merge eller publicering godkänns av dokumentsynken.
+
 ## Beslutade ramar den 15 oktober 2026
 
 | Beslut | Motiv |
@@ -21,10 +29,10 @@ Teknikvalen kan ändras av Gabriela när ett konkret behov visas. Dokumentera or
 
 | Fråga | Nästa steg | Ansvarig |
 | --- | --- | --- |
-| Slutliga API:er, villkor, CORS och nyckelbehov | P2, verifiera mot riktiga svar | Gabriela |
-| Gemensam statistikårgång och gränsindelning | P2, kontrollera källmetadata | Gabriela |
+| Uppföljning av valda API:er, villkor, CORS och nyckelbehov | Källval godkända; följ dokumenterade villkor inför beroende P3–P6-arbete | Gabriela |
+| Gemensam statistikårgång och gränsindelning | Öppet leverantörsunderlag; krävs före verifierad geografisk koppling | Gabriela |
 | Ritbibliotek och geometrioperationer | P1/P5, välj underhållna verktyg med lämpliga licenser | Gabriela |
-| Åtkomstlösning för SCB och kommungränser | Avgör före beroende implementation. Direktåtkomst till kart-api utan serveradapter är beslutad 28 oktober 2026. | Gabriela med Henrik |
+| Uppföljning av åtkomstlösningar | kart-api/TAB628 beslutade; WFS har godkänd inledande direktåtkomst. Ompröva vid verifierade hinder före beroende implementation. | Gabriela med Henrik |
 | Repo, metod och URL för första GitHub-publiceringen | Välj en stabil commit och verifiera åtkomst, bygge och Pages-stöd | Gabriela |
 | Exakt URL och åtkomst till webbhotell | Före P8 och efter GitHub-förhandsversionen | Henrik tillhandahåller, Gabriela verifierar |
 | Visuellt uttryck och eventuell GISLAB-profil | Före användartest i P7 | Gabriela med Henrik |

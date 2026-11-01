@@ -1,5 +1,24 @@
 # Datakällor och API-utvärdering
 
+## Aktuell P2-sammanställning, 2 november 2026
+
+Källunderlaget är redo för P2:s slutkontroller och avslutsgodkännande, med nedanstående avgränsningar. Aktuell bedömning av alla fem kriterier finns i [ROADMAP](../ROADMAP.md#avslutsbedömning-2-november-2026). Äldre daterade observationer och kandidatbedömningar bevaras som historik; de senaste avgränsade besluten i [DECISIONS](DECISIONS.md) gäller framför äldre formuleringar om att källval återstår.
+
+**Godkänt:** kart-api för kommunval och visningsgeometri; SCB TAB628 för folkmängd, landareal och täthet 2025 via direkt browseråtkomst; SCB WFS `stat:befolkning_1km_2025` för 1 km-befolkningsrutor med direkt browseråtkomst utan separat server som inledande riktning. SCB:s förenklade kommungränser är en undersökt alternativkälla, inte vald leverans till appen.
+
+| Belägg | Vad som faktiskt verifierats | Begränsning |
+| --- | --- | --- |
+| TAB628, browser 1 november | Verklig Edge 156 från localhost: metadata och nio värden för tre kommuner, HTTP 200, `type=cors`, ingen nyckel. | Inte produktionsorigin eller alla browsers. |
+| TAB628, Node 2 november | 290 unika fyrsiffriga kommunkoder och 870 numeriska värden för 2025; inga observerade saknade värden/statusfält i uttaget. | Inte ett browserprov eller geografisk join; CKM kvarstår. |
+| WFS, äldre redovisat browserprov | Localhost, HTTP 200, `type=cors`, tre features och CORS-header för angiven origin. | Exakt datum och fullständig ursprunglig URL saknas; tidigare redovisning, inte en ny oberoende omkörning. |
+| WFS, Node 28 oktober | Paginering 5+5+5+2, 17 unika objekt, schema/CRS/referenstid samt tom-/felprov. | Node genomdriver inte browser-CORS; provet bevisar inte nationell fullständighet eller stabilitet under uppdatering. |
+
+**Implementerat respektive förberett:** kart-api-uppslag och polygonvisning är inkopplade. Platsökningsadaptern är inte kopplad till UI. Kontrakt, validering och testfixturer finns; SCB-statistik/rutlager och analys är inte implementerade i appen. Senast dokumenterade ordinarie kontroll 30 oktober gav 65 godkända runtime-tester, typkontroll och bygge. Inga sådana tester eller nya nätverksprov upprepades vid denna dokumentsynk.
+
+**Öppna villkor, inte nya P2-funktioner:** lookup/geocode-CRS, kart-api:s källdataversion/uppdatering och gränsårgång samt geografisk kompatibilitet med TAB628 är obekräftade. Detsamma gäller exakta kart-api-cache-/fixturrättigheter och vissa WFS-kvoter/cache-/ID-egenskaper. Dessa begränsar beroende användning i P3–P6: inga antagna CRS, årgångar, fullständighetsgarantier eller nya verkliga kart-api-fixturer. WFS kräver inför implementation verifierad browser-/produktionsåtkomst, säker paginering, null-/XML-felhantering och korrekt transformation EPSG:3006 → WGS84. Landareal får inte ersättas med polygonyta och gränsrutors hela population får inte beskrivas som exakt befolkning inom ritat område. Ingen generell driftgaranti eller färdig geografisk join har godkänts.
+
+## Historiskt underlag och daterade kontroller
+
 Sammanställt 22 oktober 2026 för P2, uppdaterat 28 oktober 2026 med projektets livekontroller av kart-api, senaste testkörning och en separat metadatakontroll enligt nedan. Äldre underlag är Gabrielas redovisade externa tester, utkastet ”P2 – Datakällor: verifierade fynd och öppna punkter” (2026-10-22) och dokumentationsgenomgångar i Codex-konversationen. Vid metadatakompletteringen hämtades officiell dokumentation, TAB628-metadata, WFS-metadata, en befolkningsruta och kommungränsarkivet på nytt. Inga kodändringar eller nya körningar av den ordinarie testsviten gjordes.
 
 - **Observation:** äldre redovisat externt testresultat, om inget annat anges. Avsnittet om livekontroll 28 oktober anger vilka prov AI faktiskt körde med projektets adaptrar.
@@ -457,6 +476,10 @@ Bedömning: SCB:s förenklade kommungränser rekommenderas som **kandidat för v
 Bakgrundskarta väljs separat med kontroll av visningsvillkor, attribution och användningsvolym. Ett öppet kartbibliotek ger inte obegränsad rätt till någon annans kartserver. P1:s befintliga beslut ändras inte av detta dokumentationssteg.
 
 ## Återstående P2-dokumentation och beslut
+
+### Historisk P2-bedömning, 28 oktober 2026
+
+Detta avsnitt bevarar dåtidens kvarstående arbete. Senare kontroller och käll-/åtkomstbeslut 1–2 november ersätter dess äldre förslagsstatus; aktuell avslutsbedömning finns högst upp. Punkter om färdiga adaptrar, omprojektion och produktionshantering är uppföljning inför implementation, inte ytterligare P2-funktioner.
 
 **Bedömning 28 oktober 2026: P2 är delvis uppfyllt och kan inte markeras klart utifrån underlaget.** Tabellen jämför med de fem klartkriterier som Gabriela tillhandahållit från [Issue #2](https://github.com/gislab-se/platsorientering/issues/2); de motsvarar ROADMAP. Direkt GitHub-åtkomst saknas men kravtexten är nu tillgänglig. Avsaknad av gränssnittskoppling för adaptrarna är kommande funktionsarbete, inte ett extra P2-krav.
 
