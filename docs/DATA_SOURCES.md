@@ -170,6 +170,25 @@ Bedömning av kvarstående osäkerheter för kart-api:
 
 ## SCB TAB628: kommunstatistik
 
+### Åtkomstkontroll 1 november 2026
+
+**Dokumenterat:** SCB:s [API-översikt](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [PxWebApi v2](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/pxwebapi-v2/), lästa detta datum, beskriver GET-uttag ur Statistikdatabasen. Översikten anger högst 150 000 dataceller per uttag och 30 anrop per 10 sekunder och IP-adress. SCB länkar till [PxTools användarhandledning](https://www.pxtools.net/PxWebApi/documentation/user-guide/) och [API-specifikationen](https://github.com/PxTools/PxApiSpecs/blob/master/PxAPI-2.yml). De granskade sidorna anger inget krav på API-nyckel för dessa offentliga uttag. Detta är inte ett uttryckligt löfte om framtida nyckelfri åtkomst eller en generell CORS-garanti för alla endpoints.
+
+**Praktiskt verifierat:** metadata och ett begränsat datauttag hämtades med Node `fetch`, utan API-nyckel, Authorization-header eller tillförda cookies. Anropen skickade `Origin: http://127.0.0.1:5173`; kontrollomgången med assertions använde också `credentials: 'omit'`. Inga sparade GitHub-token eller privata inloggningsuppgifter användes. Exakta GET-adresser:
+
+```text
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data?lang=sv&outputFormat=json-stat2&valueCodes%5BRegion%5D=0380%2C1280%2C2584&valueCodes%5BKon%5D=1%2B2&valueCodes%5BContentsCode%5D=BE0101U1%2CBE0101U2%2CBE0101U3&valueCodes%5BTid%5D=2025
+```
+
+Båda gav HTTP 200, JSON och `Access-Control-Allow-Origin: *`. `Access-Control-Allow-Credentials` och `WWW-Authenticate` saknades. De testade offentliga GET-anropen krävde alltså ingen nyckel eller autentisering. CORS-headern tillåter läsning från annan origin vid anrop utan credentials; inget serverbehov på grund av autentisering eller CORS framkom i dessa prov. Node genomdriver dock inte webbläsarens CORS-regler. Detta är en HTTP-/headerkontroll, inte ett nytt webbläsartest. Tidigare redovisade browserprov nedan hålls åtskilda från denna kontroll.
+
+Metadata innehöll 290 fyrsiffriga kommunkoder och år till och med 2025. Det verkliga urvalet omfattade Uppsala `0380`, Malmö `1280` och Kiruna `2584`, totalt kön (`1+2`), år 2025: JSON-stat2 med dimensionerna `Region, Kon, ContentsCode, Tid`, storlekarna `[3,1,3,1]` och nio numeriska värden. I kommunordningen enligt dimensionsindex var värdena (täthet, folkmängd, landareal): Uppsala `(113.8, 249726, 2193.84)`, Malmö `(2336.8, 367924, 157.45)`, Kiruna `(1.2, 22402, 19307)`. Detta verifierar tre kommuners värden, inte ett nytt fullständigt uttag för alla 290.
+
+De behövda måtten bekräftades: `BE0101U1` invånare/km², `BE0101U2` folkmängd i personer och `BE0101U3` **landareal**, inte total kommunpolygonyta, i km². Metadatafältet `ContentsCode.extension.refperiod` anger att folkmängden gäller 31 december och landarealen 1 januari följande år. För statistikåret 2025 är referensdagarna därför **2025-12-31 respektive 2026-01-01**. Tätheten relaterar dessa mått. Senaste tillgängliga år var 2025 vid kontrollen; `updated=2026-02-24T07:00:00Z` är tabellens uppdateringsuppgift, inte hämtningsdatum. CKM-begränsningarna som beskrivs nedan kvarstår.
+
+**Kontroller och avgränsning:** assertions för båda HTTP-statusarna och CORS-headern, dimensionsordning/-storlek, tre förväntade kommunkoder, totalt kön, nio ändliga numeriska värden och tillgängligt år 2025 passerade. Svaren lästes i minnet; inga nya rådatafiler, fixturer eller applikationsändringar skapades. Ett nytt verkligt browserprov, produktionsdomänens eventuella CSP, fel-/kvotsvar och långsiktig tillgänglighet är inte verifierade här. Källval, förvaltningsbeslut och matchning av gränsårgång avgörs inte av denna åtkomstkontroll. Äldre formuleringar nedan om öppet nyckelbehov kompletteras av denna daterade observation för just de testade anropen.
+
 ### Observationer
 
 Leverantör SCB, PxWeb API v2. Redovisade adresser:
