@@ -59,6 +59,16 @@ Den länkade ISO-postens `dateStamp=2026-03-31T12:43:33.031Z` är metadatarevisi
 
 ### Avgränsning av återstående kart-api-metadata
 
+#### Kontroll av kommunuppslagets parametrar och CRS, 31 oktober 2026
+
+Dokumenterat 1 november 2026 utifrån kontrollen den 31 oktober. Följande officiella resurser hämtades då via Node utan autentisering och svarade med HTTP 200: [OpenAPI](https://api.kart-api.se/openapi.json), [kommunguiden](https://kart-api.se/guider/vilken-kommun/), [API-referensen](https://kart-api.se/docs/referens/) och [Kom igång](https://kart-api.se/docs/). Inga nya liveuppslag eller rådatafiler skapades i kontrollen.
+
+**Bekräftat i dokumentationen:** OpenAPI anger serverbasen `/v1` och `GET /kommun/lookup` med två obligatoriska, namngivna query-parametrar: `lat` (tal, −90 till 90) och `lon` (tal, −180 till 180). Kommunguiden och Kom igång visar `lat=58.705&lon=15.77` för Finspång. Parametrarna används alltså som latitud respektive longitud. Anropet är inte en positionsarray: ordningen mellan de namngivna parametrarna i URL:en ska inte förväxlas med axelordningen i ett CRS eller koordinatordningen i GeoJSON.
+
+**Bekräftat i befintlig kod:** `src/main.ts` skickar Leaflets `event.latlng.lat` till `lat` och `event.latlng.lng` till `lon`. `src/providers/municipalityLookup.ts` bygger motsvarande namngivna query-parametrar och validerar intervallen ovan. Ingen omprojektion görs. Detta verifierar kodens parametermappning, inte leverantörens geodetiska datum.
+
+**Fortsatt öppet:** inget uttryckligt CRS, geodetiskt datum eller EPSG-nummer för lookup-indata kunde beläggas i de granskade officiella källorna. EPSG:4326 är därför **inte bekräftat för `/v1/kommun/lookup`**. OpenAPI:s uttryckliga WGS84-beskrivning gäller `KommunFeature.geometry` från `/v1/kommun/{kod}` och får inte överföras till lookup. Parameternamn, talintervall och fungerande exempel räcker inte som CRS-bevis. För att stänga frågan behövs ett uttryckligt officiellt besked om lookup-indatats referenssystem/datum och kopplingen mellan dess axlar och parametrarna `lat`/`lon`. Inget leverantörsmeddelande har skickats.
+
 OpenAPI:s explicita WGS84-beskrivning för `KommunFeature.geometry` överförs inte till andra endpoints. De granskade beskrivningarna av geocode/lookup anger fältnamn och talvärden men fastställer inte uttryckligen deras geodetiska datum. Kommunguiden bekräftar Lantmäteriet som gränskälla; årgång och importdatum saknas fortfarande. Guidens uppgift om 422 utanför Sverige-fönstret avviker dessutom från det tidigare observerade 404-svaret för `(0,0)`; observationen behålls.
 
 Sidan Om talen redovisar räkning av ortnamn och kommunpolygoner den 2026-09-11. Detta är ett mätdatum för antal i leverantörens databas, inte källdatats referenstid, gränsårgång eller senaste import. För att stänga metadatafrågorna behövs ytterligare officiellt belägg eller leverantörsbesked via den publicerade kontakten `api@autonomousmedia.io`; inget meddelande har skickats.
