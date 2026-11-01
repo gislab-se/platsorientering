@@ -101,7 +101,7 @@ Gabriela ansvarar för fortsatt källverifiering, metadata, datakontrakt, tester
 
 ## P2 – beslutsförslag: direkt TAB628-åtkomst för kommunstatistik, 1 november 2026
 
-**Status: förslag för granskning av Gabriela och Henrik, inte slutligt godkänd arkitektur.** Uppdraget att skriva detta förslag innebär inte att källvalet eller åtkomstlösningen är beslutade. Tidigare öppna frågor kvarstår om de inte uttryckligen avgränsas här. Ingen appintegration ingår i denna dokumentationsuppgift.
+**Historisk status 1 november: förslag för granskning, inte slutligt godkänd arkitektur.** Det avgränsade käll- och åtkomstvalet har därefter godkänts av Gabriela den 2 november 2026 enligt beslutet nedan. Förslagets underlag och begränsningar bevaras; godkännandet omfattar inte implementation eller verifierad geografisk överensstämmelse.
 
 ### Föreslagen lösning och motiv
 
@@ -126,9 +126,20 @@ kart-api används för kommunval: `/v1/kommun/lookup` kopplar en kartpunkt till 
 - **Datakvalitet:** saknat, sekretess och noll ska hållas åtskilda. CKM-röjandeskydd kan göra att summerade delvärden avviker från publicerade totaler. Dimensionsindex, enheter och metadata behöver valideras i en framtida SCB-adapter; någon sådan färdig adapter införs inte genom detta förslag.
 - **Omprövning:** om senare krav innebär hemlig nyckel, otillräcklig CORS-åtkomst eller behov av gemensam cache/kapacitet ska alternativ utredas. En serveradapter kan vara ett alternativ men löser inte okänd årgång, datarättigheter eller leverantörens begränsningar av sig själv.
 
-### Beslut som återstår
+### Historisk beslutsstatus den 1 november 2026
 
 Gabriela och Henrik behöver ta ställning till detta avgränsade förslag om källa och direktåtkomst för kommunstatistik innan beroende implementation startar. Ett godkännande ska dokumenteras separat med datum, omfattning och accepterade begränsningar. WFS-åtkomst, analysgeometri och övriga öppna P2-frågor är inte avgjorda av förslaget. P2 markeras därför inte som avslutat här.
+
+### Godkänt avgränsat P2-beslut, 2 november 2026
+
+**Status: godkänt av Gabriela i projektkonversationen.** Ett separat godkännande från Henrik dokumenteras inte här. Beslutet gäller källval och åtkomst för kommunval, visningsgränser och kommunstatistik. Det ersätter tidigare förslagsstatus för just dessa delar, inte övriga öppna P2-frågor.
+
+- **kart-api:** används för kommunval genom `/v1/kommun/lookup` och för visningsgränser genom `/v1/kommun/{kod}`. Befintliga P3-funktioner ändras inte av beslutet.
+- **SCB TAB628:** väljs för folkmängd, officiell landareal och publicerad befolkningstäthet för statistikåret **2025**, via direkt GET-åtkomst från webbläsaren utan separat server eller API-nyckel. Källa, enhet och referensdatum ska följa statistiken. Skälet är att den statiska appen kan använda den verifierade åtkomsten utan ytterligare serverdrift.
+- **Underlag:** Node- och browserproven den 1 november samt [kontrollen av alla 290 kommuner den 2 november](DATA_SOURCES.md#fullständigt-kommunurval-för-2025-kontrollerat-2-november-2026): 290 unika fyrsiffriga koder och 870 numeriska värden, utan observerade saknade värden eller statusfält i just det uttaget. Det är inte en färdig appintegration eller en garanti om framtida svar.
+- **Begränsningar som kvarstår:** samtliga risker i avsnittet ovan gäller fortsatt, inklusive beroendet av SCB:s tillgänglighet/CORS, oprövad produktionsorigin/CSP, högst 150 000 dataceller per uttag och 30 anrop per 10 sekunder/IP, delad arbetsplatskvot, fel-/timeout-/cachehantering inför implementation samt CKM-röjandeskydd. Frånvaro av statusmarkeringar innebär inte statistisk exakthet eller garanterad summerbarhet. Folkmängden gäller **2025-12-31**, landarealen **2026-01-01**, och tätheten relaterar dessa mått. Ingen polygonarea får ersätta SCB:s landareal.
+- **Uttryckligen öppet:** CRS för lookup-indata och kart-api-gränsernas giltighetsdatum/indelningsår. WGS84-beskedet för polygongeometrin bekräftar inte lookup-indatats CRS. **Geografisk kompatibilitet med TAB628 2025 är inte bekräftad eller godkänd genom beslutet.** Den fyrsiffriga kommunkoden ger en teknisk kopplingsnyckel men bevisar inte samma geografiska indelning. Se [årgångskontrollen](DATA_SOURCES.md#kontroll-av-kommunpolygonernas-årgång-och-tab628-koppling-2-november-2026).
+- **Utanför godkännandet:** ingen implementation, geografisk join, merge, push eller publicering är beställd genom detta beslut. Befolkningsrutor/WFS, analysgeometri och övriga P2-frågor är fortsatt separata. P2 markeras inte som färdigt. Direktåtkomsten omprövas om nya krav eller verifierade hinder uppkommer.
 
 ## Mall för nya arkitekturbeslut
 
