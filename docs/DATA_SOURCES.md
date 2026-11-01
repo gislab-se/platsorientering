@@ -215,6 +215,21 @@ Browserns assertions verifierade kommunerna Uppsala `0380`, Malmö `1280` och Ki
 
 **Fortsatt öppet:** produktionsdomänens eventuella CSP och browserbeteende, andra browsers, fel-/kvotsvar, långsiktig tillgänglighet samt slutligt käll-/åtkomstbeslut. Provet är ett tekniskt belägg för den testade åtkomsten, inte ett generellt driftlöfte eller beslut om all framtida serverhantering. Officiella dokumentations- och metadataadresser finns i föregående avsnitt; de praktiska slutsatserna här bygger på det nya browserprovet.
 
+### Fullständigt kommunurval för 2025, kontrollerat 2 november 2026
+
+Ett nytt read-only-prov kördes med Node `fetch` utan autentisering och med `credentials: 'omit'`. Metadata och data hämtades med GET och gav båda HTTP 200. Kontrolltidpunkten var `2026-11-01T23:09:56.812Z`, alltså **2 november 2026 kl. 00:09 svensk tid**. Svaren behandlades i minnet; inga rådatafiler sparades. Exakta API-adresser:
+
+```text
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data?lang=sv&outputFormat=json-stat2&codelist%5BRegion%5D=vs_RegionKommun07EjAggr&valueCodes%5BRegion%5D=*&valueCodes%5BKon%5D=1%2B2&valueCodes%5BContentsCode%5D=BE0101U1%2CBE0101U2%2CBE0101U3&valueCodes%5BTid%5D=2025
+```
+
+**Observerat och kontrollerat:** kommunurvalet gav **290 unika fyrsiffriga kommunkoder**, utan dubbletter; 90 koder hade inledande nolla. Dimensionsindexen var unika och sammanhängande 0–289. JSON-stat2 hade `id=[Region,Kon,ContentsCode,Tid]`, `size=[290,1,3,1]`, `Kon="1+2"` (totalt), `Tid="2025"` och måtten `BE0101U1` (invånare/km²), `BE0101U2` (folkmängd, personer) och `BE0101U3` (landareal, km²). Dimensioner, index och urval verifierades med assertions. Svaret innehöll **870 ändliga numeriska värden**: 290 kommuner × 3 mått. Genomgången gav 0 nullvärden, 0 saknade värdepositioner, 0 icke-numeriska värden och 0 nollvärden. Inga fält med `status` i fältnamnet hittades vid genomgång av svarstrukturen. Resultaten avser just detta uttag, inte alla möjliga år, urval eller leverantörens framtida statusrepresentationer.
+
+**År och referensdagar:** uttaget och metadata anger att folkmängden gäller **2025-12-31**, landarealen **2026-01-01** och tätheten relaterar dessa mått. Måtten kopplades till kommuner via JSON-stat-dimensionernas index, inte JavaScripts nyckelordning. Provvärdena för Uppsala, Malmö och Kiruna överensstämde med det tidigare trekommunuttaget. Tabellens `updated=2026-02-24T07:00:00Z` är uppdateringsmetadata, inte hämtningsdatum eller gemensamt referensdatum för måtten. Landareal är inte total kommunpolygonyta.
+
+**Statistisk osäkerhet och geografisk begränsning:** SCB:s medföljande noter anger CKM-röjandeskydd från referensåret 2025, med liten kontrollerad slumpmässig osäkerhet. Summerade delvärden behöver därför inte motsvara publicerade totaler; summering kan öka osäkerheten. Avsaknad av null- eller statusmarkeringar betyder **inte** att värdena är exakta eller saknar röjandeskydd. Kontrollen verifierar struktur och tillgängliga värden, inte varje värdes statistiska riktighet. **Kompatibiliteten med kart-api:s kommungränser är fortfarande inte bekräftad**, eftersom gränsernas giltighetsdatum/indelningsår saknas. Matchande kommunkoder bevisar inte samma geografiska indelning. Detta Node-prov är inte ett nytt browserprov eller en geografisk join och ändrar inte käll-/arkitekturbeslut.
+
 ### Observationer
 
 Leverantör SCB, PxWeb API v2. Redovisade adresser:
