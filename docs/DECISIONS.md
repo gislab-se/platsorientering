@@ -99,6 +99,37 @@ Gabriela ansvarar för fortsatt källverifiering, metadata, datakontrakt, tester
 - **Uppföljning:** Ompröva lösningen om nya behov eller begränsningar uppstår.
 
 
+## P2 – beslutsförslag: direkt TAB628-åtkomst för kommunstatistik, 1 november 2026
+
+**Status: förslag för granskning av Gabriela och Henrik, inte slutligt godkänd arkitektur.** Uppdraget att skriva detta förslag innebär inte att källvalet eller åtkomstlösningen är beslutade. Tidigare öppna frågor kvarstår om de inte uttryckligen avgränsas här. Ingen appintegration ingår i denna dokumentationsuppgift.
+
+### Föreslagen lösning och motiv
+
+Låt webbläsaren hämta kommunstatistik direkt från SCB:s PxWeb API v2, tabell TAB628, utan separat server eller API-nyckel. Hämta ett begränsat urval för den valda kommunen och ett uttryckligt statistikår. TAB628 innehåller folkmängd, officiell landareal och publicerad befolkningstäthet i samma tabell. Direktåtkomst passar den statiska Vite-/Leaflet-appen på GitHub Pages och undviker en server med separat driftbehov när ingen hemlig nyckel eller CORS-proxy behövs för de testade anropen. Bedömningen gäller kommunstatistik, inte befolkningsrutor, eget ritat område eller analysgeometri.
+
+### Underlag: dokumenterat respektive praktiskt verifierat
+
+- SCB:s [API-översikt](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [v2-dokumentation](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/pxwebapi-v2/) beskriver GET-uttag. Aktuella referenser, exakta testadresser, värden och datum finns i [TAB628-kontrollerna i DATA_SOURCES](DATA_SOURCES.md#scb-tab628-kommunstatistik). Dessa kontroller är beslutsunderlag, inte en generell tillgänglighetsgaranti.
+- Node-provet den 1 november 2026 gav HTTP 200 och `Access-Control-Allow-Origin: *` för metadata och ett litet datauttag utan nyckel eller autentisering. Dimensionsordning, kommunkoder och nio numeriska värden kontrollerades med assertions.
+- Det separata, lyckade browserprovet samma dag kördes från `http://127.0.0.1:53896` i Microsoft Edge 156 headless med normal CORS-säkerhet, isolerad profil och `credentials: 'omit'`. Metadata och tre kommuners data gav läsbart JSON, HTTP 200 och `Response.type = 'cors'`, utan registrerade nätverks- eller konsolfel. Assertions och efterkontroll av server-/processavslutning passerade. Provet omfattade Uppsala `0380`, Malmö `1280` och Kiruna `2584`, totalt kön, statistikåret 2025 och tre mått; det bevisar inte alla kommunvärden eller färdig appfunktion.
+- Sparade SCB-fixturer och befintliga kontraktstester ger underlag för validering och koppling av mått. De ersätter inte browserprovet. Ingen ny körning av hela testsviten gjordes för detta beslutsförslag.
+
+### Ansvarsfördelning mellan kart-api och SCB
+
+kart-api används för kommunval: `/v1/kommun/lookup` kopplar en kartpunkt till kommunkod och `/v1/kommun/{kod}` ger visningsgeometrin. SCB TAB628 föreslås ge statistik via samma fyrsiffriga kommunkod, bevarad som sträng med eventuella inledande nollor. Ingen namnmatchning, beräkning från polygonens yta eller fördelning av kommunbefolkning till mindre områden ska göras. Uppgifterna från kart-api är inte SCB-statistik och ska behålla sin egen källa/attribution. SCB-värden ska visas med `Källa: SCB`, mått, enhet och referensdatum. Gemensamma koder bevisar inte att gränsindelning och statistikårgång överensstämmer; det ska kontrolleras före join. CRS för lookup-indata och kommungränsernas årgång förblir öppna enligt DATA_SOURCES.
+
+### Risker, begränsningar och villkor före implementation
+
+- **Tillgänglighet och CORS:** förslaget innebär ett direkt beroende av SCB:s API och framtida CORS-konfiguration. Fel, timeout och kvotbegränsning ska visas begripligt; gammal statistik får inte bli statistik för ett nytt kommunval. Ingen tjänstegaranti har belagts. Produktionsdomänens åtkomst/CSP och andra browsers är inte provade här.
+- **Anropsgränser:** SCB dokumenterar högst 150 000 dataceller per uttag och 30 anrop per 10 sekunder och IP-adress. En arbetsplats kan dela IP och därmed kvot. Begränsa uttag, undvik upprepade identiska anrop och planera återanvändning, avbrytning samt kontrollerad återhämtning. Exakt cache-/uppdateringsstrategi och hantering av exempelvis HTTP 429 återstår inför implementation. De här gränserna gäller PxWeb, inte automatiskt SCB WFS.
+- **Tid och mått:** provat statistikår är 2025 och var senaste tillgängliga år vid kontrollen. Folkmängden avser **2025-12-31**, landarealen **2026-01-01** och tätheten relaterar dessa mått enligt tabellmetadata. Referensdagarna får inte ersättas med hämtningsdatum eller tabellens `updated`. Landareal är inte kommunpolygonens totala geometriska yta. Val av nästa statistikår kräver ny metadatakontroll och kontroll av indelningen.
+- **Datakvalitet:** saknat, sekretess och noll ska hållas åtskilda. CKM-röjandeskydd kan göra att summerade delvärden avviker från publicerade totaler. Dimensionsindex, enheter och metadata behöver valideras i en framtida SCB-adapter; någon sådan färdig adapter införs inte genom detta förslag.
+- **Omprövning:** om senare krav innebär hemlig nyckel, otillräcklig CORS-åtkomst eller behov av gemensam cache/kapacitet ska alternativ utredas. En serveradapter kan vara ett alternativ men löser inte okänd årgång, datarättigheter eller leverantörens begränsningar av sig själv.
+
+### Beslut som återstår
+
+Gabriela och Henrik behöver ta ställning till detta avgränsade förslag om källa och direktåtkomst för kommunstatistik innan beroende implementation startar. Ett godkännande ska dokumenteras separat med datum, omfattning och accepterade begränsningar. WFS-åtkomst, analysgeometri och övriga öppna P2-frågor är inte avgjorda av förslaget. P2 markeras därför inte som avslutat här.
+
 ## Mall för nya arkitekturbeslut
 
 Lägg till ett kort numrerat beslut när en fråga blir avgjord:
