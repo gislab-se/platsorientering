@@ -9,7 +9,7 @@ Projektet har två lika viktiga mål: Gabriela ska lära sig bygga kartor och pr
 | Del | Status |
 | --- | --- |
 | P1 – projektgrund | Implementerad och sammanslagen till `main` genom PR #10. Kartan visar OpenStreetMap och har zoom, panorering och återställning. |
-| P2 – datakällor och kontrakt | Källval och underlag är klara för slutkontroll på `feat/2-slutfor-datakallor`. Fem kriterier är bedömda som uppfyllda inom dokumenterad avgränsning; slutliga tester och Gabrielas avslutsgodkännande återstår. Grenens P2-kompletteringar är ännu inte pushade. Se [P2-checklistan](ROADMAP.md#p2--verifiera-datakällor-och-skriv-datakontrakt). |
+| P2 – datakällor och kontrakt | Fem kriterier är bedömda som uppfyllda inom dokumenterad avgränsning. Slutkontroller 2 november 2026: 65/65 tester, typkontrakt, TypeScript och produktionsbygge godkända. Push till `feat/2-slutfor-datakallor` är genomförd och verifierad; [PR #14](https://github.com/gislab-se/platsorientering/pull/14) inväntar merge-godkännande. Se [P2-checklistan](ROADMAP.md#p2--verifiera-datakällor-och-skriv-datakontrakt). |
 | P3 – kommunval | Kartklick/kodval, markerad kommunpolygon och panelens tre steg är implementerade och ingår i PR #12 på `main`. Namnval och fullständig interaktiv browser-/mobilkontroll återstår; P3 är inte avslutat. |
 | Senare funktioner | Befolkningslager och analys visas som planerade. Regioner, sammansatta och ritade områden är ännu inte implementerade. |
 | Publicering | Kommunvalet publicerades på [GitHub Pages](https://yakimovskagabriela-ctrl.github.io/platsorientering/) och HTTP-/resurskontrollerades 30 oktober 2026. Automatisk överföring fick 403; reservpublicering användes. Ingen ny publicering eller URL-kontroll har gjorts vid P2-dokumentsynken. |
@@ -30,7 +30,7 @@ TAB628 har ett verkligt Edge-prov från localhost den 1 november och ett Node-ut
 
 Starta med `npm.cmd run dev`. Vänsterpanelen visar **1. Välj område**, **2. Välj data** och **3. Analys**. Klicka inom en svensk kommun: kommunens namn och kod visas och polygonen markeras grönt. Klicka på en annan kommun för att byta. Alternativt ange en fyrsiffrig kommunkod (exempelvis 0380, 1280 eller 2584) och välj med knappen eller Enter. Prova också snabba byten, en okänd kod och en punkt utanför Sverige. Ett äldre svar ska inte ersätta det senaste valet.
 
-Kommungränsen hämtas via kart-api och är förenklad för visning; gränsårgången är okänd. Ingen befolkningsstatistik eller analys utförs ännu. Typkontroll, produktionsbygge och 65 tester passerade den 30 oktober 2026; de har inte körts om vid denna dokumentationsändring. Fullständig interaktiv browser- och mobilkontroll återstår. Kommunvalet är publicerat enligt den daterade statusen ovan, medan P2-kompletteringarna ännu ligger lokalt.
+Kommungränsen hämtas via kart-api och är förenklad för visning; gränsårgången är okänd. Ingen befolkningsstatistik eller analys utförs ännu. Slutkontrollerna för P2 den 2 november 2026 gav 65/65 godkända tester samt godkänd typkontroll och produktionsbygge; de upprepas inte för denna statusrättelse. Fullständig interaktiv browser- och mobilkontroll återstår. Kommunvalet är publicerat enligt den daterade statusen ovan. P2-kompletteringarna är pushade på P2-grenen och ingår i PR #14, men är ännu inte mergade eller publicerade.
 
 ### Mål för kommande etapper
 
