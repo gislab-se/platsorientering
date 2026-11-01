@@ -141,6 +141,26 @@ Gabriela och Henrik behöver ta ställning till detta avgränsade förslag om k�
 - **Uttryckligen öppet:** CRS för lookup-indata och kart-api-gränsernas giltighetsdatum/indelningsår. WGS84-beskedet för polygongeometrin bekräftar inte lookup-indatats CRS. **Geografisk kompatibilitet med TAB628 2025 är inte bekräftad eller godkänd genom beslutet.** Den fyrsiffriga kommunkoden ger en teknisk kopplingsnyckel men bevisar inte samma geografiska indelning. Se [årgångskontrollen](DATA_SOURCES.md#kontroll-av-kommunpolygonernas-årgång-och-tab628-koppling-2-november-2026).
 - **Utanför godkännandet:** ingen implementation, geografisk join, merge, push eller publicering är beställd genom detta beslut. Befolkningsrutor/WFS, analysgeometri och övriga P2-frågor är fortsatt separata. P2 markeras inte som färdigt. Direktåtkomsten omprövas om nya krav eller verifierade hinder uppkommer.
 
+## P2 – avgränsat källval för befolkningsrutor, 2 november 2026
+
+**Status: godkänt av Gabriela i projektkonversationen.** SCB:s WFS vid `https://geodata.scb.se/geoserver/stat/wfs`, lager **`stat:befolkning_1km_2025`**, väljs som källa för befolkningsrutor på **1 km** med referenstid **2025-12-31**. Detta ersätter tidigare kandidat-/förslagsstatus för just källvalet. Det innebär inte godkännande av implementation eller att produktionens funktionalitet är verifierad.
+
+**Åtkomstinriktning:** direkt åtkomst från webbläsaren utan separat server är den inledande lösningen att utgå från inför senare implementation. Begränsade uttag har fungerat utan API-nyckel eller autentisering. Något verifierat behov av en server är inte belagt i dessa prov; det är inte en garanti att serverstöd aldrig behövs. Åtkomsten ska omprövas om browser/CORS, kapacitet eller andra krav ger belagda hinder.
+
+**Befintligt underlag:** [WFS-kontrollerna i DATA_SOURCES](DATA_SOURCES.md#scb-wfs-befolkningsrutor) dokumenterar schemakontroll och Node-prov den 28 oktober: fyra sidor med 5+5+5+2 objekt, 17 unika ID:n, referenstid och EPSG:3006, samt tomma svar och felaktigt lager. Observerade CORS-huvuden är inte ett nytt browserprov. Små verkliga SCB-fixturer och SCB:s dokumenterade CC0-stöd finns. Inga tester upprepades för detta beslut och ingen nationell rutdatabas laddades ned.
+
+### Öppna villkor inför beroende implementation
+
+- **Browser/CORS och drift:** direkt åtkomst från verklig browser och produktionsorigin är inte fullständigt verifierad för WFS genom Node-proven. Produktionsfunktionalitet, andra browsers och tillgänglighet får inte beskrivas som bekräftade. Inget tillgänglighetslöfte har belagts.
+- **Kvoter och cache:** numerisk WFS-anropskvot, hård servermaxgräns och exakt cachetid är obekräftade. `CountDefault=1000000` i WFS 2.0.0 är inte en kapacitetsgaranti eller automatiskt maxgräns för WFS 1.1.0. TAB628:s PxWeb-kvoter får inte överföras till WFS. Uttag ska begränsas geografiskt; storleks- och återhämtningsstrategi behöver bestämmas inför implementation.
+- **Paginering och fullständighet:** det lyckade 17-objektsprovet gäller ett enda utsnitt. Stabila ID:n över uppdateringar, avduplicering och oföränderlighet mellan sidor är inte garanterade. WFS 2.0.0 annonserar `PagingIsTransactionSafe=FALSE`. Ofullständigt uttag får inte presenteras som fullständig täckning eller total.
+- **Nullable-fält och värden:** schemat tillåter null eller frånvaro för flera ID-, referenstids-, befolknings- och geometrifält. Tolkning per variabel ska fastställas före normalisering; noll, saknat och sekretess får inte blandas. Produkten omfattar befolkade rutor; noll får inte automatiskt beskrivas som obebodd yta. Köns-/åldersdelar får inte förutsättas summera till publicerad total.
+- **XML-fel:** ett verifierat felprov gav HTTP 200 med XML `ows:ExceptionReport`. Innehållstyp och felkropp måste kontrolleras; status 200 betyder inte ensamt giltiga data. Provet fastställer inte formatet för alla felvarianter eller när JSON uttryckligen begärs.
+- **Koordinater:** källagrets CRS är **EPSG:3006**. Korrekt koordinattransformation och validering till **GeoJSON/WGS84 med longitud före latitud** krävs före webbvisning. Att byta CRS-etikett räcker inte. Transformationen är inte implementerad eller testad genom beslutet.
+- **Geografisk tolkning:** rutvärdet gäller hela rutan, inte den del som överlappar ett godtyckligt ritat område. Helt inkluderade rutor och gränsrutor ska hållas isär enligt [ANALYSIS_METHODS](ANALYSIS_METHODS.md). Ingen areaviktad fördelning införs och inga exakta befolkningstal för ett ritat område utlovas. Röjandeskyddets summeringsbegränsningar ska följa analysresultatet.
+
+**Avgränsning och nästa beslut:** källvalet och den inledande åtkomstinriktningen är fastställda för P2; ovanstående villkor kvarstår inför beroende uttags-/normaliserings-/analysarbete. Lookup-CRS, kommungränsernas årgång och deras kompatibilitet med SCB-statistik avgörs inte här. Befintliga P3-funktioner ändras inte. Ingen implementation, push, merge eller publicering är beställd genom beslutet, och P2 markeras inte som helt avslutat här.
+
 ## Mall för nya arkitekturbeslut
 
 Lägg till ett kort numrerat beslut när en fråga blir avgjord:
