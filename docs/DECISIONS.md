@@ -1,5 +1,13 @@
 # Beslut och öppna frågor
 
+## Aktuell P2-beslutsstatus, 2 november 2026
+
+Gabriela har godkänt kart-api för kommunval/visningsgränser, SCB TAB628 för kommunstatistik 2025 via direkt browseråtkomst utan separat server och SCB WFS `stat:befolkning_1km_2025` för 1 km-rutor med direktåtkomst som inledande riktning. De daterade besluten nedan är styrande inom denna omfattning och ersätter äldre förslagsstatus för samma frågor. Historiska formuleringar innebär inte att besluten saknas i dag. Separat Henrik-godkännande påstås inte för besluten den 2 november.
+
+P2:s fem kriterier är bedömda som uppfyllda inom dokumenterad avgränsning i [ROADMAP](../ROADMAP.md#avslutsbedömning-2-november-2026); slutkontroller och Gabrielas avslutsgodkännande återstår. [DATA_SOURCES](DATA_SOURCES.md#aktuell-p2-sammanställning-2-november-2026) skiljer faktiskt browserprov från Node-kontroll: TAB628 har ett precist Edge-prov 1 november, medan WFS har ett äldre redovisat browserprov med begränsad proveniens och senare Node-paginering. Inget nytt test genomförs genom denna statusuppdatering.
+
+Lookup/geocode-CRS, kommungränsernas version/giltighet och kompatibilitet med SCB-statistik är fortsatt öppna. Källvalet godkänner inte koordinatantaganden eller geografisk join. Cache-/kvotstrategi, fullständighet, WFS-ID/null-/XML-hantering, produktionens browseråtkomst och transformation till WGS84 kvarstår inför beroende P3–P6-implementation. Serverinriktningen omprövas vid belagda hinder. Oklara rättigheter till verkliga kart-api-fixturer ger inget lagringstillstånd; befintliga syntetiska fixturer används. Inga nya funktioner, implementation, push, merge eller publicering godkänns av dokumentsynken.
+
 ## Beslutade ramar den 15 oktober 2026
 
 | Beslut | Motiv |
@@ -21,10 +29,10 @@ Teknikvalen kan ändras av Gabriela när ett konkret behov visas. Dokumentera or
 
 | Fråga | Nästa steg | Ansvarig |
 | --- | --- | --- |
-| Slutliga API:er, villkor, CORS och nyckelbehov | P2, verifiera mot riktiga svar | Gabriela |
-| Gemensam statistikårgång och gränsindelning | P2, kontrollera källmetadata | Gabriela |
+| Uppföljning av valda API:er, villkor, CORS och nyckelbehov | Källval godkända; följ dokumenterade villkor inför beroende P3–P6-arbete | Gabriela |
+| Gemensam statistikårgång och gränsindelning | Öppet leverantörsunderlag; krävs före verifierad geografisk koppling | Gabriela |
 | Ritbibliotek och geometrioperationer | P1/P5, välj underhållna verktyg med lämpliga licenser | Gabriela |
-| Åtkomstlösning för SCB och kommungränser | Avgör före beroende implementation. Direktåtkomst till kart-api utan serveradapter är beslutad 28 oktober 2026. | Gabriela med Henrik |
+| Uppföljning av åtkomstlösningar | kart-api/TAB628 beslutade; WFS har godkänd inledande direktåtkomst. Ompröva vid verifierade hinder före beroende implementation. | Gabriela med Henrik |
 | Repo, metod och URL för första GitHub-publiceringen | Välj en stabil commit och verifiera åtkomst, bygge och Pages-stöd | Gabriela |
 | Exakt URL och åtkomst till webbhotell | Före P8 och efter GitHub-förhandsversionen | Henrik tillhandahåller, Gabriela verifierar |
 | Visuellt uttryck och eventuell GISLAB-profil | Före användartest i P7 | Gabriela med Henrik |
@@ -98,6 +106,68 @@ Gabriela ansvarar för fortsatt källverifiering, metadata, datakontrakt, tester
 - **Nästa steg för P2:** Komplettera återstående källmetadata och SCB-verifiering samt fastställ åtkomst för SCB och kommungränser enligt [DATA_SOURCES](DATA_SOURCES.md#återstående-p2-dokumentation-och-beslut). Inkoppling i gränssnittet hör till kommande funktionsetapper.
 - **Uppföljning:** Ompröva lösningen om nya behov eller begränsningar uppstår.
 
+
+## P2 – beslutsförslag: direkt TAB628-åtkomst för kommunstatistik, 1 november 2026
+
+**Historisk status 1 november: förslag för granskning, inte slutligt godkänd arkitektur.** Det avgränsade käll- och åtkomstvalet har därefter godkänts av Gabriela den 2 november 2026 enligt beslutet nedan. Förslagets underlag och begränsningar bevaras; godkännandet omfattar inte implementation eller verifierad geografisk överensstämmelse.
+
+### Föreslagen lösning och motiv
+
+Låt webbläsaren hämta kommunstatistik direkt från SCB:s PxWeb API v2, tabell TAB628, utan separat server eller API-nyckel. Hämta ett begränsat urval för den valda kommunen och ett uttryckligt statistikår. TAB628 innehåller folkmängd, officiell landareal och publicerad befolkningstäthet i samma tabell. Direktåtkomst passar den statiska Vite-/Leaflet-appen på GitHub Pages och undviker en server med separat driftbehov när ingen hemlig nyckel eller CORS-proxy behövs för de testade anropen. Bedömningen gäller kommunstatistik, inte befolkningsrutor, eget ritat område eller analysgeometri.
+
+### Underlag: dokumenterat respektive praktiskt verifierat
+
+- SCB:s [API-översikt](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [v2-dokumentation](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/pxwebapi-v2/) beskriver GET-uttag. Aktuella referenser, exakta testadresser, värden och datum finns i [TAB628-kontrollerna i DATA_SOURCES](DATA_SOURCES.md#scb-tab628-kommunstatistik). Dessa kontroller är beslutsunderlag, inte en generell tillgänglighetsgaranti.
+- Node-provet den 1 november 2026 gav HTTP 200 och `Access-Control-Allow-Origin: *` för metadata och ett litet datauttag utan nyckel eller autentisering. Dimensionsordning, kommunkoder och nio numeriska värden kontrollerades med assertions.
+- Det separata, lyckade browserprovet samma dag kördes från `http://127.0.0.1:53896` i Microsoft Edge 156 headless med normal CORS-säkerhet, isolerad profil och `credentials: 'omit'`. Metadata och tre kommuners data gav läsbart JSON, HTTP 200 och `Response.type = 'cors'`, utan registrerade nätverks- eller konsolfel. Assertions och efterkontroll av server-/processavslutning passerade. Provet omfattade Uppsala `0380`, Malmö `1280` och Kiruna `2584`, totalt kön, statistikåret 2025 och tre mått; det bevisar inte alla kommunvärden eller färdig appfunktion.
+- Sparade SCB-fixturer och befintliga kontraktstester ger underlag för validering och koppling av mått. De ersätter inte browserprovet. Ingen ny körning av hela testsviten gjordes för detta beslutsförslag.
+
+### Ansvarsfördelning mellan kart-api och SCB
+
+kart-api används för kommunval: `/v1/kommun/lookup` kopplar en kartpunkt till kommunkod och `/v1/kommun/{kod}` ger visningsgeometrin. SCB TAB628 föreslås ge statistik via samma fyrsiffriga kommunkod, bevarad som sträng med eventuella inledande nollor. Ingen namnmatchning, beräkning från polygonens yta eller fördelning av kommunbefolkning till mindre områden ska göras. Uppgifterna från kart-api är inte SCB-statistik och ska behålla sin egen källa/attribution. SCB-värden ska visas med `Källa: SCB`, mått, enhet och referensdatum. Gemensamma koder bevisar inte att gränsindelning och statistikårgång överensstämmer; det ska kontrolleras före join. CRS för lookup-indata och kommungränsernas årgång förblir öppna enligt DATA_SOURCES.
+
+### Risker, begränsningar och villkor före implementation
+
+- **Tillgänglighet och CORS:** förslaget innebär ett direkt beroende av SCB:s API och framtida CORS-konfiguration. Fel, timeout och kvotbegränsning ska visas begripligt; gammal statistik får inte bli statistik för ett nytt kommunval. Ingen tjänstegaranti har belagts. Produktionsdomänens åtkomst/CSP och andra browsers är inte provade här.
+- **Anropsgränser:** SCB dokumenterar högst 150 000 dataceller per uttag och 30 anrop per 10 sekunder och IP-adress. En arbetsplats kan dela IP och därmed kvot. Begränsa uttag, undvik upprepade identiska anrop och planera återanvändning, avbrytning samt kontrollerad återhämtning. Exakt cache-/uppdateringsstrategi och hantering av exempelvis HTTP 429 återstår inför implementation. De här gränserna gäller PxWeb, inte automatiskt SCB WFS.
+- **Tid och mått:** provat statistikår är 2025 och var senaste tillgängliga år vid kontrollen. Folkmängden avser **2025-12-31**, landarealen **2026-01-01** och tätheten relaterar dessa mått enligt tabellmetadata. Referensdagarna får inte ersättas med hämtningsdatum eller tabellens `updated`. Landareal är inte kommunpolygonens totala geometriska yta. Val av nästa statistikår kräver ny metadatakontroll och kontroll av indelningen.
+- **Datakvalitet:** saknat, sekretess och noll ska hållas åtskilda. CKM-röjandeskydd kan göra att summerade delvärden avviker från publicerade totaler. Dimensionsindex, enheter och metadata behöver valideras i en framtida SCB-adapter; någon sådan färdig adapter införs inte genom detta förslag.
+- **Omprövning:** om senare krav innebär hemlig nyckel, otillräcklig CORS-åtkomst eller behov av gemensam cache/kapacitet ska alternativ utredas. En serveradapter kan vara ett alternativ men löser inte okänd årgång, datarättigheter eller leverantörens begränsningar av sig själv.
+
+### Historisk beslutsstatus den 1 november 2026
+
+Gabriela och Henrik behöver ta ställning till detta avgränsade förslag om källa och direktåtkomst för kommunstatistik innan beroende implementation startar. Ett godkännande ska dokumenteras separat med datum, omfattning och accepterade begränsningar. WFS-åtkomst, analysgeometri och övriga öppna P2-frågor är inte avgjorda av förslaget. P2 markeras därför inte som avslutat här.
+
+### Godkänt avgränsat P2-beslut, 2 november 2026
+
+**Status: godkänt av Gabriela i projektkonversationen.** Ett separat godkännande från Henrik dokumenteras inte här. Beslutet gäller källval och åtkomst för kommunval, visningsgränser och kommunstatistik. Det ersätter tidigare förslagsstatus för just dessa delar, inte övriga öppna P2-frågor.
+
+- **kart-api:** används för kommunval genom `/v1/kommun/lookup` och för visningsgränser genom `/v1/kommun/{kod}`. Befintliga P3-funktioner ändras inte av beslutet.
+- **SCB TAB628:** väljs för folkmängd, officiell landareal och publicerad befolkningstäthet för statistikåret **2025**, via direkt GET-åtkomst från webbläsaren utan separat server eller API-nyckel. Källa, enhet och referensdatum ska följa statistiken. Skälet är att den statiska appen kan använda den verifierade åtkomsten utan ytterligare serverdrift.
+- **Underlag:** Node- och browserproven den 1 november samt [kontrollen av alla 290 kommuner den 2 november](DATA_SOURCES.md#fullständigt-kommunurval-för-2025-kontrollerat-2-november-2026): 290 unika fyrsiffriga koder och 870 numeriska värden, utan observerade saknade värden eller statusfält i just det uttaget. Det är inte en färdig appintegration eller en garanti om framtida svar.
+- **Begränsningar som kvarstår:** samtliga risker i avsnittet ovan gäller fortsatt, inklusive beroendet av SCB:s tillgänglighet/CORS, oprövad produktionsorigin/CSP, högst 150 000 dataceller per uttag och 30 anrop per 10 sekunder/IP, delad arbetsplatskvot, fel-/timeout-/cachehantering inför implementation samt CKM-röjandeskydd. Frånvaro av statusmarkeringar innebär inte statistisk exakthet eller garanterad summerbarhet. Folkmängden gäller **2025-12-31**, landarealen **2026-01-01**, och tätheten relaterar dessa mått. Ingen polygonarea får ersätta SCB:s landareal.
+- **Uttryckligen öppet:** CRS för lookup-indata och kart-api-gränsernas giltighetsdatum/indelningsår. WGS84-beskedet för polygongeometrin bekräftar inte lookup-indatats CRS. **Geografisk kompatibilitet med TAB628 2025 är inte bekräftad eller godkänd genom beslutet.** Den fyrsiffriga kommunkoden ger en teknisk kopplingsnyckel men bevisar inte samma geografiska indelning. Se [årgångskontrollen](DATA_SOURCES.md#kontroll-av-kommunpolygonernas-årgång-och-tab628-koppling-2-november-2026).
+- **Utanför godkännandet:** ingen implementation, geografisk join, merge, push eller publicering är beställd genom detta beslut. Befolkningsrutor/WFS, analysgeometri och övriga P2-frågor är fortsatt separata. P2 markeras inte som färdigt. Direktåtkomsten omprövas om nya krav eller verifierade hinder uppkommer.
+
+## P2 – avgränsat källval för befolkningsrutor, 2 november 2026
+
+**Status: godkänt av Gabriela i projektkonversationen.** SCB:s WFS vid `https://geodata.scb.se/geoserver/stat/wfs`, lager **`stat:befolkning_1km_2025`**, väljs som källa för befolkningsrutor på **1 km** med referenstid **2025-12-31**. Detta ersätter tidigare kandidat-/förslagsstatus för just källvalet. Det innebär inte godkännande av implementation eller att produktionens funktionalitet är verifierad.
+
+**Åtkomstinriktning:** direkt åtkomst från webbläsaren utan separat server är den inledande lösningen att utgå från inför senare implementation. Begränsade uttag har fungerat utan API-nyckel eller autentisering. Något verifierat behov av en server är inte belagt i dessa prov; det är inte en garanti att serverstöd aldrig behövs. Åtkomsten ska omprövas om browser/CORS, kapacitet eller andra krav ger belagda hinder.
+
+**Befintligt underlag:** [WFS-kontrollerna i DATA_SOURCES](DATA_SOURCES.md#scb-wfs-befolkningsrutor) dokumenterar schemakontroll och Node-prov den 28 oktober: fyra sidor med 5+5+5+2 objekt, 17 unika ID:n, referenstid och EPSG:3006, samt tomma svar och felaktigt lager. Observerade CORS-huvuden är inte ett nytt browserprov. Små verkliga SCB-fixturer och SCB:s dokumenterade CC0-stöd finns. Inga tester upprepades för detta beslut och ingen nationell rutdatabas laddades ned.
+
+### Öppna villkor inför beroende implementation
+
+- **Browser/CORS och drift:** direkt åtkomst från verklig browser och produktionsorigin är inte fullständigt verifierad för WFS genom Node-proven. Produktionsfunktionalitet, andra browsers och tillgänglighet får inte beskrivas som bekräftade. Inget tillgänglighetslöfte har belagts.
+- **Kvoter och cache:** numerisk WFS-anropskvot, hård servermaxgräns och exakt cachetid är obekräftade. `CountDefault=1000000` i WFS 2.0.0 är inte en kapacitetsgaranti eller automatiskt maxgräns för WFS 1.1.0. TAB628:s PxWeb-kvoter får inte överföras till WFS. Uttag ska begränsas geografiskt; storleks- och återhämtningsstrategi behöver bestämmas inför implementation.
+- **Paginering och fullständighet:** det lyckade 17-objektsprovet gäller ett enda utsnitt. Stabila ID:n över uppdateringar, avduplicering och oföränderlighet mellan sidor är inte garanterade. WFS 2.0.0 annonserar `PagingIsTransactionSafe=FALSE`. Ofullständigt uttag får inte presenteras som fullständig täckning eller total.
+- **Nullable-fält och värden:** schemat tillåter null eller frånvaro för flera ID-, referenstids-, befolknings- och geometrifält. Tolkning per variabel ska fastställas före normalisering; noll, saknat och sekretess får inte blandas. Produkten omfattar befolkade rutor; noll får inte automatiskt beskrivas som obebodd yta. Köns-/åldersdelar får inte förutsättas summera till publicerad total.
+- **XML-fel:** ett verifierat felprov gav HTTP 200 med XML `ows:ExceptionReport`. Innehållstyp och felkropp måste kontrolleras; status 200 betyder inte ensamt giltiga data. Provet fastställer inte formatet för alla felvarianter eller när JSON uttryckligen begärs.
+- **Koordinater:** källagrets CRS är **EPSG:3006**. Korrekt koordinattransformation och validering till **GeoJSON/WGS84 med longitud före latitud** krävs före webbvisning. Att byta CRS-etikett räcker inte. Transformationen är inte implementerad eller testad genom beslutet.
+- **Geografisk tolkning:** rutvärdet gäller hela rutan, inte den del som överlappar ett godtyckligt ritat område. Helt inkluderade rutor och gränsrutor ska hållas isär enligt [ANALYSIS_METHODS](ANALYSIS_METHODS.md). Ingen areaviktad fördelning införs och inga exakta befolkningstal för ett ritat område utlovas. Röjandeskyddets summeringsbegränsningar ska följa analysresultatet.
+
+**Avgränsning och nästa beslut:** källvalet och den inledande åtkomstinriktningen är fastställda för P2; ovanstående villkor kvarstår inför beroende uttags-/normaliserings-/analysarbete. Lookup-CRS, kommungränsernas årgång och deras kompatibilitet med SCB-statistik avgörs inte här. Befintliga P3-funktioner ändras inte. Ingen implementation, push, merge eller publicering är beställd genom beslutet, och P2 markeras inte som helt avslutat här.
 
 ## Mall för nya arkitekturbeslut
 

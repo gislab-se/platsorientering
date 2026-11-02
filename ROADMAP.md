@@ -2,7 +2,7 @@
 
 Alla produktionsuppgifter ägs av Gabriela. Henrik ger kravstöd och återkoppling. Arbetet ska ge både lärande och en användbar geografisk tittfunktion. Rubrikerna P1–P9 används även för GitHub-issues; aktuell detaljstatus följs där.
 
-**Färdigt:** P1-implementationen är sammanslagen till `main` genom PR #10. **Pågår:** P2 på grenen `feat/2-datakallor-datakontrakt`; tre commits finns på GitHub och ytterligare lokala ändringar är inte committade. **Planerat:** P3–P8. P9 är en senare utredning. Ingen projektversion är publicerad.
+**Aktuellt 2 november 2026:** P1 är sammanslaget genom PR #10. P2:s slutkontroller är godkända: 65/65 tester, typkontrakt, TypeScript och produktionsbygge. Kompletteringarna är pushade till `feat/2-slutfor-datakallor` och ingår i PR #14; merge inväntar Gabrielas godkännande. Delar av P3 (klick/kodval och polygonvisning) ingår redan i PR #12 på `main` och den tidigare publicerade kartan; P3 är inte avslutat. P4–P8 är kommande arbete och P9 en senare utredning. Aktuell funktionsstatus finns i README.
 
 Första funktionsmål: P1–P4 ger en kommunöversikt med befolkning. Regioner och sammansatta områden införs därefter i avgränsade steg. En stabil, granskad förhandsversion ska först publiceras via `yakimovskagabriela-ctrl`; exakt tidpunkt, repo och metod beslutas före publicering. Slutpublicering på gislab.se ingår i P8.
 
@@ -23,6 +23,24 @@ Klart när:
 - CI kör typkontroll och bygge vid pull requests.
 
 ## P2 – Verifiera datakällor och skriv datakontrakt
+
+### Avslutsbedömning 2 november 2026
+
+**Slutkontroller godkända och godkänd push genomförd; PR #14 inväntar merge-godkännande.** `npm.cmd test` gav 65/65 godkända runtime-tester samt godkända typkontrakt. `npm.cmd run build` passerade med TypeScript-kontroll och produktionsbygge. Arbetskopian var ren efter kontrollerna och GitHub-grenens commit verifierades mot lokal HEAD efter push. Följande bedömning gäller godkänt, avgränsat källval och befintliga P2-kontrakt, inte färdig SCB-integration. Den ersätter de historiska statusformuleringarna nedan utan att göra obekräftad metadata till fakta.
+
+| Ursprungligt P2-kriterium | Bedömning och belägg | Kvarstående avgränsning |
+| --- | --- | --- |
+| Källregister och metadata | Uppfyllt inom dokumenterad avgränsning: endpoints, urval, referensdagar, CRS-underlag, licenser och kontroller finns i DATA_SOURCES. | Lookup/geocode-CRS, gränsårgång och vissa WFS-gränser är uttryckligen okända; ingen geografisk kompatibilitet utlovas. |
+| Lokala browserprov och åtkomstgränser | Uppfyllt med begränsningar: TAB628 har nytt Edge-prov 1 november; WFS ett äldre redovisat localhost-browserprov och Node-paginering 28 oktober. | WFS-browserprovets exakta datum/original-URL saknas. Produktionsåtkomst, full kapacitet och alla felvägar är inte verifierade. |
+| Provsvar, interna typer, tomt/fel/begränsat | Uppfyllt för P2: fem kontrakt, runtime-validering, fyra syntetiska och tre verkliga SCB-fixturer samt senast 65 godkända runtime-tester. | Färdiga SCB-adaptrar och rumslig analys hör till senare implementation, inte nya P2-krav. |
+| Återpublicering separat bedömd | Uppfyllt för aktuell användning: SCB:s CC0 och kart-api:s visnings-/distributionsvillkor är åtskilda. | Inga verkliga kart-api-fixturer får införas utan klarlagd rätt för sådan lagring/publicering. |
+| Käll-/serverbeslut dokumenterat | Uppfyllt inom godkänd omfattning: kart-api och direkt TAB628; SCB WFS valt med direktåtkomst som inledande riktning. Se DECISIONS. | Omprövning vid belagda hinder; WFS är inte verifierad produktionsfunktionalitet. |
+
+**Överlämning till P3–P6:** leverantörsbesked behövs före beroende användning av obekräftat koordinatsystem eller geografisk årgångsmatchning. Cache-/kvot-/timeoutstrategi, WFS-browser-/produktionsåtkomst, ID-stabilitet, nullable-värden, XML-fel och korrekt EPSG:3006 → WGS84-transformation ska hanteras inför respektive implementation. Hela gränsrutor får inte bli exakt befolkning för ett ritat område. Ingen sådan implementation eller dispens från GIS-reglerna godkänns genom P2-avslutet.
+
+**Kvar för avslut:** granska PR #14 och invänta Gabrielas uttryckliga merge-godkännande. Sluttester och push är redan genomförda; lyckade tester och live-/browserprov upprepas inte för denna statusrättelse. Ingen merge, publicering, ändring av GitHub-issue eller backup genomförs av statusrättelsen.
+
+### Historisk status 28 oktober 2026
 
 Status 28 oktober 2026: **delvis uppfyllt, inte avslutat**. De fem klartkriterierna nedan motsvarar Issue #2 enligt kravtexten från Gabriela. Fem interna kontrakt, runtime-validering, fyra syntetiska och tre verkliga SCB-fixturer finns. Senaste typkontrakt, 63 runtime-tester och typkontroll passerade. kart-api-adaptrarna har liveprovats; SCB WFS-paginering har återtestats med 17 unika objekt samt tom-/felprov. Källor och rättighetsbedömning finns i [DATA_SOURCES](docs/DATA_SOURCES.md).
 

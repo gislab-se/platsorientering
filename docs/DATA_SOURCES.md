@@ -1,5 +1,24 @@
 # Datakällor och API-utvärdering
 
+## Aktuell P2-sammanställning, 2 november 2026
+
+Källunderlaget är redo för P2:s slutkontroller och avslutsgodkännande, med nedanstående avgränsningar. Aktuell bedömning av alla fem kriterier finns i [ROADMAP](../ROADMAP.md#avslutsbedömning-2-november-2026). Äldre daterade observationer och kandidatbedömningar bevaras som historik; de senaste avgränsade besluten i [DECISIONS](DECISIONS.md) gäller framför äldre formuleringar om att källval återstår.
+
+**Godkänt:** kart-api för kommunval och visningsgeometri; SCB TAB628 för folkmängd, landareal och täthet 2025 via direkt browseråtkomst; SCB WFS `stat:befolkning_1km_2025` för 1 km-befolkningsrutor med direkt browseråtkomst utan separat server som inledande riktning. SCB:s förenklade kommungränser är en undersökt alternativkälla, inte vald leverans till appen.
+
+| Belägg | Vad som faktiskt verifierats | Begränsning |
+| --- | --- | --- |
+| TAB628, browser 1 november | Verklig Edge 156 från localhost: metadata och nio värden för tre kommuner, HTTP 200, `type=cors`, ingen nyckel. | Inte produktionsorigin eller alla browsers. |
+| TAB628, Node 2 november | 290 unika fyrsiffriga kommunkoder och 870 numeriska värden för 2025; inga observerade saknade värden/statusfält i uttaget. | Inte ett browserprov eller geografisk join; CKM kvarstår. |
+| WFS, äldre redovisat browserprov | Localhost, HTTP 200, `type=cors`, tre features och CORS-header för angiven origin. | Exakt datum och fullständig ursprunglig URL saknas; tidigare redovisning, inte en ny oberoende omkörning. |
+| WFS, Node 28 oktober | Paginering 5+5+5+2, 17 unika objekt, schema/CRS/referenstid samt tom-/felprov. | Node genomdriver inte browser-CORS; provet bevisar inte nationell fullständighet eller stabilitet under uppdatering. |
+
+**Implementerat respektive förberett:** kart-api-uppslag och polygonvisning är inkopplade. Platsökningsadaptern är inte kopplad till UI. Kontrakt, validering och testfixturer finns; SCB-statistik/rutlager och analys är inte implementerade i appen. Senast dokumenterade ordinarie kontroll 30 oktober gav 65 godkända runtime-tester, typkontroll och bygge. Inga sådana tester eller nya nätverksprov upprepades vid denna dokumentsynk.
+
+**Öppna villkor, inte nya P2-funktioner:** lookup/geocode-CRS, kart-api:s källdataversion/uppdatering och gränsårgång samt geografisk kompatibilitet med TAB628 är obekräftade. Detsamma gäller exakta kart-api-cache-/fixturrättigheter och vissa WFS-kvoter/cache-/ID-egenskaper. Dessa begränsar beroende användning i P3–P6: inga antagna CRS, årgångar, fullständighetsgarantier eller nya verkliga kart-api-fixturer. WFS kräver inför implementation verifierad browser-/produktionsåtkomst, säker paginering, null-/XML-felhantering och korrekt transformation EPSG:3006 → WGS84. Landareal får inte ersättas med polygonyta och gränsrutors hela population får inte beskrivas som exakt befolkning inom ritat område. Ingen generell driftgaranti eller färdig geografisk join har godkänts.
+
+## Historiskt underlag och daterade kontroller
+
 Sammanställt 22 oktober 2026 för P2, uppdaterat 28 oktober 2026 med projektets livekontroller av kart-api, senaste testkörning och en separat metadatakontroll enligt nedan. Äldre underlag är Gabrielas redovisade externa tester, utkastet ”P2 – Datakällor: verifierade fynd och öppna punkter” (2026-10-22) och dokumentationsgenomgångar i Codex-konversationen. Vid metadatakompletteringen hämtades officiell dokumentation, TAB628-metadata, WFS-metadata, en befolkningsruta och kommungränsarkivet på nytt. Inga kodändringar eller nya körningar av den ordinarie testsviten gjordes.
 
 - **Observation:** äldre redovisat externt testresultat, om inget annat anges. Avsnittet om livekontroll 28 oktober anger vilka prov AI faktiskt körde med projektets adaptrar.
@@ -59,11 +78,35 @@ Den länkade ISO-postens `dateStamp=2026-03-31T12:43:33.031Z` är metadatarevisi
 
 ### Avgränsning av återstående kart-api-metadata
 
+#### Kontroll av kommunuppslagets parametrar och CRS, 31 oktober 2026
+
+Dokumenterat 1 november 2026 utifrån kontrollen den 31 oktober. Följande officiella resurser hämtades då via Node utan autentisering och svarade med HTTP 200: [OpenAPI](https://api.kart-api.se/openapi.json), [kommunguiden](https://kart-api.se/guider/vilken-kommun/), [API-referensen](https://kart-api.se/docs/referens/) och [Kom igång](https://kart-api.se/docs/). Inga nya liveuppslag eller rådatafiler skapades i kontrollen.
+
+**Bekräftat i dokumentationen:** OpenAPI anger serverbasen `/v1` och `GET /kommun/lookup` med två obligatoriska, namngivna query-parametrar: `lat` (tal, −90 till 90) och `lon` (tal, −180 till 180). Kommunguiden och Kom igång visar `lat=58.705&lon=15.77` för Finspång. Parametrarna används alltså som latitud respektive longitud. Anropet är inte en positionsarray: ordningen mellan de namngivna parametrarna i URL:en ska inte förväxlas med axelordningen i ett CRS eller koordinatordningen i GeoJSON.
+
+**Bekräftat i befintlig kod:** `src/main.ts` skickar Leaflets `event.latlng.lat` till `lat` och `event.latlng.lng` till `lon`. `src/providers/municipalityLookup.ts` bygger motsvarande namngivna query-parametrar och validerar intervallen ovan. Ingen omprojektion görs. Detta verifierar kodens parametermappning, inte leverantörens geodetiska datum.
+
+**Fortsatt öppet:** inget uttryckligt CRS, geodetiskt datum eller EPSG-nummer för lookup-indata kunde beläggas i de granskade officiella källorna. EPSG:4326 är därför **inte bekräftat för `/v1/kommun/lookup`**. OpenAPI:s uttryckliga WGS84-beskrivning gäller `KommunFeature.geometry` från `/v1/kommun/{kod}` och får inte överföras till lookup. Parameternamn, talintervall och fungerande exempel räcker inte som CRS-bevis. För att stänga frågan behövs ett uttryckligt officiellt besked om lookup-indatats referenssystem/datum och kopplingen mellan dess axlar och parametrarna `lat`/`lon`. Inget leverantörsmeddelande har skickats.
+
 OpenAPI:s explicita WGS84-beskrivning för `KommunFeature.geometry` överförs inte till andra endpoints. De granskade beskrivningarna av geocode/lookup anger fältnamn och talvärden men fastställer inte uttryckligen deras geodetiska datum. Kommunguiden bekräftar Lantmäteriet som gränskälla; årgång och importdatum saknas fortfarande. Guidens uppgift om 422 utanför Sverige-fönstret avviker dessutom från det tidigare observerade 404-svaret för `(0,0)`; observationen behålls.
 
 Sidan Om talen redovisar räkning av ortnamn och kommunpolygoner den 2026-09-11. Detta är ett mätdatum för antal i leverantörens databas, inte källdatats referenstid, gränsårgång eller senaste import. För att stänga metadatafrågorna behövs ytterligare officiellt belägg eller leverantörsbesked via den publicerade kontakten `api@autonomousmedia.io`; inget meddelande har skickats.
 
 ## kart-api: dokumentation och gemensamma villkor
+
+### Kontroll av kommunpolygonernas årgång och TAB628-koppling, 2 november 2026
+
+**Officiella källor:** [OpenAPI](https://api.kart-api.se/openapi.json), [kommunguiden](https://kart-api.se/guider/vilken-kommun/), [Om talen](https://kart-api.se/om-talen/), [API-referensen](https://kart-api.se/docs/referens/) och [attribution](https://kart-api.se/docs/attribution/) hämtades via Node med HTTP 200 detta datum. Kommunguiden och attributionen anger Lantmäteriets administrativa indelning som källa. OpenAPI beskriver `/v1/kommun/{kod}` som kommunens gräns och `KommunFeature.geometry` som GeoJSON MultiPolygon i WGS84, förenklad för visning. Schemat för `KommunEgenskaper` anger `kommunkod`, `kommunnamn` och `lanskod`, men inget giltighetsdatum eller indelningsår. Ingen uttrycklig gränsårgång, källdataversion eller importtid kunde beläggas i de granskade källorna.
+
+**Versioner och datum som inte är gränsårgång:** OpenAPI:s `info.version=1.0.0` och sökvägen `/v1` gäller API-kontraktet. Om talen redovisar 290 kommunpolygoner räknade den **2026-09-11**; det är datum för en antalsmätning, inte ett besked om polygonernas giltighet. HTTP-huvudet `Date` och denna kontrolls datum är inte heller referenstid för geografin. Ingen av uppgifterna används som belägg för gränser från 2025 eller 2026.
+
+**Begränsat verkligt prov:** `GET https://api.kart-api.se/v1/kommun/0380` gav HTTP 200 med toppfälten `type`, `properties`, `geometry` och `attribution`. Egenskaperna var `kommunkod="0380"`, `kommunnamn="Uppsala"`, `lanskod="03"`; geometritypen var MultiPolygon och attributionen Lantmäteriet/Administrativ indelning/CC BY 4.0. Varken toppnivå eller egenskaper innehöll årgång/version/giltighetsdatum; `Last-Modified` och `ETag` saknades också. Ett enda svar bevisar inte alla kommuners innehåll, och HTTP-cachemetadata skulle inte i sig bevisa gränsårgång. Svaret lästes i minnet; inga kart-api-rådata eller fixturer sparades.
+
+**Befintlig kod:** `src/providers/municipalityBoundary.ts` hämtar polygonen via fyrsiffrig kommunkod och validerar kod, attribution och WGS84-geometri. Den hämtar inte en uttrycklig årsvariant och ger inget verifierat giltighetsdatum. `src/main.ts` visar därför redan `Gränsårgång: okänd` och anger att geometrin är förenklad för visning, inte för analys. Kod och visning har inte ändrats i denna kontroll.
+
+**Kombination med SCB TAB628 för 2025:** [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv) hämtades på nytt med HTTP 200; 2025 finns som år och `ContentsCode.extension.refperiod` bekräftar folkmängd **2025-12-31**, landareal **2026-01-01** och täthet som relaterar dessa mått. Samma fyrsiffriga kommunkod möjliggör en teknisk koppling, men bevisar inte samma geografiska indelning. **Årgångsmässig kompatibilitet mellan kart-api-polygonerna och TAB628 2025 är inte verifierad.** Ingen faktisk gränsskillnad har heller fastställts: okänd årgång betyder osäkerhet, inte en konstaterad avvikelse. Polygonerna får inte beskrivas som 2025 års gränser, och statistiken får inte framställas som verifierat beräknad för exakt dessa polygoner. SCB:s publicerade landareal ska inte ersättas med polygonens yta.
+
+**Kvar innan en geografiskt verifierad join:** behövs ett officiellt besked om kart-api:s gränsprodukt, version/indelningsdatum, import/uppdatering och om samma indelning används i lookup och polygonleveransen. Därefter behöver uppgifterna jämföras med den indelning som gäller TAB628:s valda referenstider, inklusive eventuella ändringar. Ingen sådan jämförelse eller acceptans av okänd årgång har gjorts här. Frågan lämnas öppen utan nytt käll- eller arkitekturbeslut; inget meddelande har skickats till leverantören.
 
 Gabriela kontrollerade [OpenAPI](https://api.kart-api.se/openapi.json), [villkor](https://kart-api.se/villkor/) och [attribution](https://kart-api.se/docs/attribution/) **22 oktober 2026**. Dokumentation hade även granskats 15 oktober enligt den tidigare projekttexten. Den 28 oktober hämtade AI OpenAPI med Node (`HTTP 200`, `info.version=1.0.0`) och kontrollerade parametrar och svarsscheman för geocode/kommunuppslag. `GeoTraff.tier` och `kalla` är strängar; valfria fält och `spridning.entydig=null` stöds av schemat. Ingen lokal kontraktskopia finns. Villkorssidorna lästes inte om i den senaste testomgången.
 
@@ -159,6 +202,52 @@ Bedömning av kvarstående osäkerheter för kart-api:
 | Luckor och sökbegränsningar | Kända begränsningar dokumenteras i P2; ingen fullständig täckning utlovas. Nytt användningskrav som kräver alla träffar kan påverka senare källval, eftersom paginering inte är dokumenterad. |
 
 ## SCB TAB628: kommunstatistik
+
+### Åtkomstkontroll 1 november 2026
+
+**Dokumenterat:** SCB:s [API-översikt](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [PxWebApi v2](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/pxwebapi-v2/), lästa detta datum, beskriver GET-uttag ur Statistikdatabasen. Översikten anger högst 150 000 dataceller per uttag och 30 anrop per 10 sekunder och IP-adress. SCB länkar till [PxTools användarhandledning](https://www.pxtools.net/PxWebApi/documentation/user-guide/) och [API-specifikationen](https://github.com/PxTools/PxApiSpecs/blob/master/PxAPI-2.yml). De granskade sidorna anger inget krav på API-nyckel för dessa offentliga uttag. Detta är inte ett uttryckligt löfte om framtida nyckelfri åtkomst eller en generell CORS-garanti för alla endpoints.
+
+**Praktiskt verifierat:** metadata och ett begränsat datauttag hämtades med Node `fetch`, utan API-nyckel, Authorization-header eller tillförda cookies. Anropen skickade `Origin: http://127.0.0.1:5173`; kontrollomgången med assertions använde också `credentials: 'omit'`. Inga sparade GitHub-token eller privata inloggningsuppgifter användes. Exakta GET-adresser:
+
+```text
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data?lang=sv&outputFormat=json-stat2&valueCodes%5BRegion%5D=0380%2C1280%2C2584&valueCodes%5BKon%5D=1%2B2&valueCodes%5BContentsCode%5D=BE0101U1%2CBE0101U2%2CBE0101U3&valueCodes%5BTid%5D=2025
+```
+
+Båda gav HTTP 200, JSON och `Access-Control-Allow-Origin: *`. `Access-Control-Allow-Credentials` och `WWW-Authenticate` saknades. De testade offentliga GET-anropen krävde alltså ingen nyckel eller autentisering. CORS-headern tillåter läsning från annan origin vid anrop utan credentials; inget serverbehov på grund av autentisering eller CORS framkom i dessa prov. Node genomdriver dock inte webbläsarens CORS-regler. Detta är en HTTP-/headerkontroll, inte ett nytt webbläsartest. Tidigare redovisade browserprov nedan hålls åtskilda från denna kontroll.
+
+Metadata innehöll 290 fyrsiffriga kommunkoder och år till och med 2025. Det verkliga urvalet omfattade Uppsala `0380`, Malmö `1280` och Kiruna `2584`, totalt kön (`1+2`), år 2025: JSON-stat2 med dimensionerna `Region, Kon, ContentsCode, Tid`, storlekarna `[3,1,3,1]` och nio numeriska värden. I kommunordningen enligt dimensionsindex var värdena (täthet, folkmängd, landareal): Uppsala `(113.8, 249726, 2193.84)`, Malmö `(2336.8, 367924, 157.45)`, Kiruna `(1.2, 22402, 19307)`. Detta verifierar tre kommuners värden, inte ett nytt fullständigt uttag för alla 290.
+
+De behövda måtten bekräftades: `BE0101U1` invånare/km², `BE0101U2` folkmängd i personer och `BE0101U3` **landareal**, inte total kommunpolygonyta, i km². Metadatafältet `ContentsCode.extension.refperiod` anger att folkmängden gäller 31 december och landarealen 1 januari följande år. För statistikåret 2025 är referensdagarna därför **2025-12-31 respektive 2026-01-01**. Tätheten relaterar dessa mått. Senaste tillgängliga år var 2025 vid kontrollen; `updated=2026-02-24T07:00:00Z` är tabellens uppdateringsuppgift, inte hämtningsdatum. CKM-begränsningarna som beskrivs nedan kvarstår.
+
+**Kontroller och avgränsning:** assertions för båda HTTP-statusarna och CORS-headern, dimensionsordning/-storlek, tre förväntade kommunkoder, totalt kön, nio ändliga numeriska värden och tillgängligt år 2025 passerade. Svaren lästes i minnet; inga nya rådatafiler, fixturer eller applikationsändringar skapades. Ett nytt verkligt browserprov, produktionsdomänens eventuella CSP, fel-/kvotsvar och långsiktig tillgänglighet är inte verifierade här. Källval, förvaltningsbeslut och matchning av gränsårgång avgörs inte av denna åtkomstkontroll. Äldre formuleringar nedan om öppet nyckelbehov kompletteras av denna daterade observation för just de testade anropen.
+
+### Verkligt webbläsarprov från localhost, 1 november 2026
+
+Efter Node-kontrollen ovan gjordes ett separat prov i **Microsoft Edge 156, headless**, med normal webbsäkerhet och en ny isolerad testprofil. Provet kördes från `http://127.0.0.1:53896`; resultatet registrerades `2026-11-01T22:52:27.391Z` (23:52 svensk tid). En tillfällig lokal HTTP-server visade en tom testsida utan appens kartkod. Browserstyrningen skedde via lokal DevTools-anslutning; SCB-anropen kördes som sidans egen JavaScript med `fetch(..., {mode: 'cors', credentials: 'omit'})`, inte med Node-fetch. Inga API-nycklar, Authorization-header, sparade token eller ordinarie användarprofiler användes. CORS-säkerheten stängdes inte av.
+
+**Praktiskt bekräftat i webbläsaren:** exakt samma metadata- och dataadresser som i åtkomstkontrollen ovan hämtades direkt från SCB. Båda gav HTTP 200, läsbart JSON, `Response.type = 'cors'` och `Access-Control-Allow-Origin: *`. Inga nätverksfel eller felposter i browserns logg registrerades. Detta bekräftar direkt browseråtkomst utan autentisering för dessa två anrop från den angivna localhost-origin, utöver de tidigare kontrollerade HTTP-huvudena.
+
+Browserns assertions verifierade kommunerna Uppsala `0380`, Malmö `1280` och Kiruna `2584`, totalt kön, `Tid=2025`, dimensionsordningen `Region, Kon, ContentsCode, Tid`, storlekarna `[3,1,3,1]` och nio ändliga numeriska värden. Värdena överensstämde med Node-provet ovan. Måtten var befolkningstäthet `BE0101U1`, folkmängd `BE0101U2` och landareal `BE0101U3`. Metadatafältet `refperiod` kontrollerades för folkmängd den 31 december respektive landareal den 1 januari följande år: **2025-12-31 och 2026-01-01** för det valda statistikåret. Senaste tillgängliga år i metadata var 2025. Detta är inte en kontroll av all kommunstatistik, kommungeometri eller en färdig appintegration.
+
+**Avslutning och avgränsning:** den lyckade körningen avslutades med exitkod 0. Den lokala servern stängdes och inga identifierade test-Edge-processer återstod vid skriptets efterkontroll, som skiljer testprocesser genom isolerad profil samt process-ID/starttid och identifierade barnprocesser. Den tillfälliga skriptfilen och profilerna ligger ignorerade under `.local/` och ingår inte i commit; profildata behålls lokalt. Appkod och P3-funktioner ändrades inte. Ett tidigare försök samma dag klarade SCB-kontrollerna men fick fel vid processavslutning; det räknas inte som en helt lyckad testkörning. Efter rättning av det lokala granskningsverktygets listhantering passerade den här omkörningen även avslutningskontrollen.
+
+**Fortsatt öppet:** produktionsdomänens eventuella CSP och browserbeteende, andra browsers, fel-/kvotsvar, långsiktig tillgänglighet samt slutligt käll-/åtkomstbeslut. Provet är ett tekniskt belägg för den testade åtkomsten, inte ett generellt driftlöfte eller beslut om all framtida serverhantering. Officiella dokumentations- och metadataadresser finns i föregående avsnitt; de praktiska slutsatserna här bygger på det nya browserprovet.
+
+### Fullständigt kommunurval för 2025, kontrollerat 2 november 2026
+
+Ett nytt read-only-prov kördes med Node `fetch` utan autentisering och med `credentials: 'omit'`. Metadata och data hämtades med GET och gav båda HTTP 200. Kontrolltidpunkten var `2026-11-01T23:09:56.812Z`, alltså **2 november 2026 kl. 00:09 svensk tid**. Svaren behandlades i minnet; inga rådatafiler sparades. Exakta API-adresser:
+
+```text
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv
+https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data?lang=sv&outputFormat=json-stat2&codelist%5BRegion%5D=vs_RegionKommun07EjAggr&valueCodes%5BRegion%5D=*&valueCodes%5BKon%5D=1%2B2&valueCodes%5BContentsCode%5D=BE0101U1%2CBE0101U2%2CBE0101U3&valueCodes%5BTid%5D=2025
+```
+
+**Observerat och kontrollerat:** kommunurvalet gav **290 unika fyrsiffriga kommunkoder**, utan dubbletter; 90 koder hade inledande nolla. Dimensionsindexen var unika och sammanhängande 0–289. JSON-stat2 hade `id=[Region,Kon,ContentsCode,Tid]`, `size=[290,1,3,1]`, `Kon="1+2"` (totalt), `Tid="2025"` och måtten `BE0101U1` (invånare/km²), `BE0101U2` (folkmängd, personer) och `BE0101U3` (landareal, km²). Dimensioner, index och urval verifierades med assertions. Svaret innehöll **870 ändliga numeriska värden**: 290 kommuner × 3 mått. Genomgången gav 0 nullvärden, 0 saknade värdepositioner, 0 icke-numeriska värden och 0 nollvärden. Inga fält med `status` i fältnamnet hittades vid genomgång av svarstrukturen. Resultaten avser just detta uttag, inte alla möjliga år, urval eller leverantörens framtida statusrepresentationer.
+
+**År och referensdagar:** uttaget och metadata anger att folkmängden gäller **2025-12-31**, landarealen **2026-01-01** och tätheten relaterar dessa mått. Måtten kopplades till kommuner via JSON-stat-dimensionernas index, inte JavaScripts nyckelordning. Provvärdena för Uppsala, Malmö och Kiruna överensstämde med det tidigare trekommunuttaget. Tabellens `updated=2026-02-24T07:00:00Z` är uppdateringsmetadata, inte hämtningsdatum eller gemensamt referensdatum för måtten. Landareal är inte total kommunpolygonyta.
+
+**Statistisk osäkerhet och geografisk begränsning:** SCB:s medföljande noter anger CKM-röjandeskydd från referensåret 2025, med liten kontrollerad slumpmässig osäkerhet. Summerade delvärden behöver därför inte motsvara publicerade totaler; summering kan öka osäkerheten. Avsaknad av null- eller statusmarkeringar betyder **inte** att värdena är exakta eller saknar röjandeskydd. Kontrollen verifierar struktur och tillgängliga värden, inte varje värdes statistiska riktighet. **Kompatibiliteten med kart-api:s kommungränser är fortfarande inte bekräftad**, eftersom gränsernas giltighetsdatum/indelningsår saknas. Matchande kommunkoder bevisar inte samma geografiska indelning. Detta Node-prov är inte ett nytt browserprov eller en geografisk join och ändrar inte käll-/arkitekturbeslut.
 
 ### Observationer
 
@@ -387,6 +476,10 @@ Bedömning: SCB:s förenklade kommungränser rekommenderas som **kandidat för v
 Bakgrundskarta väljs separat med kontroll av visningsvillkor, attribution och användningsvolym. Ett öppet kartbibliotek ger inte obegränsad rätt till någon annans kartserver. P1:s befintliga beslut ändras inte av detta dokumentationssteg.
 
 ## Återstående P2-dokumentation och beslut
+
+### Historisk P2-bedömning, 28 oktober 2026
+
+Detta avsnitt bevarar dåtidens kvarstående arbete. Senare kontroller och käll-/åtkomstbeslut 1–2 november ersätter dess äldre förslagsstatus; aktuell avslutsbedömning finns högst upp. Punkter om färdiga adaptrar, omprojektion och produktionshantering är uppföljning inför implementation, inte ytterligare P2-funktioner.
 
 **Bedömning 28 oktober 2026: P2 är delvis uppfyllt och kan inte markeras klart utifrån underlaget.** Tabellen jämför med de fem klartkriterier som Gabriela tillhandahållit från [Issue #2](https://github.com/gislab-se/platsorientering/issues/2); de motsvarar ROADMAP. Direkt GitHub-åtkomst saknas men kravtexten är nu tillgänglig. Avsaknad av gränssnittskoppling för adaptrarna är kommande funktionsarbete, inte ett extra P2-krav.
 
