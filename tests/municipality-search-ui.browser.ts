@@ -32,6 +32,7 @@ try {
     const button = buttons().find(b => b.textContent === 'Upplands Väsby (0114)');
     assert(Boolean(button), 'Saknad träff'); button!.click();
     assert(selected.at(-1) === '0114', 'Fel kod från flervalsresultat');
+    assert(input.value === 'upp', 'Valet får inte skriva över sökfrågan');
   });
   test('svenska namn visas korrekt', () => {
     for (const [query, expected] of [['LULEÅ', 'Luleå (2580)'], ['ÄLMHULT', 'Älmhult (0765)'], ['ÖREBRO', 'Örebro (1880)']]) {

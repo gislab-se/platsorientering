@@ -33,7 +33,6 @@ export function mountMunicipalitySearch({ form, input, results, status, onSelect
       button.type = 'button';
       button.textContent = `${municipality.name} (${municipality.code})`;
       button.addEventListener('click', () => {
-        input.value = municipality.code;
         input.focus();
         clearResults();
         onSelect(municipality.code);
