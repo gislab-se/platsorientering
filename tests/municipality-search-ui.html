@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="sv">
+  <meta charset="utf-8" />
+  <title>Browserprov för kommunpanelen</title>
+  <body>
+    <h1>Kommunpanelens browserprov</h1>
+    <form id="form">
+      <label for="query">Kommunnamn eller fyrsiffrig kod</label>
+      <input id="query" type="search" />
+      <button type="submit">Sök kommun</button>
+    </form>
+    <p id="status" role="status"></p>
+    <ul id="results" aria-label="Sökresultat"></ul>
+    <pre id="test-report">Kör tester…</pre>
+    <script type="module" src="./municipality-search-ui.browser.ts"></script>
+  </body>
+</html>

@@ -60,6 +60,8 @@ Klart när:
 
 ## P3 – Välj kommun och visa rätt område
 
+P3.1b, lokalt 2 november 2026: grenen `feat/3-1b-kommunval-sokning` bygger på P3.1a-commit `174df1b`. Panelen kopplar namn-/kodsökning till befintlig `selectMunicipality()` genom vald fyrsiffrig kod; kartklick använder fortsatt samma valflöde. SCB-registret och sökalgoritmen är oförändrade. 75 runtime-tester, sex separata browser-UI-tester inklusive alla 290 kodval, verklig Tab/Enter/Space-styrning samt TypeScript/bygge passerade. Liveval av Uppsala och Upplands Väsby ritade gränsen. Gabrielas manuella kontroll återstår före commit/push; P3 är inte slutligt avslutat och gränsårgång/lookup-CRS förblir öppna.
+
 Lokalt påbörjat 30 oktober 2026 på `feat/3-kommunval-panel`: panel i tre steg och kommunval med kartklick eller kod är implementerade. Bygge och 65 tester passerar. Webbläsarverifiering och namnval återstår; P3 är inte avslutat. Befolkningsdata och analys är fortsatt planerade. GitHub Issue #3 kunde inte läsas från miljön; uppgiften följer användarens avgränsning och kriterierna nedan. Grenen bygger på aktuell P2-arbetskopia med befintliga lokala ändringar bevarade; dessa behöver hållas åtskilda vid senare commit/PR.
 
 Ansvarig: Gabriela. Beroenden: P2.

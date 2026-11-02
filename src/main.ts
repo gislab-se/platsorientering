@@ -5,6 +5,7 @@ import { geoJSON } from 'leaflet';
 import type { GeoJSON } from 'leaflet';
 import { lookupMunicipality } from './providers/municipalityLookup';
 import { fetchMunicipalityBoundary } from './providers/municipalityBoundary';
+import { mountMunicipalitySearch } from './ui/municipalitySearch';
 
 const mapElement = document.querySelector<HTMLElement>('#map');
 const statusElement = document.querySelector<HTMLElement>('#map-status');
@@ -21,12 +22,20 @@ const selectionStatus = document.querySelector<HTMLElement>('#selection-status')
 const source = document.querySelector<HTMLElement>('#boundary-source')!;
 const analysis = document.querySelector<HTMLElement>('#analysis-status')!;
 const form = document.querySelector<HTMLFormElement>('#municipality-form')!;
-const codeInput = document.querySelector<HTMLInputElement>('#municipality-code')!;
+const codeInput = document.querySelector<HTMLInputElement>('#municipality-query')!;
+const municipalitySearch = mountMunicipalitySearch({
+  form,
+  input: codeInput,
+  results: document.querySelector<HTMLUListElement>('#municipality-results')!,
+  status: document.querySelector<HTMLElement>('#municipality-search-status')!,
+  onSelect: code => { void selectMunicipality(code); },
+});
 let boundary: GeoJSON | undefined;
 let requestId = 0;
 let controller: AbortController | undefined;
 
 async function selectMunicipality(selection: string | { lat: number; lon: number }) {
+  municipalitySearch.clearResults();
   const currentRequest = ++requestId;
   controller?.abort();
   controller = new AbortController();
@@ -73,8 +82,4 @@ async function selectMunicipality(selection: string | { lat: number; lon: number
 
 leafletMap.on('click', event => {
   void selectMunicipality({ lat: event.latlng.lat, lon: event.latlng.lng });
-});
-form.addEventListener('submit', event => {
-  event.preventDefault();
-  if (form.reportValidity()) void selectMunicipality(codeInput.value.trim());
 });
