@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseMunicipalityBoundary } from '../src/providers/municipalityBoundary.ts';
+import { fetchMunicipalityBoundary, parseMunicipalityBoundary } from '../src/providers/municipalityBoundary.ts';
 
 // Syntetiskt kontraktsprov, inga återpublicerade kart-api-data.
 const feature = () => ({
@@ -20,4 +20,35 @@ test('avvisar fel kommun, saknad attribution och ogiltig geometri', () => {
   assert.throws(() => parseMunicipalityBoundary(missing, '0380'));
   const invalid = feature(); invalid.geometry.coordinates[0][0][0] = [500000, 6500000];
   assert.throws(() => parseMunicipalityBoundary(invalid, '0380'));
+});
+
+test('nätverksfel vid gränshämtning ger ett begripligt svenskt meddelande', async t => {
+  const signal = new AbortController().signal;
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    assert.equal(url, 'https://api.kart-api.se/v1/kommun/0380');
+    assert.equal(options.signal, signal);
+    throw new TypeError('Failed to fetch');
+  });
+  await assert.rejects(fetchMunicipalityBoundary('0380', signal), {
+    message: 'Kommungränsen kunde inte hämtas. Kontrollera internetanslutningen och försök igen.',
+  });
+});
+
+test('ogiltig JSON vid gränshämtning ger ett begripligt svenskt meddelande', async t => {
+  t.mock.method(globalThis, 'fetch', async () => new Response('{', { status: 200 }));
+  await assert.rejects(fetchMunicipalityBoundary('0380', new AbortController().signal), {
+    message: 'Svaret med kommungränsen kunde inte läsas. Försök igen senare.',
+  });
+});
+
+test('avbruten gränshämtning behåller avbrottsfelet vid både anrop och läsning', async t => {
+  for (const phase of ['fetch', 'json']) {
+    const controller = new AbortController();
+    const abortError = new DOMException('The operation was aborted.', 'AbortError');
+    const abort = () => { controller.abort(); throw abortError; };
+    t.mock.method(globalThis, 'fetch', phase === 'fetch' ? async () => abort()
+      : async () => ({ ok: true, status: 200, json: async () => abort() }));
+    await assert.rejects(fetchMunicipalityBoundary('0380', controller.signal), error => error === abortError);
+    t.mock.restoreAll();
+  }
 });

@@ -43,6 +43,8 @@ P3.2-kontroller: 12 nya offline-tester täcker tillståndsbyten, abort, sena pol
 
 Kommungränsen hämtas via kart-api och är förenklad för visning; gränsårgången är okänd. Ingen befolkningsstatistik eller analys utförs ännu. Slutkontrollerna för P2 den 2 november 2026 gav 65/65 godkända tester samt godkänd typkontroll och produktionsbygge; de upprepas inte för denna statusrättelse. Fullständig interaktiv browser- och mobilkontroll återstår. Kommunvalet är publicerat enligt den daterade statusen ovan. P2-kompletteringarna är pushade på P2-grenen och ingår i PR #14, men är ännu inte mergade eller publicerade.
 
+P3.3, 3 november 2026 på `feat/3-3-felmeddelanden`, från `5b21ea5`: nätverksfel vid kommungränshämtning visas som ”Kommungränsen kunde inte hämtas. Kontrollera internetanslutningen och försök igen.” Ogiltig JSON visas som ”Svaret med kommungränsen kunde inte läsas. Försök igen senare.” Avbrott, HTTP-fel och befintlig datavalidering behåller sin tidigare hantering. Tre nya offline-tester täcker nätverksfel, ogiltig JSON och bevarat avbrott under anrop/läsning; totalt 90/90 runtime-tester samt typkontroll/bygge passerade. Gabriela har godkänt den manuella localhost-kontrollen: Offline-läget gav rätt svenskt nätverksmeddelande; efter återgång till No throttling och nytt val av Uppsala visades kommungränsen korrekt. Ogiltig JSON har verifierats automatiskt, inte manuellt i browsern.
+
 ### Mål för kommande etapper
 
 - Täcker Sverige och fungerar för olika platser utan kodändringar.
