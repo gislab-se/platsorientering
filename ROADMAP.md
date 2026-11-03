@@ -2,7 +2,9 @@
 
 Alla produktionsuppgifter ägs av Gabriela. Henrik ger kravstöd och återkoppling. Arbetet ska ge både lärande och en användbar geografisk tittfunktion. Rubrikerna P1–P9 används även för GitHub-issues; aktuell detaljstatus följs där.
 
-**Aktuellt 2 november 2026:** P1 är sammanslaget genom PR #10. P2:s slutkontroller är godkända: 65/65 tester, typkontrakt, TypeScript och produktionsbygge. Kompletteringarna är pushade till `feat/2-slutfor-datakallor` och ingår i PR #14; merge inväntar Gabrielas godkännande. Delar av P3 (klick/kodval och polygonvisning) ingår redan i PR #12 på `main` och den tidigare publicerade kartan; P3 är inte avslutat. P4–P8 är kommande arbete och P9 en senare utredning. Aktuell funktionsstatus finns i README.
+**Aktuellt P3, 3 november 2026:** kommunvalets funktionalitet och avgränsade P3-kontroller är klara på `feat/3-3-felmeddelanden`. Gabriela har även godkänt Kiruna `2584` på localhost. P3 är redo för PR-granskning; tilläggen är ännu inte sammanslagna till `main` eller publicerade. Gränsårgång och lookup-CRS förblir obekräftade. Se P3-bedömningen nedan.
+
+**Historisk status 2 november 2026:** P1 är sammanslaget genom PR #10. P2:s slutkontroller är godkända: 65/65 tester, typkontrakt, TypeScript och produktionsbygge. Kompletteringarna är pushade till `feat/2-slutfor-datakallor` och ingår i PR #14; merge inväntar Gabrielas godkännande. Delar av P3 (klick/kodval och polygonvisning) ingår redan i PR #12 på `main` och den tidigare publicerade kartan; P3 är inte avslutat. P4–P8 är kommande arbete och P9 en senare utredning. Aktuell funktionsstatus finns i README.
 
 Första funktionsmål: P1–P4 ger en kommunöversikt med befolkning. Regioner och sammansatta områden införs därefter i avgränsade steg. En stabil, granskad förhandsversion ska först publiceras via `yakimovskagabriela-ctrl`; exakt tidpunkt, repo och metod beslutas före publicering. Slutpublicering på gislab.se ingår i P8.
 
@@ -59,6 +61,23 @@ Klart när:
 - Eventuellt serverbehov är avgjort i DECISIONS innan beroende funktioner byggs.
 
 ## P3 – Välj kommun och visa rätt område
+
+### Slutbedömning 3 november 2026
+
+**Funktionalitet och P3-kontroller klara; redo för PR-granskning.** P3.1a, P3.1b, P3.2 och P3.3 ingår i commitkedjan till `2382d4b`, pushad på `feat/3-3-felmeddelanden`. Ingen PR, merge eller publicering har genomförts genom dokumentationsuppdateringen.
+
+| Ursprungligt P3-kriterium | Bedömning och belägg |
+| --- | --- |
+| Kommunval i Uppsala, Malmö och Kiruna utan särskild kod | Uppfyllt: samma sök-/valflöde använder SCB-listans 290 namn/koder. Gabriela har godkänt localhost-flödet i Uppsala, Malmö och Kiruna `2584`; Kiruna var den sista manuella kontrollen. Register-/söktester och browser-UI-prov omfattar alla 290 kodval, men inte alla verkliga kommunpolygoner. |
+| Centrering och gemensamt apptillstånd | Uppfyllt: kartklick och vald sökträff använder samma `AreaOfInterest`-baserade tillstånd. Gräns, centrering och panel följer samma val; söktexten är separat. Tillståndstester och Gabrielas fyra manuella P3.2-kontroller är godkända. |
+| Ett gammalt nätverkssvar kan inte ersätta ett nyare val | Uppfyllt: `AbortController` och `requestId` bevaras. Automatiska tester täcker sena polygon-/uppslagssvar och sena fel; ett syntetiskt browserprov verifierade att ett sent svar inte ändrar vyn. |
+| Tydlig laddning, tomt resultat och fel; tangentbordsval | Uppfyllt: separata tillstånd/meddelanden och rensning av gammal gräns. Sex browser-UI-prov och verkligt Tab/Enter/Space-val är godkända. Gabriela har godkänt klick utanför Sverige, svenskt Offline-fel och återhämtning efter No throttling med nytt val av Uppsala. Ogiltig JSON och bevarade avbrott är automatiskt testade. |
+
+Senaste automatiska kontroller: **90/90 runtime-tester samt godkänt TypeScript och produktionsbygge**. Tidigare lyckade tester upprepas inte för denna dokumentationsändring. De separata browserproven ingår inte i `npm test`; PR-konflikter och GitHub-CI har ännu inte bedömts för en P3-PR.
+
+**Kvarstående begränsningar:** gränsen är förenklad för visning och årgången är okänd; detta visas uttryckligen i appen och lagras som `unknown`. Lookup-indatas CRS är fortfarande inte officiellt bekräftat. Ingen geografisk kompatibilitet med SCB-årgångar eller analysnoggrannhet utlovas. Befolkningsdata/analys hör till P4–P6 och bredare browser-/mobil-/helflödeskontroller till fortsatt kvalitetsarbete, bland annat P7. Dessa funktioner eller metadatafrågor blir inte bekräftade genom P3-bedömningen. Kvar i GitHub-flödet är att, efter godkännande, öppna/granska PR och kontrollera CI före separat merge-beslut.
+
+### Historiska delstatusar före slutbedömningen
 
 P3.2, 3 november 2026 på `feat/3-2-gemensamt-tillstand`, från `0926f33`: gemensamt kommunval med befintligt `AreaOfInterest`, separat söktext och samma tillstånd som underlag för karta/panel. Nya val, tomma uppslag och fel lämnar ingen gammal gräns. `AbortController` och `requestId` bevaras; gränsårgång förblir okänd. 87/87 runtime-tester inklusive 12 nya tillstånds-/svarsracetester samt TypeScript/bygge passerade. Sex browser-UI-tester, tangentbord och ett syntetiskt browserprov av kart-/sökval och felvägar passerade; inget nytt live-API-prov gjordes. Gabriela har godkänt alla fyra manuella localhost-kontroller den 3 november: byte mellan Uppsala och Malmö med gräns/centrering/panel, söktext utan nytt val, kartval med bevarad söktext och klick utanför Sverige utan kvarvarande gammal gräns. P3.2 är därmed manuellt godkänt; P3 är inte slutligt avslutat.
 
