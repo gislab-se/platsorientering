@@ -211,6 +211,18 @@ Bedömning av kvarstående osäkerheter för kart-api:
 
 ## SCB TAB628: kommunstatistik
 
+### Lokal P4-omvandling, 3 november 2026
+
+Testkomplettering 4 november 2026, andra steget: alla negativa fall i `tests/scb-tab628.test.mjs` kontrollerar nu att felet är en instans av `ValidationError` och att både `path` och felmeddelande stämmer med det provade felet. Därmed kan ett orelaterat körfel inte göra ett negativt test godkänt. Adapterkoden är oförändrad i detta steg. `npm.cmd test` passerade med 98/98 runtime-tester och typkontrakt; tidigare produktionsbygge har inte körts om för denna teständring.
+
+Komplettering 4 november 2026: källmetadata måste ange `provider: SCB`, `dataset: TAB628`, HTTPS-dataendpointen `https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data` (frågeparametrar tillåts) och känt referensår 2025 (`kind: year`). Andra datum-/periodformat och okänt år avvisas i denna avgränsade adapter. Hämtningstid får ligga ett annat år. Kontrollen styrker metadataformatets överensstämmelse med adaptern, inte URL-parametrarnas innehåll, datats äkthet eller geografisk kompatibilitet. Tre nya offline-tester täcker fel källa, URL och referensår. Befintliga feltester har inte omarbetats.
+
+`src/providers/scbTab628.ts` innehåller en ren funktion, `parseTab628Statistics(body, code, source)`, för det dokumenterade JSON-stat2-urvalet: TAB628, totalt kön, statistikår 2025 och tre mått. Inga nya API-anrop eller källkontroller gjordes för denna implementation. Anroparen ansvarar för korrekta källmetadata, inklusive källans noter och begränsningar. Referensdagarna är avgränsade till det tidigare verifierade 2025-urvalet.
+
+Funktionen läser dimensions- och kategoriindex, bevarar SCB:s publicerade täthet och markerar indelningsår som okänt. Den kontrollerar kommunkoder mot den lokala SCB-listan (inte historiska indelningar), avvisar duplicerade kategoriindex, ofullständiga värdearrayer, okända dimensioner och ogiltiga valda statistikvärden. Duplicerade JSON-nycklar kan inte upptäckas efter JSON-parsning. Null blir saknat med okänd orsak, aldrig automatiskt sekretess eller noll. Statusfält avvisas tills deras innebörd har verifierats. Noll eller saknad landareal ger saknad täthet; negativ landareal avvisas. Ingen egen täthet räknas fram.
+
+Offline-tester i `tests/scb-tab628.test.mjs` jämför alla tre provkommunerna med det sparade källsvaret och använder högst 0,05 invånare/km² avvikelse vid kontroll mot folkmängd/landareal (publicerad täthet har en decimal). Syntetiska variationer provar omordnade dimensioner/mått, null, noll, okänd/saknad kod, dubblettindex och felaktiga/ofullständiga svar. Appintegration, nätverksfel och geografisk kompatibilitet omfattas inte av dessa tester.
+
 ### Åtkomstkontroll 1 november 2026
 
 **Dokumenterat:** SCB:s [API-översikt](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/) och [PxWebApi v2](https://www.scb.se/vara-tjanster/oppna-data/pxwebapi/pxwebapi-v2/), lästa detta datum, beskriver GET-uttag ur Statistikdatabasen. Översikten anger högst 150 000 dataceller per uttag och 30 anrop per 10 sekunder och IP-adress. SCB länkar till [PxTools användarhandledning](https://www.pxtools.net/PxWebApi/documentation/user-guide/) och [API-specifikationen](https://github.com/PxTools/PxApiSpecs/blob/master/PxAPI-2.yml). De granskade sidorna anger inget krav på API-nyckel för dessa offentliga uttag. Detta är inte ett uttryckligt löfte om framtida nyckelfri åtkomst eller en generell CORS-garanti för alla endpoints.
