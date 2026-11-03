@@ -19,8 +19,24 @@ export function parseMunicipalityBoundary(value: unknown, expectedCode: string) 
 
 export async function fetchMunicipalityBoundary(code: string, signal: AbortSignal) {
   if (!/^\d{4}$/.test(code)) throw new Error('Ange en fyrsiffrig kommunkod.');
-  const response = await fetch(`https://api.kart-api.se/v1/kommun/${code}`, { signal });
+  let response: Response;
+  try {
+    response = await fetch(`https://api.kart-api.se/v1/kommun/${code}`, { signal });
+  } catch (error) {
+    if (signal.aborted) throw error;
+    throw new Error('Kommungränsen kunde inte hämtas. Kontrollera internetanslutningen och försök igen.');
+  }
   if (response.status === 404) throw new Error('Ingen kommun hittades med den koden.');
   if (!response.ok) throw new Error(`Kommungränsen kunde inte hämtas (HTTP ${response.status}).`);
-  return parseMunicipalityBoundary(await response.json(), code);
+  let value: unknown;
+  try {
+    value = await response.json();
+  } catch (error) {
+    if (signal.aborted) throw error;
+    if (error instanceof SyntaxError) {
+      throw new Error('Svaret med kommungränsen kunde inte läsas. Försök igen senare.');
+    }
+    throw error;
+  }
+  return parseMunicipalityBoundary(value, code);
 }

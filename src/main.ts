@@ -3,8 +3,8 @@ import './style.css';
 import { createMap } from './map/createMap';
 import { geoJSON } from 'leaflet';
 import type { GeoJSON } from 'leaflet';
-import { lookupMunicipality } from './providers/municipalityLookup';
-import { fetchMunicipalityBoundary } from './providers/municipalityBoundary';
+import { createAreaSelection } from './state/areaSelection';
+import { mountMunicipalitySearch } from './ui/municipalitySearch';
 
 const mapElement = document.querySelector<HTMLElement>('#map');
 const statusElement = document.querySelector<HTMLElement>('#map-status');
@@ -21,60 +21,48 @@ const selectionStatus = document.querySelector<HTMLElement>('#selection-status')
 const source = document.querySelector<HTMLElement>('#boundary-source')!;
 const analysis = document.querySelector<HTMLElement>('#analysis-status')!;
 const form = document.querySelector<HTMLFormElement>('#municipality-form')!;
-const codeInput = document.querySelector<HTMLInputElement>('#municipality-code')!;
+const queryInput = document.querySelector<HTMLInputElement>('#municipality-query')!;
+const areaSelection = createAreaSelection();
+const { selectMunicipality } = areaSelection;
+const municipalitySearch = mountMunicipalitySearch({
+  form,
+  input: queryInput,
+  results: document.querySelector<HTMLUListElement>('#municipality-results')!,
+  status: document.querySelector<HTMLElement>('#municipality-search-status')!,
+  onSelect: code => { void selectMunicipality(code); },
+});
 let boundary: GeoJSON | undefined;
-let requestId = 0;
-let controller: AbortController | undefined;
 
-async function selectMunicipality(selection: string | { lat: number; lon: number }) {
-  const currentRequest = ++requestId;
-  controller?.abort();
-  controller = new AbortController();
-  const { signal } = controller;
+// Kartan och panelen läser samma bekräftade val. Söktexten är en separat fråga.
+areaSelection.subscribe(state => {
+  if (state.status === 'loading') municipalitySearch.clearResults();
   if (boundary) { boundary.remove(); boundary = undefined; }
   source.textContent = '';
-  selectionStatus.textContent = 'Hämtar kommun…';
-  selectionStatus.setAttribute('aria-busy', 'true');
+  selectionStatus.removeAttribute('aria-busy');
   analysis.textContent = 'Analysfunktioner är planerade och ännu inte tillgängliga.';
-  try {
-    let code: string;
-    let lookupAttribution: readonly string[] = [];
-    if (typeof selection === 'string') {
-      code = selection;
-    } else {
-      const result = await lookupMunicipality(selection,
-        (input, init) => fetch(input, { ...init, signal }));
-      if (currentRequest !== requestId) return;
-      if (result.status === 'empty') throw new Error('Ingen kommun hittades vid den punkten. Klicka inom Sverige.');
-      if (result.status === 'error') throw new Error(result.error.message);
-      if (result.status !== 'ready') return;
-      code = result.data.kommunkod;
-      lookupAttribution = result.data.attribution;
-    }
-    const result = await fetchMunicipalityBoundary(code, signal);
-    if (currentRequest !== requestId) return;
-    boundary = geoJSON(result.geometry, {
+  if (state.status === 'ready') {
+    const { area } = state;
+    const code = area.selection.kind === 'municipality' ? area.selection.municipalityCode : '';
+    boundary = geoJSON(area.geometry, {
       style: { color: '#17594c', weight: 3, fillColor: '#48b99a', fillOpacity: 0.3 },
       interactive: false,
     }).addTo(leafletMap);
     leafletMap.fitBounds(boundary.getBounds(), { padding: [24, 24], maxZoom: 11 });
-    codeInput.value = code;
-    selectionStatus.textContent = `Vald kommun: ${result.municipality.kommunnamn} (${code}).`;
-    const attribution = [...new Set([...lookupAttribution, ...result.municipality.attribution])];
-    source.textContent = `Grön yta: vald kommun. Källa: kart-api. ${attribution.join(' · ')}. Gränsårgång: okänd. Förenklad för visning; används inte för analys.`;
-    analysis.textContent = `Område: ${result.municipality.kommunnamn}. Analys blir tillgänglig när ett datalager och dess analysfunktioner har införts.`;
-  } catch (error) {
-    if (currentRequest !== requestId) return;
-    selectionStatus.textContent = error instanceof Error ? error.message : 'Kommunen kunde inte hämtas. Försök igen.';
-  } finally {
-    if (currentRequest === requestId) selectionStatus.removeAttribute('aria-busy');
+    selectionStatus.textContent = `Vald kommun: ${area.name} (${code}).`;
+    const attribution = area.geometrySource?.attribution;
+    const attributionText = attribution?.status === 'known' ? attribution.value.join(' · ') : '';
+    source.textContent = `Grön yta: vald kommun. Källa: kart-api. ${attributionText}. Gränsårgång: okänd. Förenklad för visning; används inte för analys.`;
+    analysis.textContent = `Område: ${area.name}. Analys blir tillgänglig när ett datalager och dess analysfunktioner har införts.`;
+  } else if (state.status === 'loading') {
+    selectionStatus.textContent = 'Hämtar kommun…';
+    selectionStatus.setAttribute('aria-busy', 'true');
+  } else if (state.status === 'idle') {
+    selectionStatus.textContent = 'Ingen kommun vald.';
+  } else {
+    selectionStatus.textContent = state.message;
   }
-}
+});
 
 leafletMap.on('click', event => {
   void selectMunicipality({ lat: event.latlng.lat, lon: event.latlng.lng });
-});
-form.addEventListener('submit', event => {
-  event.preventDefault();
-  if (form.reportValidity()) void selectMunicipality(codeInput.value.trim());
 });

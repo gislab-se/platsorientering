@@ -19,6 +19,14 @@ Källunderlaget är redo för P2:s slutkontroller och avslutsgodkännande, med n
 
 ## Historiskt underlag och daterade kontroller
 
+### P3.1a – lokal SCB-kommunförteckning, 2 november 2026
+
+Källa är SCB:s [kodlista Kommuner](https://statistikdatabasen.scb.se/api/v2/codeLists/vs_RegionKommun07EjAggr?lang=sv), länkad från [TAB628-metadata](https://statistikdatabasen.scb.se/api/v2/tables/TAB628/metadata?lang=sv). GET utan autentisering gav HTTP 200 och 290 poster med unika fyrsiffriga `code` och icke-tomma `label`. Namn och koder sparas som `name`/`code`, sorterade efter kod, i [municipalities.ts](../src/data/municipalities.ts). Filen innehåller käll-URL, hämtningstid `2026-11-02T21:28:52.566Z`, kontrolldatum, attribution `Källa: SCB`, bearbetning och begränsning. [SCB:s användningsvillkor](https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/), kontrollerade samma dag, anger CC0 för öppna data i Statistikdatabasen; underlaget kommer inte från kart-api.
+
+Detta är en lokal ögonblickskopia för kommunnamn/koder, utan polygoner eller statistikvärden. Kodlistans ID eller hämtningstid används inte som belägg för geografisk årgång eller kompatibilitet med kart-api-gränserna. Ingen automatisk uppdatering är införd. [Sökfunktionen](../src/domain/municipalitySearch.ts) gör exakta fyrsiffriga koduppslag och delsträngssökning på namn, oberoende av skiftläge och yttre blanksteg, med NFC-normalisering och svensk sortering. Å, ä och ö behålls som egna bokstäver; exempelvis `Lulea` ersätter inte `Luleå`. Tom fråga eller utebliven träff ger tom lista; inga träffar väljs automatiskt.
+
+Tio nya offline-tester verifierar register/proveniens, `0380`, ledande nollor, skiftläge, å/ä/ö, Unicode-varianter, flera träffar, tomt resultat och att ändrade resultat inte påverkar kommande sökningar. `npm.cmd test` gav 75/75 godkända tester och typkontrakt; `npm.cmd run build` passerade inklusive TypeScript-kontroll. Funktion och lista är inte kopplade till gränssnittet. Befintlig karta, panel och kart-api-adaptrar har inte ändrats.
+
 Sammanställt 22 oktober 2026 för P2, uppdaterat 28 oktober 2026 med projektets livekontroller av kart-api, senaste testkörning och en separat metadatakontroll enligt nedan. Äldre underlag är Gabrielas redovisade externa tester, utkastet ”P2 – Datakällor: verifierade fynd och öppna punkter” (2026-10-22) och dokumentationsgenomgångar i Codex-konversationen. Vid metadatakompletteringen hämtades officiell dokumentation, TAB628-metadata, WFS-metadata, en befolkningsruta och kommungränsarkivet på nytt. Inga kodändringar eller nya körningar av den ordinarie testsviten gjordes.
 
 - **Observation:** äldre redovisat externt testresultat, om inget annat anges. Avsnittet om livekontroll 28 oktober anger vilka prov AI faktiskt körde med projektets adaptrar.
