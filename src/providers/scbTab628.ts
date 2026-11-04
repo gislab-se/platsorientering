@@ -106,3 +106,72 @@ export function parseTab628Statistics(
     source: metadata,
   });
 }
+
+// Anroparen äger AbortController och kopplingen till valt område.
+// fetcher kan ersättas i offline-tester; inga hemligheter eller cookies skickas.
+export async function fetchTab628Statistics(
+  code: string, signal: AbortSignal, fetcher: typeof fetch = globalThis.fetch,
+): Promise<MunicipalityStatistics> {
+  signal.throwIfAborted();
+  parseMunicipalityCode(code);
+  if (!municipalityDirectory.some(item => item.code === code)) invalid('Okänd kommunkod i den lokala SCB-kodlistan.');
+  const url = new URL('https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data');
+  for (const [key, value] of Object.entries({
+    lang: 'sv', outputFormat: 'json-stat2',
+    'valueCodes[Region]': code, 'valueCodes[Kon]': '1+2',
+    'valueCodes[ContentsCode]': 'BE0101U1,BE0101U2,BE0101U3', 'valueCodes[Tid]': '2025',
+  })) url.searchParams.set(key, value);
+
+  let response: Response;
+  try {
+    response = await fetcher(url, { signal, mode: 'cors', credentials: 'omit' });
+  } catch {
+    signal.throwIfAborted();
+    throw new Error('SCB kunde inte nås. Kontrollera internetanslutningen och försök igen.');
+  }
+  signal.throwIfAborted();
+  if (!response.ok) {
+    if (response.status === 429) throw new Error('För många anrop till SCB. Vänta en stund och försök igen.');
+    throw new Error(`Kommunstatistiken kunde inte hämtas från SCB (HTTP ${response.status}).`);
+  }
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch (error) {
+    signal.throwIfAborted();
+    if (error instanceof SyntaxError) throw new Error('SCB:s svar kunde inte läsas som JSON. Försök igen senare.');
+    throw new Error('Överföringen av SCB:s svar kunde inte slutföras. Försök igen senare.');
+  }
+  signal.throwIfAborted();
+
+  // Bevara publicerade förklaringar, inklusive CKM och måttens begränsningar.
+  function notes(value: unknown): string[] {
+    if (value === undefined) return [];
+    if (!Array.isArray(value) || !Array.from(value).every(note => typeof note === 'string')) {
+      return invalid('SCB:s källnoter har ogiltigt format.');
+    }
+    return value;
+  }
+  const data = record(body);
+  const dimensions = record(data.dimension);
+  const region = record(dimensions.Region);
+  const regionCategory = record(region.category);
+  if (Object.keys(record(regionCategory.index)).length !== 1) invalid('Förväntade statistik för endast den efterfrågade kommunen.');
+  const contents = record(record(dimensions.ContentsCode).category);
+  const measureNotes = contents.note === undefined ? {} : record(contents.note);
+  const regionNotes = regionCategory.note === undefined ? {} : record(regionCategory.note);
+  const limitations = [...new Set([
+    'Kommunindelningens årgång och kompatibilitet med kartgränsen är inte verifierade.',
+    ...notes(data.note), ...notes(region.note), ...notes(regionNotes[code]),
+    ...['BE0101U1', 'BE0101U2', 'BE0101U3'].flatMap(key => notes(measureNotes[key])),
+  ])];
+  const known = <T,>(value: T) => ({ status: 'known' as const, value });
+  return parseTab628Statistics(body, code, {
+    provider: 'SCB', dataset: 'TAB628', sourceUrl: url.href,
+    license: known({ name: 'CC0-1.0', url: 'https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/' }),
+    attribution: known(['Källa: SCB']),
+    referenceTime: known({ kind: 'year', year: 2025 }),
+    retrievedAt: known(new Date().toISOString()), sourceCrs: { status: 'not-applicable' },
+    geographicCoverage: known({ description: `Kommun ${code}, SCB TAB628 2025`, limitations }),
+  });
+}

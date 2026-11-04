@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseTab628Statistics } from '../src/providers/scbTab628.ts';
+import { parseTab628Statistics, fetchTab628Statistics } from '../src/providers/scbTab628.ts';
 import { ValidationError } from '../src/domain/validation.ts';
 
 function rejectsValidation(run, description, path = 'TAB628') {
@@ -32,6 +32,107 @@ test('TAB628-källmetadata: fel leverantör eller dataset avvisas', () => {
   for (const patch of [{ provider: 'Annan källa' }, { dataset: 'TAB999' }]) {
     rejectsValidation(() => parseTab628Statistics(fixture.body, '0380', { ...source, ...patch }),
       'Källmetadata måste ange provider SCB och dataset TAB628.');
+  }
+});
+
+function singleMunicipalityBody(code = '0380') {
+  const body = structuredClone(fixture.body);
+  const position = body.dimension.Region.category.index[code];
+  body.value = body.value.slice(position * 3, position * 3 + 3);
+  body.size[0] = 1;
+  body.dimension.Region.category.index = { [code]: 0 };
+  body.dimension.Region.category.label = { [code]: body.dimension.Region.category.label[code] };
+  return body;
+}
+
+test('TAB628-hämtning: begränsat GET-anrop, kod, metadata och källnoter för tre kommuner', async () => {
+  for (const code of ['0380', '1280', '2584']) {
+    const controller = new AbortController();
+    const body = singleMunicipalityBody(code);
+    const started = Date.now();
+    const result = await fetchTab628Statistics(code, controller.signal, async (url, options) => {
+      assert.equal(url.origin + url.pathname, 'https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data');
+      assert.deepEqual(Object.fromEntries(url.searchParams), {
+        lang: 'sv', outputFormat: 'json-stat2', 'valueCodes[Region]': code,
+        'valueCodes[Kon]': '1+2', 'valueCodes[ContentsCode]': 'BE0101U1,BE0101U2,BE0101U3', 'valueCodes[Tid]': '2025',
+      });
+      assert.ok(url.href.includes('1%2B2'));
+      assert.equal(options.signal, controller.signal);
+      assert.equal(options.credentials, 'omit');
+      assert.equal(options.mode, 'cors');
+      return Response.json(body);
+    });
+    assert.equal(result.municipalityCode, code);
+    assert.equal(result.population.value.value, body.value[1]);
+    assert.equal(result.source.referenceTime.value.year, 2025);
+    assert.equal(result.source.sourceCrs.status, 'not-applicable');
+    assert.equal(result.divisionVintage.status, 'unknown');
+    assert.ok(Date.parse(result.source.retrievedAt.value) >= started);
+    assert.ok(result.source.geographicCoverage.value.limitations.includes(body.note[0]));
+    assert.ok(result.source.geographicCoverage.value.limitations.includes(
+      body.dimension.ContentsCode.category.note.BE0101U1[0]));
+  }
+});
+
+test('TAB628-hämtning: fel kod och redan avbrutet anrop gör inget nätverksanrop', async () => {
+  let calls = 0;
+  const fetcher = async () => { calls++; throw new Error('Ska inte anropas'); };
+  for (const code of ['380', '9999']) {
+    await assert.rejects(fetchTab628Statistics(code, new AbortController().signal, fetcher), ValidationError);
+  }
+  const controller = new AbortController();
+  const reason = new DOMException('Avbrutet i test', 'AbortError');
+  controller.abort(reason);
+  await assert.rejects(fetchTab628Statistics('0380', controller.signal, fetcher), error => error === reason);
+  assert.equal(calls, 0);
+});
+
+test('TAB628-hämtning: nätverksfel och HTTP-fel ger svenska meddelanden', async () => {
+  const signal = new AbortController().signal;
+  await assert.rejects(fetchTab628Statistics('0380', signal, async () => { throw new TypeError('fetch failed'); }),
+    { message: 'SCB kunde inte nås. Kontrollera internetanslutningen och försök igen.' });
+  for (const status of [400, 404, 429, 503]) {
+    await assert.rejects(fetchTab628Statistics('0380', signal, async () => ({
+      ok: false, status, json: () => assert.fail('Felkropp ska inte tolkas som statistik'),
+    })), { message: status === 429
+      ? 'För många anrop till SCB. Vänta en stund och försök igen.'
+      : `Kommunstatistiken kunde inte hämtas från SCB (HTTP ${status}).` });
+  }
+});
+
+test('TAB628-hämtning: oläsbar JSON, avbruten överföring och felaktig statistik avvisas', async () => {
+  const signal = new AbortController().signal;
+  await assert.rejects(fetchTab628Statistics('0380', signal, async () => new Response('inte JSON')),
+    { message: 'SCB:s svar kunde inte läsas som JSON. Försök igen senare.' });
+  await assert.rejects(fetchTab628Statistics('0380', signal, async () => ({
+    ok: true, json: async () => { throw new TypeError('bruten ström'); },
+  })), { message: 'Överföringen av SCB:s svar kunde inte slutföras. Försök igen senare.' });
+  for (const body of [null, {}, singleMunicipalityBody('1280'), fixture.body,
+    { ...singleMunicipalityBody(), value: [113.8, 249726] },
+    { ...singleMunicipalityBody(), note: [123] }]) {
+    await assert.rejects(fetchTab628Statistics('0380', signal, async () => Response.json(body)), ValidationError);
+  }
+});
+
+test('TAB628-hämtning: avbrottsorsaken bevaras under fetch och JSON-läsning, även vid sent svar', async () => {
+  for (const phase of ['fetch-reject', 'fetch-resolve', 'json-reject', 'json-resolve']) {
+    const controller = new AbortController();
+    const reason = new DOMException('Nytt kommunval', 'AbortError');
+    const fetcher = async () => {
+      if (phase.startsWith('fetch')) {
+        controller.abort(reason);
+        if (phase === 'fetch-reject') throw reason;
+      }
+      return {
+        ok: true,
+        json: async () => {
+          controller.abort(reason);
+          if (phase === 'json-reject') throw reason;
+          return singleMunicipalityBody();
+        },
+      };
+    };
+    await assert.rejects(fetchTab628Statistics('0380', controller.signal, fetcher), error => error === reason);
   }
 });
 

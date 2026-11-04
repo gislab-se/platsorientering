@@ -6,9 +6,9 @@ Projektet har två lika viktiga mål: Gabriela ska lära sig bygga kartor och pr
 
 ## Status
 
-P4 påbörjad lokalt: `src/providers/scbTab628.ts` omvandlar det dokumenterade TAB628-urvalet för 2025 till `MunicipalityStatistics` utan nätverk. Källmetadata lämnas av anroparen. Funktionen är inte inkopplad i appen; API-hämtning, panelvisning och verifierad geografisk koppling återstår. Se testerna i `tests/scb-tab628.test.mjs`.
+P4 pågår: `src/providers/scbTab628.ts` har dels en ren omvandling av TAB628-urvalet för 2025 till `MunicipalityStatistics`, dels den nya `fetchTab628Statistics(code, signal, fetcher)` som hämtar tre mått för en kommun och skapar källmetadata. Hämtningen hanterar nätverks-/HTTP-fel, oläsbara svar och avbrott. Funktionen är inte inkopplad i appen; panelvisning och verifierad geografisk koppling återstår. Se testerna i `tests/scb-tab628.test.mjs`.
 
-Kontroll 4 november 2026 efter kompletterad validering av SCB TAB628-källmetadata och referensår 2025: 98/98 runtime-tester, typkontrakt, TypeScript och produktionsbygge passerade. Ingen commit, push eller publicering har gjorts för P4-steget.
+Kontroll 4 november 2026 efter den nya hämtningsfunktionen: 103/103 runtime-tester, typkontrakt, TypeScript och produktionsbygge passerade. De nya hämtningstesterna använder simulerade svar utan nätverk. Ett separat liveprov av `fetchTab628Statistics()` i Edge 156 på localhost för Uppsala, Malmö och Kiruna gav HTTP 200 och giltiga resultat för 2025, utan CORS-/nätverksfel eller JavaScript-undantag. Panelvisning och produktionsåtkomst ingick inte i SCB-provet. Den rena omvandlingen finns i pushad commit `56325a7`; det nya hämtningssteget är ännu inte committat, pushat eller publicerat.
 
 | Del | Status |
 | --- | --- |
