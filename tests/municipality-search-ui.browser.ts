@@ -17,6 +17,18 @@ const passed: string[] = [];
 const test = (name: string, run: () => void) => { run(); passed.push(name); };
 
 try {
+  const appResponse = await fetch('/index.html');
+  assert(appResponse.ok, 'Kunde inte läsa appens HTML');
+  const appDocument = new DOMParser().parseFromString(await appResponse.text(), 'text/html');
+  test('Kommunöversikt finns i steg 3 som separat del utan statistikvärden', () => {
+    const analysisSection = appDocument.querySelector('[aria-labelledby="analysis-heading"]');
+    assert(analysisSection?.querySelector('h2')?.textContent === 'Analys', 'P3-rubriken Analys saknas');
+    assert(Boolean(analysisSection?.querySelector('#analysis-status')), 'P3:s statusfält saknas');
+    const overview = analysisSection?.querySelector('[role="region"][aria-labelledby="municipality-overview-heading"]');
+    assert(overview?.querySelector('h3')?.textContent === 'Kommunöversikt', 'Översikten ligger inte under Analys');
+    assert(overview?.querySelector('p')?.textContent === 'Kommunstatistiken har ännu inte lästs in.', 'Tydligt oladdat tillstånd saknas');
+    assert(!/\d/.test(overview?.textContent ?? ''), 'Översikten innehåller statistikvärden');
+  });
   test('0380 visar Uppsala utan automatiskt val', () => {
     search('0380');
     assert(buttons().length === 1 && buttons()[0].textContent === 'Uppsala (0380)', 'Fel kodträff');
