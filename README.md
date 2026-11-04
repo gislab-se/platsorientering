@@ -6,13 +6,23 @@ Projektet har två lika viktiga mål: Gabriela ska lära sig bygga kartor och pr
 
 ## Status
 
-P4:s första panelsteg finns lokalt: under steg 3 – Analys visas rubriken Kommunöversikt och texten ”Kommunstatistiken har ännu inte lästs in.” Ingen SCB-hämtning eller statistikvisning är kopplad till panelen. P3:s kommunval och statusfält är oförändrade.
+P4 lokalt, 4 november 2026: Kommunöversikt följer P3:s bekräftade kommunval från sökning eller kartklick. Den hämtar TAB628-statistik för 2025 och visar folkmängd, officiell landareal och publicerad täthet med enheter, referenstider och SCB-källänk. Laddning, saknade/sekretessmarkerade värden och fel visas separat. Ett nytt val rensar gamla siffror och avbryter föregående statistikanrop; sena svar kan inte ersätta det nya valet. SCB-fel ändrar inte P3:s val eller karta. Gränsårgången är fortsatt okänd och geografisk överensstämmelse utlovas inte. Inget befolkningsrutlager är infört.
+
+Kontroller för panelkopplingen: 110/110 runtime-tester och typkontrakt samt TypeScript/produktionsbygge passerade. Nio separata browserprov passerade i isolerad Edge på localhost, inklusive formatering, saknade värden och tidigare sökprov. Ett verkligt appflöde med sökval av Uppsala `0380` visade 249 726 invånare, 2 193,84 km² och 113,8 invånare/km² med datum, källa och begränsningar. Kommunbyten/sena svar är testade med simulerade svar; inget nytt automatiserat liveprov av kartklick, Malmö, Kiruna eller mobil gjordes för denna panelkoppling. Gabriela har därefter bekräftat att kartan fungerar på localhost; den manuella kontrollens exakta omfattning är inte dokumenterad. Demonstration för Henrik återstår. Panelkopplingen hör till P4-grenen och är ännu inte sammanslagen till `main` eller publicerad som webbplats.
+
+Prova lokalt med `npm.cmd run dev`: välj Uppsala i steg 1 och kontrollera värden/datum i Kommunöversikt. Byt till Malmö och kontrollera att gamla siffror försvinner under laddningen. Prova även kartval och nätverksfel. Kartgränsen och statistikens källor ska visas åtskilda.
+
+### Tidigare P4-delsteg
+
+Följande kontroller beskriver läget före den nya panelkopplingen.
 
 Panelkontroll 4 november 2026: 103/103 runtime-tester, typkontrakt och produktionsbygge passerade. Browserrapporten visade 7/7 godkända kontroller, inklusive översiktens placering/text och tidigare kommunvalstester. Edge-processen gav samtidigt ett internt avslutningsfel; testresultatet lästes ur den returnerade HTML-rapporten. Ingen ny kontroll av verkliga kommungränser ingick.
 
-P4 pågår: `src/providers/scbTab628.ts` har dels en ren omvandling av TAB628-urvalet för 2025 till `MunicipalityStatistics`, dels den nya `fetchTab628Statistics(code, signal, fetcher)` som hämtar tre mått för en kommun och skapar källmetadata. Hämtningen hanterar nätverks-/HTTP-fel, oläsbara svar och avbrott. Funktionen är inte inkopplad i appen; panelvisning och verifierad geografisk koppling återstår. Se testerna i `tests/scb-tab628.test.mjs`.
+`src/providers/scbTab628.ts` har dels en ren omvandling av TAB628-urvalet för 2025 till `MunicipalityStatistics`, dels `fetchTab628Statistics(code, signal, fetcher)` som hämtar tre mått för en kommun och skapar källmetadata. Hämtningen hanterar nätverks-/HTTP-fel, oläsbara svar och avbrott. Se testerna i `tests/scb-tab628.test.mjs`.
 
 Kontroll 4 november 2026 efter den nya hämtningsfunktionen: 103/103 runtime-tester, typkontrakt, TypeScript och produktionsbygge passerade. De nya hämtningstesterna använder simulerade svar utan nätverk. Ett separat liveprov av `fetchTab628Statistics()` i Edge 156 på localhost för Uppsala, Malmö och Kiruna gav HTTP 200 och giltiga resultat för 2025, utan CORS-/nätverksfel eller JavaScript-undantag. Panelvisning och produktionsåtkomst ingick inte i SCB-provet. Den rena omvandlingen finns i pushad commit `56325a7`; hämtningssteget är lokalt committat som `ba38651`, men ännu inte pushat eller publicerat.
+
+### Etappstatus
 
 | Del | Status |
 | --- | --- |
@@ -32,7 +42,7 @@ Källkodsrepot är privat och ligger på `gislab-se/platsorientering`. En godkä
 
 kart-api är vald för kommunval och visningsgränser; SCB TAB628 för folkmängd, landareal och täthet för 2025 med direkt browseråtkomst; SCB WFS `stat:befolkning_1km_2025` för 1 km-befolkningsrutor med direktåtkomst som inledande riktning. Se [beslut och villkor](docs/DECISIONS.md).
 
-**Implementerat:** kart-api-uppslag och polygonvisning. **Förberett:** platsökningsadapter utan gränssnitt, fem datakontrakt, runtime-validering och testfixturer. **Inte implementerat:** SCB-adaptrar i appen, befolkningslager, statistikvisning och analys. Ett godkänt källval är inte en fungerande SCB-integration.
+P2-läget före P4: kart-api-uppslag och polygonvisning var implementerade; platsökningsadapter utan gränssnitt, datakontrakt, runtime-validering och testfixturer var förberedda. SCB-kopplingen och kommunstatistikvisningen har därefter tillkommit lokalt i P4 enligt status ovan. Befolkningsrutlager och rumslig analys är fortsatt planerade.
 
 TAB628 har ett verkligt Edge-prov från localhost den 1 november och ett Node-uttag för 290 kommuner/870 värden den 2 november. WFS har ett äldre redovisat browserprov med tre features (exakt datum/original-URL saknas) och Node-prov av 17 paginerade objekt den 28 oktober. Node genomdriver inte browser-CORS. Lookup/geocode-CRS, gränsårgång och geografisk kompatibilitet är inte verifierade; WFS-kvoter, ID-/nullhantering, koordinattransformation och produktionsåtkomst kvarstår inför beroende P3–P6-arbete. Se [källunderlaget](docs/DATA_SOURCES.md).
 
@@ -44,7 +54,7 @@ Starta med `npm.cmd run dev`. Vänsterpanelen visar **1. Välj område**, **2. V
 
 **P3-slutbedömning 3 november 2026:** Gabriela har bekräftat fungerande kommunval, gränsvisning, centrering och panel i Uppsala, Malmö och nu även Kiruna `2584` på localhost. Hon har också godkänt separat söktext, byte genom kartklick, rensning efter klick utanför Sverige samt Offline-fel och återhämtning efter No throttling. De senaste automatiska kontrollerna gav 90/90 runtime-tester och godkänt TypeScript/produktionsbygge; sex separata browser-UI-prov och verkligt tangentbordsval är tidigare godkända. Ingen kontroll har upprepats för denna dokumentationsuppdatering. Det är inte en livekontroll av alla 290 kommungränser. Bredare browser-/mobil- och helflödeskontroller hör till fortsatt kvalitetsarbete, bland annat P7. Se [P3-bedömningen i ROADMAP](ROADMAP.md#p3--välj-kommun-och-visa-rätt-område).
 
-För panelens separata offline-browserprov: öppna `/tests/municipality-search-ui.html` på samma dev-server. Sidan kör sju tester i riktig browser, inklusive Kommunöversikt och att alla 290 koder kan visas och skickas till valcallbacken. Den kräver inget kart-api-anrop och ingår inte i produktionsbygget. `npm.cmd test` typkontrollerar även browser-testkoden men kör inte browserproven. Den 2 november 2026 passerade sidan i isolerad Edge tillsammans med separat styrning av verkliga Tab/Enter/Space-nedtryckningar. Ett begränsat liveprov i appen verifierade sökval och ritad gräns för Uppsala och Upplands Väsby; det är inte ett prov av alla kommunpolygoner eller ett nytt belägg för deras årgång.
+För panelens separata offline-browserprov: öppna `/tests/municipality-search-ui.html` på samma dev-server. Sidan kör nio tester i riktig browser, inklusive Kommunöversikt, statistikformatering/saknatillstånd och att alla 290 koder kan visas och skickas till valcallbacken. Den kräver inget kart-api- eller SCB-anrop och ingår inte i produktionsbygget. `npm.cmd test` typkontrollerar även browser-testkoden men kör inte browserproven. Den 2 november 2026 passerade den dåvarande sidan i isolerad Edge tillsammans med separat styrning av verkliga Tab/Enter/Space-nedtryckningar. Ett begränsat liveprov i appen verifierade sökval och ritad gräns för Uppsala och Upplands Väsby; det är inte ett prov av alla kommunpolygoner eller ett nytt belägg för deras årgång.
 
 P3.2, lokalt 3 november 2026: både sökträffar och kartklick går via `src/state/areaSelection.ts`. Tillstånden är inget val, laddning, bekräftat område, tomt uppslag och fel. Ett bekräftat område använder befintligt `AreaOfInterest` med validerad geometri, källa, hämtningstid och uttryckligen okänd gränsårgång/referenstid. Nytt val tömmer föregående område direkt; karta, panel och områdestext uppdateras från samma tillstånd. `AbortController` och `requestId` skyddar fortfarande mot sena svar och fel. Sökfältets text är en separat fråga och skrivs inte över av kommunvalet. Att skriva eller söka utan att välja en träff ändrar inte det bekräftade området, även om sökningen saknar träffar.
 

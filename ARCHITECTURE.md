@@ -4,6 +4,8 @@ Status: beslutad utgångspunkt för implementation. P1-grunden är implementerad
 
 ## Grundval
 
+Lokalt P4-tillägg 4 november 2026: `main.ts` kopplar samma `areaSelection.subscribe()` till `createMunicipalityStatistics()` i `src/state/municipalityStatistics.ts`. Statistikmodulen äger endast statistikens `AbortController`, requestId och laddnings-/resultat-/feltillstånd; P3:s kommunval förblir oförändrat. Hämtning börjar efter bekräftat kommunval, och varje nytt områdestillstånd rensar föregående resultat. `src/ui/municipalityOverview.ts` renderar tillståndet med svenskt talformat, referenstider, SCB-källa och GIS-begränsningar. Detta är kodkopplad kommunstatistik, inte en verifierad geografisk join eller analys av visningspolygonen.
+
 Lokalt P3-tillägg 30 oktober 2026: vänsterpanelen har områdesval, dataval och analys. Kartklick använder kommunuppslaget och hämtar sedan endast vald kommun via `municipalityBoundary.ts`. GeoJSON valideras före rendering. Nya val avbryter tidigare anrop och ett löpnummer hindrar sena svar från att ändra valet. Namn, kod, attribution och geometri kommer från API:t. Dataval och analys är ännu planerade; gränsgeometrin används endast för visning.
 
 En statisk webbklient byggs med TypeScript, Vite och Leaflet. Ingen server eller databas behövs innan ett verifierat behov finns. Valet bygger vidare på Gabrielas erfarenhet av Leaflet, HTML, CSS och JavaScript och lämpar sig för en första GitHub-publicering samt senare drift på gislab.se.

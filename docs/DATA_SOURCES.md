@@ -211,6 +211,12 @@ Bedömning av kvarstående osäkerheter för kart-api:
 
 ## SCB TAB628: kommunstatistik
 
+### Lokal panelkoppling, 4 november 2026
+
+Kommunöversikt använder nu P3:s bekräftade kommunkod för `fetchTab628Statistics()`. Folkmängd visas som heltal, officiell landareal med två decimaler och SCB:s publicerade täthet med en decimal, alla med svenskt talformat och måttens referenstider. Ingen egen täthet eller polygonyta beräknas. Noll, saknat och sekretess skiljs åt. Käll-URL och källnoter följer resultatet; CKM och okänd geografisk kompatibilitet förklaras vid värdena. Nytt val avbryter och rensar statistik utan att ändra kommunvalets logik.
+
+110/110 runtime-tester och typkontrakt passerade. Nio separata browserprov verifierade bland annat källvärden, datum/enheter och saknat-/feltillstånd. Ett liveprov av själva appen i isolerad Edge från `http://127.0.0.1:52804` verifierade sökval Uppsala `0380` och panelvärdena `(249726, 2193.84, 113.8)`. Det är inte ett nytt liveprov av alla kommuner, kartklick, mobil eller publicerad miljö. Årgångsmatchning med kart-api-gränsen är fortsatt obekräftad och framgår i panelen.
+
 ### P4 – hämtningsfunktion, 4 november 2026
 
 `fetchTab628Statistics(code, signal, fetcher)` i `src/providers/scbTab628.ts` hämtar endast vald kommunkod, totalt kön (`1+2`, URL-kodat med `%2B`), måtten `BE0101U1,BE0101U2,BE0101U3` och år 2025 med GET, `lang=sv` och `outputFormat=json-stat2`. Basadressen är `https://statistikdatabasen.scb.se/api/v2/tables/TAB628/data`. Anropet använder `mode: cors`, `credentials: omit` och anroparens `AbortSignal`. Inga nya beroenden eller nycklar införs.
