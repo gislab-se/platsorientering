@@ -2,6 +2,8 @@
 // Ingen nätverksåtkomst till kart-api och inga nya testberoenden behövs.
 import { mountMunicipalitySearch } from '../src/ui/municipalitySearch';
 import { municipalityDirectory } from '../src/data/municipalities';
+import { renderMunicipalityOverview } from '../src/ui/municipalityOverview';
+import { parseTab628Statistics } from '../src/providers/scbTab628';
 
 const form = document.querySelector<HTMLFormElement>('#form')!;
 const input = document.querySelector<HTMLInputElement>('#query')!;
@@ -17,6 +19,53 @@ const passed: string[] = [];
 const test = (name: string, run: () => void) => { run(); passed.push(name); };
 
 try {
+  const appResponse = await fetch('/index.html');
+  assert(appResponse.ok, 'Kunde inte läsa appens HTML');
+  const appDocument = new DOMParser().parseFromString(await appResponse.text(), 'text/html');
+  test('Kommunöversikt finns i steg 3 som separat del utan statistikvärden', () => {
+    const analysisSection = appDocument.querySelector('[aria-labelledby="analysis-heading"]');
+    assert(analysisSection?.querySelector('h2')?.textContent === 'Analys', 'P3-rubriken Analys saknas');
+    assert(Boolean(analysisSection?.querySelector('#analysis-status')), 'P3:s statusfält saknas');
+    const overview = analysisSection?.querySelector('[role="region"][aria-labelledby="municipality-overview-heading"]');
+    assert(overview?.querySelector('h3')?.textContent === 'Kommunöversikt', 'Översikten ligger inte under Analys');
+    assert(overview?.querySelector('p')?.textContent === 'Kommunstatistiken har ännu inte lästs in.', 'Tydligt oladdat tillstånd saknas');
+    assert(!/\d/.test(overview?.textContent ?? ''), 'Översikten innehåller statistikvärden');
+  });
+  const fixture = await (await fetch('/tests/fixtures/scb-tab628.real.json')).json();
+  const statistics = parseTab628Statistics(fixture.body, '0380', {
+    provider: 'SCB', dataset: 'TAB628', sourceUrl: fixture.source.url,
+    license: { status: 'unknown', reason: 'Prov' }, attribution: { status: 'known', value: ['Källa: SCB'] },
+    referenceTime: { status: 'known', value: { kind: 'year', year: 2025 } },
+    retrievedAt: { status: 'unknown', reason: 'Prov' }, sourceCrs: { status: 'not-applicable' },
+    geographicCoverage: { status: 'known', value: { description: 'Sparat SCB-prov', limitations: fixture.body.note } },
+  });
+  const overviewContent = document.createElement('div');
+  const municipality = { name: 'Uppsala', code: '0380' };
+  test('Kommunöversikt visar källvärden med enheter, referensdagar och begränsningar', () => {
+    renderMunicipalityOverview(overviewContent, { status: 'ready', municipality, statistics });
+    const text = overviewContent.textContent!.replace(/\s/g, ' ');
+    for (const expected of ['Uppsala (0380)', '249 726 invånare', '2 193,84 km²', '113,8 invånare/km²',
+      '2025-12-31', '2026-01-01', 'SCB, TAB628', 'Kartgränsens årgång är okänd', 'CKM']) {
+      assert(text.includes(expected), `Saknar ${expected}`);
+    }
+    assert(overviewContent.querySelector('a')?.href === fixture.source.url, 'Källänken är fel');
+  });
+  test('Kommunöversikt skiljer noll, saknat och sekretess och rensar vid laddning/fel', () => {
+    const data = structuredClone(statistics);
+    data.population.value = { status: 'available', value: 0 };
+    data.landArea.value = { status: 'missing', reason: 'Test saknat' };
+    data.density.value = { status: 'suppressed', reason: 'Test sekretess' };
+    renderMunicipalityOverview(overviewContent, { status: 'ready', municipality, statistics: data });
+    assert(overviewContent.textContent!.includes('0 invånare'), 'Noll saknas');
+    assert(overviewContent.textContent!.includes('Uppgift saknas: Test saknat'), 'Saknat saknas');
+    assert(overviewContent.textContent!.includes('Sekretessmarkerat: Test sekretess'), 'Sekretess saknas');
+    renderMunicipalityOverview(overviewContent, { status: 'loading', municipality });
+    assert(!overviewContent.querySelector('dl') && overviewContent.getAttribute('aria-busy') === 'true', 'Gammal statistik vid laddning');
+    renderMunicipalityOverview(overviewContent, { status: 'error', municipality, message: 'SCB-fel' });
+    assert(!overviewContent.querySelector('dl') && overviewContent.textContent!.includes('SCB-fel'), 'Fel blandas med statistik');
+    renderMunicipalityOverview(overviewContent, { status: 'idle' });
+    assert(!overviewContent.textContent!.includes('Uppsala'), 'Gammal kommun finns kvar');
+  });
   test('0380 visar Uppsala utan automatiskt val', () => {
     search('0380');
     assert(buttons().length === 1 && buttons()[0].textContent === 'Uppsala (0380)', 'Fel kodträff');

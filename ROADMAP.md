@@ -100,6 +100,20 @@ Klart när:
 
 ## P4 – Visa befolkning och täthet för kommuner
 
+### Avslutsbedömning 6 november 2026
+
+**P4:s leverans är klar enligt avgränsningen som Gabriela återrapporterat efter samtal med Henrik.** Gabriela bekräftar att hon visat den fungerande Kommunöversikt för Henrik och fått hans godkännande. Okänd gränsårgång accepteras som dokumenterad begränsning för kommunöversikten, enligt [beslutet](docs/DECISIONS.md#p4--accepterad-metadataosäkerhet-och-godkänd-demonstration-6-november-2026). Detta ersätter verifierad geografisk överensstämmelse som avslutshinder för just P4; det är ingen bekräftelse av gränsårgången.
+
+| Kriterium | Bedömning |
+| --- | --- |
+| Folkmängd, officiell landareal och publicerad täthet med år, enhet och källa | Implementerat i Kommunöversikt för valt kommunnummer, med SCB-källänk och skilda referenstider. |
+| Testkommuner och avrundning | Uppsala, Malmö och Kiruna jämförs med sparade SCB-värden; publicerad täthet visas och kontrolltoleransen är dokumenterad. |
+| Dubbletter, okända koder, saknade värden och ogiltiga nämnare | Duplicerade JSON-stat-index och ogiltiga svar avvisas; okända koder, null, noll och ogiltig landareal hanteras utan påhittade statistikvärden. |
+| Meningsfulla tester utan nätverk | Senaste kodkontroller gav 110/110 runtime-tester, typkontrakt och produktionsbygge. Nio separata browserprov och dokumenterade liveprov finns. Inga tester har körts om för denna statusändring. |
+| Demonstration för Henrik | Gabriela har den 6 november bekräftat genomförd demonstration och Henriks godkännande. |
+
+Den offentliga P4-förhandsversionen är verifierad enligt README och DEPLOYMENT. PR #16 och Issue #4 har inte ändrats genom denna dokumentationsuppdatering; ingen ny commit, merge eller publicering ingår. De ursprungliga kriterierna nedan bevaras som historiskt kravunderlag och läses tillsammans med beslutet ovan.
+
 Ansvarig: Gabriela. Beroenden: P3.
 
 Koppla kommunstatistik via kod och verifierad indelning. Använd sammanhängande årgångar för befolkning, officiell landareal och täthet.

@@ -5,6 +5,8 @@ import { geoJSON } from 'leaflet';
 import type { GeoJSON } from 'leaflet';
 import { createAreaSelection } from './state/areaSelection';
 import { mountMunicipalitySearch } from './ui/municipalitySearch';
+import { createMunicipalityStatistics } from './state/municipalityStatistics';
+import { renderMunicipalityOverview } from './ui/municipalityOverview';
 
 const mapElement = document.querySelector<HTMLElement>('#map');
 const statusElement = document.querySelector<HTMLElement>('#map-status');
@@ -23,6 +25,10 @@ const analysis = document.querySelector<HTMLElement>('#analysis-status')!;
 const form = document.querySelector<HTMLFormElement>('#municipality-form')!;
 const queryInput = document.querySelector<HTMLInputElement>('#municipality-query')!;
 const areaSelection = createAreaSelection();
+const statistics = createMunicipalityStatistics();
+const overview = document.querySelector<HTMLElement>('#municipality-overview-content')!;
+statistics.subscribe(state => renderMunicipalityOverview(overview, state));
+areaSelection.subscribe(state => { void statistics.updateSelection(state); });
 const { selectMunicipality } = areaSelection;
 const municipalitySearch = mountMunicipalitySearch({
   form,
@@ -52,7 +58,7 @@ areaSelection.subscribe(state => {
     const attribution = area.geometrySource?.attribution;
     const attributionText = attribution?.status === 'known' ? attribution.value.join(' · ') : '';
     source.textContent = `Grön yta: vald kommun. Källa: kart-api. ${attributionText}. Gränsårgång: okänd. Förenklad för visning; används inte för analys.`;
-    analysis.textContent = `Område: ${area.name}. Analys blir tillgänglig när ett datalager och dess analysfunktioner har införts.`;
+    analysis.textContent = `Område: ${area.name}. Kommunstatistiken visas i Kommunöversikt. Analys av befolkningsrutor kommer senare.`;
   } else if (state.status === 'loading') {
     selectionStatus.textContent = 'Hämtar kommun…';
     selectionStatus.setAttribute('aria-busy', 'true');
