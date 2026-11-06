@@ -1,5 +1,13 @@
 # Beslut och öppna frågor
 
+## P4 – accepterad metadataosäkerhet och godkänd demonstration, 6 november 2026
+
+Gabriela uppger efter dagens samtal med Henrik att de använder det senaste dokumenterade underlaget för kommungränserna och går vidare med P4 även om gränsårgången inte kan beläggas där. Hon bekräftar också att hon visat den fungerande Kommunöversikt för Henrik och fått hans godkännande. Detta är Gabrielas återrapportering, inte en separat granskning eller leverantörsbekräftelse inhämtad av AI.
+
+För P4:s kommunöversikt accepteras därför okänd kart-api-gränsårgång som en uttrycklig begränsning. Det tidigare kravet på verifierad geografisk överensstämmelse är inte ett kvarstående avslutshinder för denna avgränsade leverans. Statistikens kommunkod, SCB-källa, referenstider och officiella landareal behålls, liksom den synliga upplysningen om okänd gränsårgång och obekräftad överensstämmelse. Ingen årgång får anges som verifierad utan belägg.
+
+Beslutet gäller visning av SCB:s publicerade kommunstatistik tillsammans med en förenklad visningsgräns. Det godkänner inte geografisk analys med okänd indelning, omfördelning av befolkning till ritade områden eller ändringar av GIS-reglerna för senare etapper. Nytt officiellt underlag ska bedömas och dokumenteras när det finns. P4 kan bedömas klart enligt denna ändrade avgränsning och den godkända demonstrationen; GitHub-granskning, merge och uppdatering av Issue #4 hanteras separat.
+
 ## Aktuell P2-beslutsstatus, 2 november 2026
 
 Gabriela har godkänt kart-api för kommunval/visningsgränser, SCB TAB628 för kommunstatistik 2025 via direkt browseråtkomst utan separat server och SCB WFS `stat:befolkning_1km_2025` för 1 km-rutor med direktåtkomst som inledande riktning. De daterade besluten nedan är styrande inom denna omfattning och ersätter äldre förslagsstatus för samma frågor. Historiska formuleringar innebär inte att besluten saknas i dag. Separat Henrik-godkännande påstås inte för besluten den 2 november.

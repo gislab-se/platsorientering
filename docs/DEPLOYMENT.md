@@ -1,5 +1,13 @@
 # Stegvis publicering
 
+## P4-förhandsversion för Henrik, 6 november 2026
+
+På Gabrielas uttryckliga uppdrag publicerades en separat offentlig förhandsversion från den pushade P4-committen `9cfc0db804f03e9c9702be2cdcaf7d571f3ab856`, utan merge av PR #16. Detta är ett avgränsat undantag från den ordinarie regeln om publicering endast från privata `main`; den ordinarie automatiken ändras inte. Issue #4 förblir öppet. Gränsårgång/geografisk kompatibilitet är fortfarande obekräftad. Demonstrationen är genomförd och Henrik har godkänt Kommunöversikt enligt Gabrielas bekräftelse.
+
+Bygg med `npm.cmd run build -- --base=/platsorientering/p4/`. Endast kontrollerade filer från `dist/` samt `.nojekyll` publiceras under `p4/` i `yakimovskagabriela-ctrl/platsorientering` på dess `main`. Befintliga rotfiler bevaras. Privat källkod, dokumentation, testfixturer, rådata och credentials publiceras inte. Föregående publika commit är `5c6275ed081f49db6d45a5e1836756fe16aa123e` och sparas som återställningsreferens. Publiceringen görs genom en vanlig ny commit utan force; en senare återställning ska också bevara historiken.
+
+Verifierad adress: https://yakimovskagabriela-ctrl.github.io/platsorientering/p4/ . Publik byggcommit: `fa53a92b273a3fa246aeaeb4aa2f8c68de7db810`. HTTP 200 samt identiskt HTML och identiska SHA-256 för JS/CSS mot lokalt kontrollerad `dist/` verifierades den 6 november 2026. Ett verkligt browserprov i isolerad Edge `156.0.4314.50` på den publika sidan verifierade namn-/kodsökning, gränsval och kommunstatistik för Uppsala `0380` och därefter Malmö `1280`, med SCB-källänk och referenstider. En emulerad mobilbredd på 390 px gav dokumentbredd 390 px utan horisontell överströmning. Fysisk mobil, alla kommuner och alla felvägar är inte verifierade genom detta avgränsade prov. Tidigare rotversion bevarades.
+
 Gabriela ansvarar för genomförandet. P1 finns på den verifierade adressen https://yakimovskagabriela-ctrl.github.io/platsorientering/ (HTTP 200, kontrollerat 30 oktober 2026). Kommunvalet och panelens tre steg förbereds nu för publicering på samma adress på användarens uppdrag. Publicering sker i två steg: först en förhandsversion via Gabrielas GitHub-konto och senare slutpublicering på gislab.se.
 
 ## Aktuellt läge
