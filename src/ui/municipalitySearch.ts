@@ -24,9 +24,14 @@ export function mountMunicipalitySearch({ form, input, results, status, onSelect
       return;
     }
     const matches = searchMunicipalities(input.value);
+    if (matches.length === 1) {
+      input.focus();
+      onSelect(matches[0].code);
+      return;
+    }
     status.textContent = matches.length === 0
-      ? 'Ingen kommun hittades. Prova ett kommunnamn eller en fyrsiffrig kod, till exempel 0380.'
-      : `${matches.length} ${matches.length === 1 ? 'kommun hittad' : 'kommuner hittade'}. Välj en träff nedan.`;
+      ? 'Ingen kommun hittades.'
+      : `${matches.length} kommuner hittade. Välj en träff nedan.`;
     for (const municipality of matches) {
       const item = document.createElement('li');
       const button = document.createElement('button');
