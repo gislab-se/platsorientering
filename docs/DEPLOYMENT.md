@@ -1,6 +1,18 @@
 # Stegvis publicering
 
+## Verifierad publicering av P4 och PR #17, 7 november 2026
+
+P4 är sammanslaget till privata `main` genom [PR #16](https://github.com/gislab-se/platsorientering/pull/16), commit `50fe0e321006bc8f45a073dd80f46926fdea62b8`, den 6 november kl. 23:31 svensk tid. [Projektkontrollerna](https://github.com/gislab-se/platsorientering/actions/runs/42305308648) och [den automatiska publiceringen](https://github.com/gislab-se/platsorientering/actions/runs/42305308582) lyckades. Det äldre 403-felet är därmed inte ett aktuellt publiceringshinder för denna leverans.
+
+Efterföljande [PR #17](https://github.com/gislab-se/platsorientering/pull/17) med förenklad panel, källpresentation och direktval vid en enda kommunträff är sammanslaget i `d7e63ebaa385f2a523da289288116a670d6275d6`. Även dess [projektkontroller](https://github.com/gislab-se/platsorientering/actions/runs/42321515767) och [automatiska publicering](https://github.com/gislab-se/platsorientering/actions/runs/42321515766) lyckades. Den publika byggcommitten är `094e0773f6362987c32d9f0b89b3d36ddd7d6c0a`, med meddelandet `Publicera d7e63ebaa385f2a523da289288116a670d6275d6`.
+
+Nuvarande adress är https://yakimovskagabriela-ctrl.github.io/platsorientering/ . Den 7 november gav sidan och dess refererade `assets/index-BTZtgWyR.js` och `assets/index-B3QUwAtg.css` HTTP 200. JavaScript innehöll kommunstatistik och TAB628-referens. Detta är en HTTP-/resurskontroll tillsammans med GitHub-belägg för publicering, inte ett nytt interaktivt browserprov, en bytejämförelse mot lokalt bygge eller en ny verifiering av SCB-anrop i produktion. Äldre browserprov nedan gäller den dåvarande förhandsversionen. Gränsårgång och geografisk kompatibilitet förblir obekräftade.
+
+Publicering sker med befintligt workflow från privata `main`, med bas-URL `/platsorientering/` och endast den kontrollerade `dist/`-artefakten till det publika byggrepot. Ingen publicering eller ändring av workflow görs genom denna dokumentationsuppdatering. Issue #4 var öppet vid GitHub-kontrollen och stängs inte här.
+
 ## P4-förhandsversion för Henrik, 6 november 2026
+
+Historiskt underlag: detta var den separata förhandsversionen före merge av PR #16. `/p4/` är inte den nuvarande huvudadressen; dess fortsatta tillgänglighet har inte kontrollerats den 7 november. Den ordinarie publiceringen speglar `dist/` med borttagning av äldre filer, så den tidigare underkatalogen bevaras inte av det ordinarie workflowet.
 
 På Gabrielas uttryckliga uppdrag publicerades en separat offentlig förhandsversion från den pushade P4-committen `9cfc0db804f03e9c9702be2cdcaf7d571f3ab856`, utan merge av PR #16. Detta är ett avgränsat undantag från den ordinarie regeln om publicering endast från privata `main`; den ordinarie automatiken ändras inte. Issue #4 förblir öppet. Gränsårgång/geografisk kompatibilitet är fortfarande obekräftad. Demonstrationen är genomförd och Henrik har godkänt Kommunöversikt enligt Gabrielas bekräftelse.
 
@@ -8,7 +20,7 @@ Bygg med `npm.cmd run build -- --base=/platsorientering/p4/`. Endast kontrollera
 
 Verifierad adress: https://yakimovskagabriela-ctrl.github.io/platsorientering/p4/ . Publik byggcommit: `fa53a92b273a3fa246aeaeb4aa2f8c68de7db810`. HTTP 200 samt identiskt HTML och identiska SHA-256 för JS/CSS mot lokalt kontrollerad `dist/` verifierades den 6 november 2026. Ett verkligt browserprov i isolerad Edge `156.0.4314.50` på den publika sidan verifierade namn-/kodsökning, gränsval och kommunstatistik för Uppsala `0380` och därefter Malmö `1280`, med SCB-källänk och referenstider. En emulerad mobilbredd på 390 px gav dokumentbredd 390 px utan horisontell överströmning. Fysisk mobil, alla kommuner och alla felvägar är inte verifierade genom detta avgränsade prov. Tidigare rotversion bevarades.
 
-Gabriela ansvarar för genomförandet. P1 finns på den verifierade adressen https://yakimovskagabriela-ctrl.github.io/platsorientering/ (HTTP 200, kontrollerat 30 oktober 2026). Kommunvalet och panelens tre steg förbereds nu för publicering på samma adress på användarens uppdrag. Publicering sker i två steg: först en förhandsversion via Gabrielas GitHub-konto och senare slutpublicering på gislab.se.
+Gabriela ansvarar för genomförandet. GitHub-förhandsversionen innehåller nu P4 och PR #17 enligt kontrollen ovan. Slutpublicering på gislab.se är en senare etapp.
 
 ## Aktuellt läge
 
@@ -16,14 +28,14 @@ Gabriela ansvarar för genomförandet. P1 finns på den verifierade adressen htt
 | --- | --- |
 | Källkodsrepo | Privat: `gislab-se/platsorientering` |
 | Första publiceringskonto | `yakimovskagabriela-ctrl` |
-| Publikt byggrepo | `yakimovskagabriela-ctrl/platsorientering`, innehåller den publicerade P1-versionen |
-| GitHub Pages-URL | https://yakimovskagabriela-ctrl.github.io/platsorientering/ – P1 verifierad 30 oktober 2026 |
+| Publikt byggrepo | `yakimovskagabriela-ctrl/platsorientering`, byggartefakt från `d7e63eb` med P4 och PR #17 |
+| GitHub Pages-URL | https://yakimovskagabriela-ctrl.github.io/platsorientering/ – HTTP-/resurskontrollerad 7 november 2026 |
 | Publiceringskälla | Godkända commits på privata `gislab-se/platsorientering`, grenen `main` |
-| Automatik | Workflow följer med releasen till privata `main`. Repository secret `PAGES_DEPLOY_TOKEN` finns; dess värde har inte lästs eller visats. |
-| Senast verifierat produktionsbygge | 30 oktober 2026: typkontroll, bygge med `/platsorientering/` och 65 tester passerar |
+| Automatik | Lyckade körningar för P4 och PR #17. Endast kontrollerad `dist/` speglas från privata `main`; hemligheters värden har inte lästs eller visats. |
+| Senast verifierat produktionsbygge | GitHub-workflow för `d7e63eb` lyckades; innehåller typkontroll och bygge med `/platsorientering/`. Ingen ny lokal test-/byggkörning för dokumentationsändringen. |
 | Slutmål | gislab.se; exakt URL och överföringsmetod är inte verifierade |
 
-P1-grunden är sammanslagen till `main`. Kommunval och dess P2-beroenden är committade och pushade på `feat/3-kommunval-panel`. Publiceringsuppdraget gäller denna förhandsversion; P2:s öppna metadatafrågor och P3:s återstående namnval kvarstår. Publiceringen utgår därför endast från en commit som har nått privata `main`, aldrig direkt från den lokala arbetsmappen eller en feature-gren.
+P1–P4 och PR #17 är sammanslagna till `main`. Det ordinarie workflowet publicerar från privata `main`, inte från den lokala arbetsmappen eller en feature-gren. Den separata P4-förhandsversionen ovan var ett tidigare dokumenterat undantag.
 
 ## Steg 1 – förhandsversion via GitHub
 
@@ -38,7 +50,7 @@ Målet är en liten, reproducerbar förhandsversion i `yakimovskagabriela-ctrl/p
 
 Det privata repots vanliga `GITHUB_TOKEN` kan inte skriva till ett annat repo. En fine-grained personal access token ska därför begränsas till `yakimovskagabriela-ctrl/platsorientering` med `Contents: Read and write` och sparas som repository secret `PAGES_DEPLOY_TOKEN` i det privata repot. Token får aldrig skrivas i kod, dokumentation eller loggar. Om Gabriela saknar rättighet att skapa hemligheten behöver Henrik eller en repo-administratör lägga in den. GitHub Pages ska konfigureras från `main` och `/ (root)` efter att första publiceringscommiten har skapats.
 
-Varje senare push till privata `main` kör samma byggning och publicering automatiskt när bygget lyckas. Feature-grenar och lokala P2-filer publiceras inte. Den föreslagna adressen `https://yakimovskagabriela-ctrl.github.io/platsorientering/` får inte beskrivas som fungerande förrän den har kontrollerats.
+Varje senare push till privata `main` kör samma byggning och publicering automatiskt när bygget lyckas. Feature-grenar och lokala arbetsfiler publiceras inte. Den verifierade huvudadressen anges ovan; nya versioner kontrolleras efter publicering.
 
 ## Steg 2 – slutpublicering på gislab.se
 
