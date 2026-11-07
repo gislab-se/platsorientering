@@ -4,10 +4,10 @@ Detta är en mall som Gabriela fyller i under projektet och färdigställer i P8
 
 ## Leverans
 
-- Produktions-URL: inte publicerad.
-- GitHub-förhandsversion: inte publicerad; planerad via `yakimovskagabriela-ctrl`.
-- Levererad version och commit: ej fastställda.
-- Datum och utförare: ej fastställda.
+- Slutlig produktions-URL på gislab.se: inte fastställd eller publicerad.
+- GitHub-förhandsversion: https://yakimovskagabriela-ctrl.github.io/platsorientering/ – P4 och efterföljande UI-förbättringar från PR #17 är publicerade.
+- Verifierad förhandsversion: källcommit `d7e63eb`, publik byggcommit `094e0773f6362987c32d9f0b89b3d36ddd7d6c0a`. Slutversion i P8 är inte fastställd.
+- Kontroll: 7 november 2026, AI-assisterad GitHub-/HTTP-kontroll på Gabrielas uppdrag. Publicering via GitHub Actions; belägg och kontrollens begränsningar finns i [DEPLOYMENT](DEPLOYMENT.md#verifierad-publicering-av-p4-och-pr-17-7-november-2026).
 - Produktionsansvarig under projektet: Gabriela.
 - Beställare och kontakt efter överlämning: Henrik; förvaltningsupplägg fastställs före avslut.
 

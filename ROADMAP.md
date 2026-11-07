@@ -2,11 +2,11 @@
 
 Alla produktionsuppgifter ägs av Gabriela. Henrik ger kravstöd och återkoppling. Arbetet ska ge både lärande och en användbar geografisk tittfunktion. Rubrikerna P1–P9 används även för GitHub-issues; aktuell detaljstatus följs där.
 
-**Aktuellt P3, 3 november 2026:** kommunvalets funktionalitet och avgränsade P3-kontroller är klara på `feat/3-3-felmeddelanden`. Gabriela har även godkänt Kiruna `2584` på localhost. P3 är redo för PR-granskning; tilläggen är ännu inte sammanslagna till `main` eller publicerade. Gränsårgång och lookup-CRS förblir obekräftade. Se P3-bedömningen nedan.
+**Aktuellt, verifierat 7 november 2026:** P1–P4 är sammanslagna till `main`. P4 levererades genom [PR #16](https://github.com/gislab-se/platsorientering/pull/16), commit `50fe0e3`. De efterföljande UI-förbättringarna levererades separat genom [PR #17](https://github.com/gislab-se/platsorientering/pull/17), commit `d7e63eb`. Båda har lyckade projektkontroller och automatiska publiceringar. Nuvarande GitHub Pages-version innehåller båda; se [DEPLOYMENT](docs/DEPLOYMENT.md#verifierad-publicering-av-p4-och-pr-17-7-november-2026). Issue #4 var öppet vid kontrollen och stängs inte genom denna dokumentationsuppdatering. P5 är inte påbörjat. Äldre daterade statusar nedan beskriver dåvarande läge; gränsårgång och lookup-CRS förblir obekräftade.
 
 **Historisk status 2 november 2026:** P1 är sammanslaget genom PR #10. P2:s slutkontroller är godkända: 65/65 tester, typkontrakt, TypeScript och produktionsbygge. Kompletteringarna är pushade till `feat/2-slutfor-datakallor` och ingår i PR #14; merge inväntar Gabrielas godkännande. Delar av P3 (klick/kodval och polygonvisning) ingår redan i PR #12 på `main` och den tidigare publicerade kartan; P3 är inte avslutat. P4–P8 är kommande arbete och P9 en senare utredning. Aktuell funktionsstatus finns i README.
 
-Första funktionsmål: P1–P4 ger en kommunöversikt med befolkning. Regioner och sammansatta områden införs därefter i avgränsade steg. En stabil, granskad förhandsversion ska först publiceras via `yakimovskagabriela-ctrl`; exakt tidpunkt, repo och metod beslutas före publicering. Slutpublicering på gislab.se ingår i P8.
+Första funktionsmålet P1–P4, en kommunöversikt med befolkning, är levererat på GitHub Pages via `yakimovskagabriela-ctrl`. Regioner och sammansatta områden införs därefter i avgränsade steg. Slutpublicering på gislab.se ingår i P8.
 
 ## P1 – Skapa och förstå en körbar projektgrund
 
@@ -112,7 +112,7 @@ Klart när:
 | Meningsfulla tester utan nätverk | Senaste kodkontroller gav 110/110 runtime-tester, typkontrakt och produktionsbygge. Nio separata browserprov och dokumenterade liveprov finns. Inga tester har körts om för denna statusändring. |
 | Demonstration för Henrik | Gabriela har den 6 november bekräftat genomförd demonstration och Henriks godkännande. |
 
-Den offentliga P4-förhandsversionen är verifierad enligt README och DEPLOYMENT. PR #16 och Issue #4 har inte ändrats genom denna dokumentationsuppdatering; ingen ny commit, merge eller publicering ingår. De ursprungliga kriterierna nedan bevaras som historiskt kravunderlag och läses tillsammans med beslutet ovan.
+Uppföljning 7 november 2026: PR #16 är sammanslaget till `main` i `50fe0e3` den 6 november kl. 23:31 svensk tid. P4:s projektkontroller och automatiska publicering lyckades. Efterföljande PR #17 med UI-förbättringar är sammanslaget i `d7e63eb` och också publicerat. Den ordinarie publika sidan och dess JS/CSS gav HTTP 200 vid kontrollen; det är inget nytt interaktivt browserprov. Se [DEPLOYMENT](docs/DEPLOYMENT.md#verifierad-publicering-av-p4-och-pr-17-7-november-2026). Issue #4 var fortfarande öppet och stängs inte här. De ursprungliga kriterierna nedan bevaras som historiskt kravunderlag och läses tillsammans med beslutet ovan.
 
 Ansvarig: Gabriela. Beroenden: P3.
 

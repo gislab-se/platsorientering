@@ -1,10 +1,12 @@
 # Datakällor och API-utvärdering
 
-## Lokal UI-presentation av källor, 7 november 2026
+## Levererad kommunstatistik och UI-presentation, 7 november 2026
+
+SCB TAB628 är kopplat till kommunvalet och resultatpanelen genom P4, sammanslaget i PR #16 (`50fe0e3`). PR #17 (`d7e63eb`) innehåller de efterföljande UI-förbättringarna som beskrivs nedan. Båda är publicerade enligt [DEPLOYMENT](DEPLOYMENT.md#verifierad-publicering-av-p4-och-pr-17-7-november-2026). Detta uppdaterar leveransstatusen; ingen ny API-kontraktskontroll, ändring av datakälla eller verifiering av geografisk kompatibilitet har gjorts. Platsökningsadaptern är fortsatt utan UI, och befolkningsrutlager/rumslig analys är inte implementerade. Äldre daterade observationer nedan beskriver dåvarande implementation och testomfattning.
 
 Statistikens befintliga urvals-URL och kart-api:s attributionslänk visas kort under måtten. Referenstider, licensuppgifter, CKM och alla medföljande källnoter behålls i en normalt stängd Källor och begränsningar. Kartgränssvarets faktiska attributionsrader visas dessutom i Leaflets synliga attributionskontroll, tillsammans med befintlig OpenStreetMap-attribution; texten HTML-escapas före visning. Kontroll av [kart-api:s attribution](https://kart-api.se/docs/attribution/) och [villkor](https://kart-api.se/villkor/) den 7 november bekräftade krav på attribution där data visas och Lantmäteriet/Administrativ indelning/CC BY 4.0 för kommungränser; svarets egna rader har företräde. Ingen ändring av datakälla, API-kontrakt, koordinater eller årgång följer av presentationsändringen.
 
-## Aktuell P2-sammanställning, 2 november 2026
+## Historisk P2-sammanställning, 2 november 2026
 
 Källunderlaget är redo för P2:s slutkontroller och avslutsgodkännande, med nedanstående avgränsningar. Aktuell bedömning av alla fem kriterier finns i [ROADMAP](../ROADMAP.md#avslutsbedömning-2-november-2026). Äldre daterade observationer och kandidatbedömningar bevaras som historik; de senaste avgränsade besluten i [DECISIONS](DECISIONS.md) gäller framför äldre formuleringar om att källval återstår.
 
