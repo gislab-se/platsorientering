@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="sv">
+  <head><meta charset="UTF-8" /><title>Platsökning – browserprov</title></head>
+  <body>
+    <form id="form">
+      <label for="query">Plats</label><input id="query" />
+      <label for="filter">Kommun</label><select id="filter"><option value="">Alla kommuner</option></select>
+      <button type="submit">Sök</button>
+    </form>
+    <p id="status" role="status"></p><ul id="results"></ul><p id="attribution"></p>
+    <pre id="test-report">Kör…</pre>
+    <script type="module" src="./place-search-ui.browser.ts"></script>
+  </body>
+</html>
