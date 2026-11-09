@@ -1,5 +1,19 @@
 # Beslut och öppna frågor
 
+## P5.1 – avgränsad fas med kommungrupper och antal, 8 november 2026
+
+Gabriela beslutar att tills vidare behålla platsökningen som hjälp för kommunval. UI grupperar per kommun och redovisar antalet visade träffposter från det aktuella API-svaret. Identiska namn/typer får sammanfattas textmässigt, men alla poster räknas och bevaras i modellens `hits`. Antalet är inte ett verifierat antal unika geografiska platser eller alla sökträffar; högst 20 poster hämtas per sökning.
+
+Denna lilla fas omfattar inte markörer, exakt platsval, separat Platsinformation eller komplettering med närliggande orter. Geocode-CRS och säkert geografiskt särskiljande är fortsatt öppna frågor. Koordinaterna används inte för positionering, och inga ID:n härleds från träffordningen. Leverantörsmejl och ny Lantmäteriet-integration ingår inte. Ett uttryckligt val av kommun fortsätter att styra P3/P4; sökning, tomma svar och sökfel ändrar inte bekräftat kommunval eller dess statistik. Hela P5 och Issue #5 förblir ofärdiga även när denna lilla fas avslutas.
+
+## P5.1 – börja med platsökning för kommunval, 7 november 2026
+
+Första lokala implementationen av Issue #5 avgränsas till att söka platser, visa begränsade träffar per kommun och låta användaren välja kommunen via svarens kommunkod. Det återanvänder P3/P4:s val, gräns och kommunstatistik. Kodmatchning innebär inte verifierad geografisk årgångsmatchning. Samma ortnamn kan förekomma flera gånger även i samma kommun; grupperna beskriver visade träffar och utgör inte ett exakt ortval.
+
+Geocode-koordinaternas CRS/datum är fortsatt obekräftat efter kontraktskontrollen. P5.1 använder därför inte lat/lon eller bbox för centrering, markering, lookup eller analys. Exakt platsval/markering kräver fortsatt underlag före beroende implementation. Kommunfilter erbjuds uttryckligt, och ett nytt sökresultat ändrar aldrig kommunvalet automatiskt. Spridning, begränsat antal och attribution visas.
+
+Detta är en teknisk avgränsning för det första testbara steget, inte en ändring av hela P5:s klartkriterier eller ett nytt Henrik-godkännande. Regioner, sammansatta områden och polygonritning införs i separata uppgifter. Befolkning i ett ritat område hör fortsatt till P6 och följer ANALYSIS_METHODS.
+
 ## P4 – accepterad metadataosäkerhet och godkänd demonstration, 6 november 2026
 
 Gabriela uppger efter dagens samtal med Henrik att de använder det senaste dokumenterade underlaget för kommungränserna och går vidare med P4 även om gränsårgången inte kan beläggas där. Hon bekräftar också att hon visat den fungerande Kommunöversikt för Henrik och fått hans godkännande. Detta är Gabrielas återrapportering, inte en separat granskning eller leverantörsbekräftelse inhämtad av AI.

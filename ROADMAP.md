@@ -1,5 +1,7 @@
 # Arbetsplan
 
+**P5 påbörjat lokalt 7 november 2026:** P5.1 beskrivs nedan. P4:s avslutsdokumentation är mergad genom PR #18 (`8a0daf5`) och Issue #4 är stängt. Följande daterade status föregick avslutet och starten av P5.1.
+
 Alla produktionsuppgifter ägs av Gabriela. Henrik ger kravstöd och återkoppling. Arbetet ska ge både lärande och en användbar geografisk tittfunktion. Rubrikerna P1–P9 används även för GitHub-issues; aktuell detaljstatus följs där.
 
 **Aktuellt, verifierat 7 november 2026:** P1–P4 är sammanslagna till `main`. P4 levererades genom [PR #16](https://github.com/gislab-se/platsorientering/pull/16), commit `50fe0e3`. De efterföljande UI-förbättringarna levererades separat genom [PR #17](https://github.com/gislab-se/platsorientering/pull/17), commit `d7e63eb`. Båda har lyckade projektkontroller och automatiska publiceringar. Nuvarande GitHub Pages-version innehåller båda; se [DEPLOYMENT](docs/DEPLOYMENT.md#verifierad-publicering-av-p4-och-pr-17-7-november-2026). Issue #4 var öppet vid kontrollen och stängs inte genom denna dokumentationsuppdatering. P5 är inte påbörjat. Äldre daterade statusar nedan beskriver dåvarande läge; gränsårgång och lookup-CRS förblir obekräftade.
@@ -127,6 +129,22 @@ Klart när:
 - Gabriela visar den första fungerande kommunöversikten för Henrik.
 
 ## P5 – Sök plats och hantera fler områdesval
+
+### P5.1 – Platsökning för kommunval
+
+Godkänd avgränsning 8 november 2026: Gabriela väljer kommungrupper med antal visade träffposter som mål för denna lilla fas. Antalet gäller endast poster i aktuellt svar, inte unika fysiska platser eller alla matchningar i kommunen; sökningen begränsas till 20 träffar. Alla poster bevaras i `hits`, medan UI får sammanfatta identiska namn/typer i en textetikett. Endast uttryckligt kommunval ändrar kommungräns och P4-statistik. Exakt platsval, kartmarkörer, separat Platsinformation och geografisk särskiljning skjuts fram eftersom geocode-CRS inte är bekräftat. Detta ändrar inte hela P5:s ursprungliga klartkriterier och stänger inte Issue #5.
+
+Avslut för den avgränsade fasen: klart lokalt den 9 november 2026. Avgränsningen är dokumenterad och browserprovet av fyra likadana namn i samma kommun är godkänt. Kontroll 8 november: 118/118 runtime-tester och typkontrakt samt 8/8 plats-UI-prov och 10/10 kommunpanelprov i isolerad Edge passerade. Browserproven använde syntetiska svar utan externa API-anrop. Gabriela har den 9 november bekräftat att det beskrivna Edge-flödet med kommunfilter, gruppantal, bevarad Uppsala-statistik under sökning och uttryckligt kommunval fungerar. TypeScript och produktionsbygge med `/platsorientering/` passerade den 9 november. Runtime-/browserproven upprepades inte för avslutsdokumentationen. Arbetet är fortfarande endast lokalt; ingen commit, push eller PR har gjorts. Hela Issue #5 stängs inte av detta delsteg.
+
+Första avgränsade delen av Issue #5, lokalt på `feat/5-1-platsokning` den 7 november 2026: sök ort/plats efter uttrycklig submit, visa högst 20 träffar grupperade per kommun och erbjud valfritt kommunfilter. Kommunnamn kommer från befintlig SCB-kodlista. Ett uttryckligt kommunval går genom befintligt kommunval och kommunstatistik. Saknad/omatchad kommunkod visas utan valknapp. Ingen enskild plats väljs automatiskt; koordinaterna används inte.
+
+Ändrad fråga/filter rensar träffar och avbryter pågående sökning. Sena svar/fel kan inte ersätta aktuell fråga. Sökladdning, tomt svar och fel är skilda tillstånd och ändrar inte befintlig kommunstatistik. UI redovisar begränsad täckning och API-attribution, även för tomt svar. Inga nya beroenden eller rådatabaser införs.
+
+Kontroller: 116/116 runtime-tester samt typkontrakt och produktionsbygge passerade. Sju plats-UI-prov och tio tidigare kommunpanelprov passerade i isolerad Edge. Verkligt localhost-flöde: Uppsala behölls under Fridhem-sökningen; Enter på Vallentunas valknapp valde `0115` och visade kommunstatistik. Emulerad 390 px-bredd gav ingen horisontell överströmning. Fysisk mobil och alla kommuner/felvägar är inte liveprovade.
+
+P5 är inte klart: exakt val/markering av en ort bland flera likadana namn kräver fortsatt CRS-underlag; regioner och sammansatta områden är separata uppgifter; ritning, redigering, borttagning, geometrivalidering och tillhörande mobil-/tangentbordskontroller återstår. P5.1 är inte committat eller publicerat.
+
+### Hela P5:s omfattning och klartkriterier
 
 Ansvarig: Gabriela. Beroenden: P3; kan genomföras efter P4.
 

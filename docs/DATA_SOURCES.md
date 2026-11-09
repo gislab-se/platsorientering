@@ -1,5 +1,15 @@
 # Datakällor och API-utvärdering
 
+## P5.1 – förnyad geocode-kontroll, 7 november 2026
+
+[OpenAPI](https://api.kart-api.se/openapi.json) hämtades med HTTP 200. Kontraktets `/geocode` under `/v1` har obligatorisk `q`, valfri `kommunkod` och `limit` 1–20 (standard 5). `GeoTraff` kräver `lat`, `lon`, `namn`, `tier`, `kalla`; `kommunkod`, `lanskod`, `typ` och `bbox` kan saknas eller vara null. GeoTraff-fälten gav inget uttryckligt CRS/datum; tidigare osäkerhet kvarstår. [Kom igång](https://kart-api.se/docs/) förklarar att `spridning` räknas före limit och att listan inte är fullständig. Ingen pagineringsparameter identifierades i geocode-kontraktet.
+
+Ett Node-prov av `GET https://api.kart-api.se/v1/geocode?q=Fridhem&limit=3` gav HTTP 200 den `2026-11-07T22:28:24.222Z`: tre träffar med samma namn, typ bebyggelse och kommunkod `0115`. `spridning` angav 1 198 exakta namnträffar i 217 kommuner och `entydig=false`. Attribution omfattade Lantmäteriets ortnamn och administrativa indelning samt OpenStreetMap. Inget råsvar sparades i Git. Detta beskriver just det uttaget, inte garanterad täckning eller framtida antal.
+
+Ett separat verkligt Edge-prov från localhost använde Fridhem med `limit=20` och visade 20 träffar i tolv kommungrupper, attribution och begränsning. Uppsala förblev vald under sökningen; Enter på Vallentuna valde `0115` och visade SCB-statistiken. Det belägger browseråtkomst i detta lokala prov, inte produktionsorigin, geocode-CRS, exakt platspunkt eller alla browser-/felvägar. Filterparametern är kontraktskontrollerad och offlineprovad, men inget nytt filtrerat liveuttag gjordes.
+
+P5.1 grupperar enbart visade träffar via deras kommunkod och befintlig SCB-kodlista. Saknad/omatchad kod går inte att välja. Koordinater och bbox används inte för karta, lookup eller analys. UI låter användaren hitta och välja en kommun; enskilda platspunkter återstår. Adaptern tar nu emot AbortSignal och ger ett svenskt meddelande för HTTP 429. Inga käll- eller licensvillkor ändras. Äldre daterade leveransstatusar nedan föregår denna lokala implementation.
+
 ## Levererad kommunstatistik och UI-presentation, 7 november 2026
 
 SCB TAB628 är kopplat till kommunvalet och resultatpanelen genom P4, sammanslaget i PR #16 (`50fe0e3`). PR #17 (`d7e63eb`) innehåller de efterföljande UI-förbättringarna som beskrivs nedan. Båda är publicerade enligt [DEPLOYMENT](DEPLOYMENT.md#verifierad-publicering-av-p4-och-pr-17-7-november-2026). Detta uppdaterar leveransstatusen; ingen ny API-kontraktskontroll, ändring av datakälla eller verifiering av geografisk kompatibilitet har gjorts. Platsökningsadaptern är fortsatt utan UI, och befolkningsrutlager/rumslig analys är inte implementerade. Äldre daterade observationer nedan beskriver dåvarande implementation och testomfattning.

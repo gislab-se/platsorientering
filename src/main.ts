@@ -7,6 +7,7 @@ import { createAreaSelection } from './state/areaSelection';
 import { mountMunicipalitySearch } from './ui/municipalitySearch';
 import { createMunicipalityStatistics } from './state/municipalityStatistics';
 import { renderMunicipalityOverview } from './ui/municipalityOverview';
+import { mountPlaceSearch } from './ui/placeSearch';
 
 const mapElement = document.querySelector<HTMLElement>('#map');
 const statusElement = document.querySelector<HTMLElement>('#map-status');
@@ -39,11 +40,23 @@ const municipalitySearch = mountMunicipalitySearch({
   status: document.querySelector<HTMLElement>('#municipality-search-status')!,
   onSelect: code => { void selectMunicipality(code); },
 });
+const placeSearch = mountPlaceSearch({
+  form: document.querySelector<HTMLFormElement>('#place-form')!,
+  input: document.querySelector<HTMLInputElement>('#place-query')!,
+  filter: document.querySelector<HTMLSelectElement>('#place-municipality')!,
+  results: document.querySelector<HTMLUListElement>('#place-results')!,
+  status: document.querySelector<HTMLElement>('#place-status')!,
+  attribution: document.querySelector<HTMLElement>('#place-attribution')!,
+  onSelectMunicipality: code => { void selectMunicipality(code); },
+});
 let boundary: GeoJSON | undefined;
 
 // Kartan och panelen läser samma bekräftade val. Söktexten är en separat fråga.
 areaSelection.subscribe(state => {
-  if (state.status === 'loading') municipalitySearch.clearResults();
+  if (state.status === 'loading') {
+    municipalitySearch.clearResults();
+    placeSearch.clearResults();
+  }
   if (boundary) { boundary.remove(); boundary = undefined; }
   selectionStatus.removeAttribute('aria-busy');
   analysis.textContent = 'Analysfunktioner är planerade och ännu inte tillgängliga.';

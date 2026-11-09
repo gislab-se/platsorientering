@@ -8,6 +8,7 @@ export type GeocodeResult = Exclude<DataState<GeocodeResponse>, { status: 'empty
 export async function geocode(
   input: { q: string; limit?: number; kommunkod?: MunicipalityCode },
   fetcher: typeof fetch = globalThis.fetch,
+  signal?: AbortSignal,
 ): Promise<GeocodeResult> {
   const scope = 'Resultat för den efterfrågade sökningen och kommunfiltret';
   const limit = input.limit ?? 5;
@@ -26,7 +27,7 @@ export async function geocode(
   if (input.kommunkod !== undefined) url.searchParams.set('kommunkod', input.kommunkod);
   let response: Response;
   try {
-    response = await fetcher(url);
+    response = await fetcher(url, { signal });
   } catch {
     return { status: 'error', error: {
       kind: 'network', message: 'Platsökningen kunde inte nås.', httpStatus: null,
@@ -36,6 +37,7 @@ export async function geocode(
     return { status: 'error', error: {
       kind: 'http', httpStatus: response.status,
       message: response.status === 422 ? 'API:t kunde inte godta sökningen.'
+        : response.status === 429 ? 'För många platsökningar. Vänta och försök igen senare.'
         : `Platsökningen misslyckades (HTTP ${response.status}).`,
     } };
   }
